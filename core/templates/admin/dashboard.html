@@ -6,9 +6,23 @@
 
 {% block content %}
 <style>
-    /* Stats Grid */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
-    .stat-card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: flex-start; transition: 0.2s; }
+    /* --- Stats Grid --- */
+    .stats-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
+        gap: 20px; 
+        margin-bottom: 30px; 
+    }
+    .stat-card { 
+        background: white; 
+        padding: 25px; 
+        border-radius: 12px; 
+        border: 1px solid #e0e0e0; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: flex-start; 
+        transition: 0.2s; 
+    }
     .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.05); }
     .stat-info h3 { font-size: 0.85rem; color: #666; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
     .stat-info .value { font-family: 'Playfair Display'; font-size: 1.8rem; font-weight: 700; color: #2c2c2c; margin-bottom: 5px; }
@@ -22,15 +36,64 @@
     .trend-up { color: #4caf50; font-size: 0.8rem; font-weight: 500; display: flex; align-items: center; gap: 4px; }
     .trend-down { color: #f44336; font-size: 0.8rem; font-weight: 500; display: flex; align-items: center; gap: 4px; }
 
-    /* Tables */
+    /* --- Charts Section --- */
+    .charts-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    /* Card Styles */
+    .card { 
+        background: var(--white); 
+        padding: 25px; 
+        border-radius: 12px; 
+        border: 1px solid #e0e0e0; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+        /* IMPORTANT: min-width: 0 allows the card (and canvas) to shrink below its content size in Grid/Flex */
+        min-width: 0; 
+    }
+
+    .chart-header {
+        display: flex; 
+        justify-content: space-between; 
+        margin-bottom: 20px;
+    }
+
+    /* Responsive Chart Heights */
+    .chart-container-lg { position: relative; height: 300px; width: 100%; }
+    .chart-container-sm { position: relative; height: 250px; width: 100%; display: flex; justify-content: center; }
+
+    /* --- Tables --- */
     .table-container { background: white; padding: 25px; border-radius: 12px; border: 1px solid #e0e0e0; overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; }
+    .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
     th { text-align: left; padding: 15px; border-bottom: 2px solid #f4f1ea; font-size: 0.95rem; color: #1a1a1a; }
     td { padding: 15px; border-bottom: 1px solid #f0f0f0; color: #666; font-size: 0.9rem; vertical-align: middle; }
-    .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+    
+    .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; white-space: nowrap; }
     .status-completed { background: rgba(76, 175, 80, 0.1); color: #4caf50; }
     .status-progress { background: rgba(33, 150, 243, 0.1); color: #2196f3; }
     .status-pending { background: rgba(255, 152, 0, 0.1); color: #ff9800; }
+
+    /* --- Responsive Queries --- */
+    @media (max-width: 992px) {
+        .charts-grid {
+            grid-template-columns: 1fr; /* Stack charts vertically */
+        }
+        .stat-info .value { font-size: 1.5rem; }
+    }
+
+    @media (max-width: 576px) {
+        .table-container { padding: 15px; }
+        .stat-card { padding: 20px; }
+        
+        /* Reduce chart height on very small screens to fit better */
+        .chart-container-lg { height: 250px; }
+        .chart-container-sm { height: 220px; }
+    }
 </style>
 
 <div class="stats-grid fade-in-up">
@@ -71,27 +134,28 @@
     </div>
 </div>
 
-<div class="fade-in-up" style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px;">
+<div class="charts-grid fade-in-up">
     <div class="card">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+        <div class="chart-header">
             <h3>Revenue vs Expenses</h3>
             <i class="fas fa-ellipsis-v" style="color: #888; cursor: pointer;"></i>
         </div>
-        <div style="height: 300px;">
+        <div class="chart-container-lg">
             <canvas id="revenueChart"></canvas>
         </div>
     </div>
 
     <div class="card">
         <h3>Sales by Category</h3>
-        <div style="height: 250px; margin-top: 20px;">
+        <div style="margin-top: 20px;"></div>
+        <div class="chart-container-sm">
             <canvas id="categoryChart"></canvas>
         </div>
     </div>
 </div>
 
 <div class="table-container fade-in-up">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div class="table-header">
         <h3>Recent Orders</h3>
         <button style="padding: 8px 16px; background: #2c2c2c; color: white; border: none; border-radius: 6px; cursor: pointer;">View All</button>
     </div>
@@ -144,7 +208,17 @@
                 borderRadius: 4
             }]
         },
-        options: { responsive: true, maintainAspectRatio: false }
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false, // Important for fitting into custom container heights
+            plugins: {
+                legend: { display: false } // Cleaner look for small screens
+            },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
+                x: { grid: { display: false } }
+            }
+        }
     });
 
     const ctxCat = document.getElementById('categoryChart').getContext('2d');
@@ -158,7 +232,13 @@
                 borderWidth: 0
             }]
         },
-        options: { responsive: true, maintainAspectRatio: false }
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
     });
 </script>
 {% endblock %}

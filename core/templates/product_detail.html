@@ -1,0 +1,239 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.name }} | TRANQUIL TRAILS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    
+    <style>
+        /* --- KEEPING YOUR THEME --- */
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: #F4EFE6; 
+        }
+        
+        /* Navbar Tweaks to match your Shop Page */
+        nav { 
+            background: #fff; 
+            padding: 20px 5%; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+        }
+
+        /* Product Detail Specific Layout */
+        .detail-container {
+            padding: 120px 10% 80px;
+            display: flex;
+            gap: 60px;
+            align-items: flex-start;
+            min-height: 80vh;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .detail-image-wrapper {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .detail-image-wrapper img {
+            width: 100%;
+            height: auto;
+            max-height: 500px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .detail-info {
+            flex: 1;
+            padding-top: 10px;
+        }
+
+        .detail-info h1 {
+            font-family: 'Playfair Display';
+            font-size: 3.5rem;
+            color: #2d2d2d;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+
+        .detail-price {
+            font-size: 2rem;
+            color: #8B5E3C;
+            font-weight: 600;
+            margin-bottom: 25px;
+            display: block;
+        }
+
+        .detail-desc {
+            font-size: 1.1rem;
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 40px;
+        }
+
+        .buy-now-btn {
+            background: #8B5E3C;
+            color: white;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(139, 94, 60, 0.3);
+        }
+
+        .buy-now-btn:hover {
+            background: #2d2d2d;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 900px) {
+            .detail-container { 
+                flex-direction: column; 
+                padding: 100px 5%; 
+            }
+            .detail-info h1 { 
+                font-size: 2.5rem; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="{% url 'home' %}" class="logo-container">
+            <img src="{% static 'Adobe Express - file.png' %}" alt="Logo" class="logo-img">
+            <span class="logo-text">TRANQUIL TRAILS</span>
+        </a>
+        
+        <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
+
+        <ul class="nav-links" id="navLinks">
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li class="user-link"><a href="{% url 'shop' %}">Shop</a></li>
+            <li class="user-link"><a href="{% url 'gallery' %}">Gallery</a></li>
+            <li class="admin-link" style="display: none;"><a href="#">Manage Products</a></li>
+            <li><a href="{% url 'about' %}">About</a></li>
+            <li><a href="{% url 'Contact' %}">Contact Us</a></li> 
+            <li id="cartNavItem"><a href="#" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a></li>
+            <li><a href="{% url 'login' %}" class="login-btn" id="authBtn">Log In</a></li>
+        </ul>
+    </nav>
+
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h2 style="font-family: 'Playfair Display';">Your Bag</h2>
+            <button class="close-cart" id="closeCart">&times;</button>
+        </div>
+        <div class="cart-body">
+            <ul id="cart-items-list"></ul>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total-row">
+                <span>Total</span>
+                <span>$<span id="total-price">0</span></span>
+            </div>
+            <button class="checkout-btn" style="width: 100%;">Checkout Now</button>
+            <button class="clear-cart-link" onclick="clearCart()">Clear All Items</button>
+        </div>
+    </div>
+
+    <div class="detail-container">
+        <div class="detail-image-wrapper">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% else %}
+                <img src="{% static 'placeholder.jpg' %}" alt="No Image">
+            {% endif %}
+        </div>
+
+        <div class="detail-info">
+            <h1>{{ product.name }}</h1>
+            <span class="detail-price">${{ product.price }}</span>
+            
+            <p class="detail-desc">
+                {{ product.description }}
+            </p>
+
+            <button class="buy-now-btn" 
+                    id="buyBtn"
+                    data-id="{{ product.id }}"
+                    data-name="{{ product.name }}"
+                    data-price="{{ product.price }}"
+                    {% if product.image %}data-img="{{ product.image.url }}"{% endif %}>
+                Add to Cart
+            </button>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="footer-container">
+            <div class="footer-section about">
+                <h3 class="footer-logo">TRANQUIL TRAILS</h3>
+                <p>Preserving Indian heritage from Ahmedabad to your home.</p>
+            </div>
+            <div class="footer-section links">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="{% url 'Contact' %}">Contact Us</a></li>
+                    <li><a href="{% url 'about' %}">Our Story</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 TRANQUIL TRAILS. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{% static 'script.js' %}"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const buyBtn = document.getElementById('buyBtn');
+
+            if(buyBtn) {
+                buyBtn.addEventListener('click', function() {
+                    // Create the product object securely
+                    const productData = {
+                        id: this.dataset.id,
+                        name: this.dataset.name,
+                        price: parseFloat(this.dataset.price),
+                        img: this.dataset.img || '',
+                        quantity: 1
+                    };
+                    
+                    // Call the function from your main script.js
+                    if(typeof handleAddToCart === "function") {
+                        handleAddToCart(productData);
+                    } else {
+                        console.error("handleAddToCart function is missing from script.js");
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

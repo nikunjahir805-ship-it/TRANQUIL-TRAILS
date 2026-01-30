@@ -5,30 +5,65 @@
 
 {% block content %}
 <div class="fade-in-up" style="max-width: 800px; margin: 0 auto;">
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div style="padding: 15px; margin-bottom: 20px; border-radius: 6px; 
+                 {% if message.tags == 'success' %}background: #d4edda; color: #155724;{% else %}background: #f8d7da; color: #721c24;{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <div class="card">
-        <form>
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                 <div>
                     <label style="display: block; font-weight: 600; margin-bottom: 8px;">Product Name</label>
-                    <input type="text" placeholder="e.g. Clay Pot" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;">
+                    <input type="text" name="name" required placeholder="e.g. Clay Pot" 
+                           style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;">
                 </div>
+                
                 <div>
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px;">Price ($)</label>
-                    <input type="number" placeholder="0.00" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px;">Category</label>
+                    <select name="category" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; background: white;">
+                        <option value="" disabled selected>Select Category...</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat.id }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
 
             <div style="margin-bottom: 20px;">
+                <label style="display: block; font-weight: 600; margin-bottom: 8px;">Price ($)</label>
+                <input type="number" step="0.01" name="price" required placeholder="0.00" 
+                       style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;">
+            </div>
+
+            <div style="margin-bottom: 20px;">
                 <label style="display: block; font-weight: 600; margin-bottom: 8px;">Description</label>
-                <textarea rows="5" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;"></textarea>
+                <textarea name="description" rows="5" required 
+                          style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;"></textarea>
             </div>
 
-            <div style="margin-bottom: 20px; border: 2px dashed #ddd; padding: 40px; text-align: center; border-radius: 6px; cursor: pointer; transition: 0.3s;" onmouseover="this.style.borderColor='#8b5e3c'" onmouseout="this.style.borderColor='#ddd'">
-                <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #8b5e3c; margin-bottom: 10px;"></i>
-                <p>Drag and drop product images here</p>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-weight: 600; margin-bottom: 8px;">Product Image</label>
+                <div style="border: 2px dashed #ddd; padding: 30px; text-align: center; border-radius: 6px; position: relative; background: #fafafa;">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #8b5e3c; margin-bottom: 10px;"></i>
+                    <p style="margin-bottom: 10px;">Click to select an image</p>
+                    
+                    <input type="file" name="image" accept="image/*" required
+                           style="display: block; margin: 0 auto; max-width: 100%;">
+                </div>
             </div>
 
-            <button type="submit" style="background: #8b5e3c; color: white; padding: 15px 30px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s;" onmouseover="this.style.background='#2c2c2c'" onmouseout="this.style.background='#8b5e3c'">
+            <button type="submit" 
+                    style="background: #8b5e3c; color: white; padding: 15px 30px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s;" 
+                    onmouseover="this.style.background='#2c2c2c'" 
+                    onmouseout="this.style.background='#8b5e3c'">
                 Publish Product
             </button>
         </form>

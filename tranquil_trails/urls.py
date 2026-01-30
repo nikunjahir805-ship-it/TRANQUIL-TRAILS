@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.urls import path
+from django.conf import settings 
+from django.conf.urls.static import static
 from core import views
 
 urlpatterns = [
@@ -7,6 +9,12 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
     path('shop/', views.shop, name='shop'),
+    
+    # --- NEW: PRODUCT DETAIL PATH ---
+    # This line connects the URL "product/5/" to the product_detail view
+    path('product/<int:pk>/', views.product_detail, name='product_detail'),
+    # --------------------------------
+    
     path('offers/', views.offers, name='offers'),
     path('gallery/', views.gallery, name='gallery'),
     path('about/', views.about, name='about'),
@@ -43,8 +51,14 @@ urlpatterns = [
     
     # Admin Panel - System
     path('admin-settings/', views.admin_settings, name='admin_settings'),
-    # ... your existing paths ...
+    
+    # API Paths
     path('api/signup/', views.signup_api, name='signup_api'),
     path('api/login/', views.login_api, name='login_api'),
     path('api/logout/', views.logout_api, name='logout_api'),
 ]
+
+# IMPORTANT: enable media file serving during development
+# This makes sure product images (uploaded in Admin) actually show up
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
