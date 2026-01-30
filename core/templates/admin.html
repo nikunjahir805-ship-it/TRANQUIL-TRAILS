@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Tranquil Trails</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            /* Palette derived from "Artisan/Tranquil" theme */
+            --primary-dark: #2c2c2c;
+            --primary-accent: #8b5e3c; /* Earthy Brown */
+            --primary-accent-hover: #a67c52;
+            --secondary-bg: #f4f1ea; /* Cream/Beige */
+            --white: #ffffff;
+            --text-dark: #1a1a1a;
+            --text-light: #666666;
+            --border-color: #e0e0e0;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
+            
+            /* Fonts */
+            --font-heading: 'Playfair Display', serif;
+            --font-body: 'Poppins', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            text-decoration: none;
+            list-style: none;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--secondary-bg);
+            color: var(--text-dark);
+            display: flex;
+            height: 100vh;
+            overflow: hidden; 
+        }
+
+        /* --- Scrollbar Styling --- */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(139, 94, 60, 0.3); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary-accent); }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: 280px;
+            background-color: var(--primary-dark);
+            color: var(--white);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: 0.3s;
+            z-index: 1000;
+            flex-shrink: 0;
+        }
+
+        .logo-container {
+            padding: 25px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
+            background-color: #252525;
+        }
+
+        .logo-text {
+            font-family: var(--font-heading);
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--white);
+        }
+
+        .sidebar-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px 0;
+        }
+
+        .nav-menu { padding: 0 10px; }
+        .nav-item { margin-bottom: 2px; }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            color: #b0b0b0;
+            border-radius: 6px;
+            transition: 0.2s;
+            font-size: 0.9rem;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .nav-content { display: flex; align-items: center; }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--white);
+        }
+        
+        .nav-link.active { background-color: var(--primary-accent); }
+
+        .nav-link i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .nav-category {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #666;
+            padding: 20px 20px 8px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-badge {
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        .badge-warning { background: var(--warning); color: #000; }
+
+        .sidebar-footer {
+            padding: 20px;
+            background-color: #252525;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: var(--primary-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .footer-info { flex: 1; }
+        .footer-name { font-size: 0.9rem; font-weight: 600; }
+        .footer-role { font-size: 0.75rem; color: #888; }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 30px;
+            background-color: var(--secondary-bg);
+            position: relative;
+        }
+
+        /* --- Dynamic Content Switching & Animation --- */
+        .content-section {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .content-section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .placeholder-content {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-light);
+            background: var(--white);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
+        .placeholder-content i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+
+        /* --- Header --- */
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title h1 {
+            font-family: var(--font-heading);
+            font-size: 2rem;
+            color: var(--primary-dark);
+        }
+
+        .page-title span { color: var(--text-light); font-size: 0.9rem; }
+
+        .header-tools { display: flex; align-items: center; gap: 20px; }
+
+        .search-box { position: relative; }
+        .search-box input {
+            padding: 10px 40px 10px 15px;
+            border-radius: 25px;
+            border: 1px solid #ccc;
+            background: var(--white);
+            font-family: var(--font-body);
+            width: 250px;
+        }
+        .search-box i { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #888; }
+
+        .icon-btn {
+            background: var(--white);
+            border: 1px solid #ddd;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-dark);
+            position: relative;
+            transition: 0.2s;
+        }
+        .icon-btn:hover { background: #f9f9f9; transform: translateY(-2px); }
+        .notification-dot {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 10px;
+            height: 10px;
+            background: var(--danger);
+            border-radius: 50%;
+            border: 2px solid var(--white);
+        }
+
+        /* --- Dashboard Widgets --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border: 1px solid var(--border-color);
+            transition: 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.05); }
+
+        .stat-info h3 {
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-info .value {
+            font-family: var(--font-heading);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 5px;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .bg-light-accent { background: rgba(139, 94, 60, 0.1); color: var(--primary-accent); }
+        .bg-light-green { background: rgba(76, 175, 80, 0.1); color: var(--success); }
+        .bg-light-blue { background: rgba(33, 150, 243, 0.1); color: #2196f3; }
+        .bg-light-orange { background: rgba(255, 152, 0, 0.1); color: var(--warning); }
+        .trend-up { color: var(--success); font-size: 0.8rem; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+        .trend-down { color: var(--danger); font-size: 0.8rem; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+
+        /* --- Charts Section --- */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .card-header h3 {
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+
+        /* --- Tables --- */
+        .table-container {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            text-align: left;
+            padding: 15px;
+            font-family: var(--font-heading);
+            color: var(--text-dark);
+            font-weight: 600;
+            border-bottom: 2px solid var(--secondary-bg);
+            font-size: 0.95rem;
+        }
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #fafafa; }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-completed { background: rgba(76, 175, 80, 0.1); color: var(--success); }
+        .status-progress { background: rgba(33, 150, 243, 0.1); color: #2196f3; }
+        .status-pending { background: rgba(255, 152, 0, 0.1); color: var(--warning); }
+        .status-rejected { background: rgba(244, 67, 54, 0.1); color: var(--danger); }
+
+        .user-cell { display: flex; align-items: center; gap: 12px; }
+        .user-img-placeholder {
+            width: 35px;
+            height: 35px;
+            background: #eee;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-size: 0.8rem;
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 992px) {
+            .sidebar { position: fixed; left: -280px; }
+            .sidebar.active { left: 0; }
+            .charts-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="logo-container">
+            <div class="logo-text">TRANQUIL TRAILS</div>
+            <small style="opacity: 0.6; font-size: 0.75rem;">Artisan Dashboard v2.0</small>
+        </div>
+
+        <div class="sidebar-scroll-area">
+            <ul class="nav-menu">
+                <li class="nav-category">Overview</li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" data-target="dashboard">
+                        <div class="nav-content"><i class="fas fa-th-large"></i> <span>Dashboard</span></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-target="analytics">
+                        <div class="nav-content"><i class="fas fa-chart-line"></i> <span>Analytics</span></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-target="live-view">
+                        <div class="nav-content"><i class="fas fa-globe"></i> <span>Live View</span></div>
+                        <span class="sidebar-badge badge-warning">LIVE</span>
+                    </a>
+                </li>
+
+                <li class="nav-category">Catalog Management</li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-target="all-products">
+                        <div class="nav-content"><i class="fas fa-box"></i> <span>All Products</span></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-target="add-product">
+                        <div class="nav-content"><i class="fas fa-plus-circle"></i> <span>Add Product</span></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-target="categories">
+                        <div class="nav-content"><i class="fas fa-tags"></i> <span>Categories</span></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-target="inventory">
+                        <div class="nav-content"><i class="fas fa-warehouse"></i> <span>Inventory</span></div>
+                        <span class="sidebar-badge">LOW</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-target="reviews">
+                        <div class="nav-content"><i class="fas fa-star"></i> <span>Reviews</span></div>
+                    </a>
+                </li>
+
+                <li class="nav-category">Sales & Orders</li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-target="orders">
+                        <div class="nav-content"><i class="fas fa-shopping-cart"></i> <span>Orders</span></div>
+                        <span class="sidebar-badge badge-warning">12</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-target="invoices">
+                        <div class="nav-content"><i class="fas fa-file-invoice-dollar"></i> <span>Invoices</span></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-target="shipments">
+                        <div class="nav-content"><i class="fas fa-shipping-fast"></i> <span>Shipments</span></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-target="returns">
+                        <div class="nav-content"><i class="fas fa-undo"></i> <span>Returns & Refunds</span></div>
+                    </a>
+                </li>
+
+                <li class="nav-category">People</li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-target="customers">
+                        <div class="nav-content"><i class="fas fa-users"></i> <span>Customers</span></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-target="segments">
+                        <div class="nav-content"><i class="fas fa-user-tag"></i> <span>Segments</span></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-target="staff">
+                        <div class="nav-content"><i class="fas fa-id-badge"></i> <span>Staff Management</span></div>
+                    </a>
+                </li>
+
+                <li class="nav-category">Marketing</li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-target="discounts">
+                        <div class="nav-content"><i class="fas fa-percent"></i> <span>Discounts & Coupons</span></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-target="campaigns">
+                        <div class="nav-content"><i class="fas fa-envelope-open-text"></i> <span>Email Campaigns</span></div>
+                    </a>
+                </li>
+                
+                <li class="nav-category">Content</li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-target="blog">
+                        <div class="nav-content"><i class="fas fa-pen-nib"></i> <span>Artisan Stories (Blog)</span></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-target="media">
+                        <div class="nav-content"><i class="fas fa-images"></i> <span>Media Gallery</span></div>
+                    </a>
+                </li>
+
+                <li class="nav-category">System</li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-target="settings">
+                        <div class="nav-content"><i class="fas fa-cog"></i> <span>General Settings</span></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">
+                        <div class="nav-content"><i class="fas fa-sign-out-alt"></i> <span>Back to Storefront</span></div>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="footer-avatar">NL</div>
+            <div class="footer-info">
+                <div class="footer-name">Nikunj Ladumor</div>
+                <div class="footer-role">Super Admin</div>
+            </div>
+            <i class="fas fa-chevron-right" style="font-size: 0.8rem; color: #666;"></i>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="admin-header">
+            <div class="page-title">
+                <h1 id="page-header-title">Dashboard</h1>
+                <span id="page-header-desc">Here is what's happening with your store today.</span>
+            </div>
+
+            <div class="header-tools">
+                <button id="sidebarToggle" style="display:none; background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--text-dark);">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <div class="search-box">
+                    <input type="text" placeholder="Search orders, products...">
+                    <i class="fas fa-search"></i>
+                </div>
+                
+                <button class="icon-btn">
+                    <i class="far fa-bell"></i>
+                    <span class="notification-dot"></span>
+                </button>
+                <button class="icon-btn">
+                    <i class="far fa-envelope"></i>
+                </button>
+            </div>
+        </header>
+
+        <div id="dashboard" class="content-section active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3>Total Revenue</h3>
+                        <div class="value">$5,569</div>
+                        <div class="trend-up"><i class="fas fa-arrow-up"></i> 12.5% from last month</div>
+                    </div>
+                    <div class="stat-icon bg-light-accent"><i class="fas fa-dollar-sign"></i></div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3>Orders</h3>
+                        <div class="value">1,240</div>
+                        <div class="trend-up"><i class="fas fa-arrow-up"></i> 5.2% from last month</div>
+                    </div>
+                    <div class="stat-icon bg-light-orange"><i class="fas fa-shopping-bag"></i></div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3>Pending Projects</h3>
+                        <div class="value">16</div>
+                        <div class="trend-down"><i class="fas fa-clock"></i> 3 Overdue</div>
+                    </div>
+                    <div class="stat-icon bg-light-blue"><i class="fas fa-briefcase"></i></div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3>Site Visitors</h3>
+                        <div class="value">45k</div>
+                        <div class="trend-up"><i class="fas fa-arrow-up"></i> 18% Traffic Spike</div>
+                    </div>
+                    <div class="stat-icon bg-light-green"><i class="fas fa-users"></i></div>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3>Revenue vs Expenses</h3>
+                        <button style="border:none; background:none; cursor:pointer; color:#888;"><i class="fas fa-ellipsis-v"></i></button>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3>Sales by Category</h3>
+                    </div>
+                    <div class="chart-wrapper" style="height: 250px;">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="card-header">
+                    <h3>Recent Orders & Leads</h3>
+                    <button style="padding: 8px 16px; background: var(--primary-dark); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">View All Orders</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Customer</th><th>Order ID</th><th>Amount</th><th>Status</th><th>Date</th><th style="text-align:right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="user-cell"><div class="user-img-placeholder">AC</div><div><strong>Archie Cantones</strong><br><span style="font-size: 0.8rem; color: #999;">archie@example.com</span></div></td>
+                            <td>#ORD-7829</td><td>$120.00</td><td><span class="status-badge status-completed">Completed</span></td><td>Jan 22, 2026</td><td style="text-align:right;"><i class="fas fa-ellipsis-h" style="cursor: pointer; color: #999;"></i></td>
+                        </tr>
+                        <tr>
+                            <td class="user-cell"><div class="user-img-placeholder">HC</div><div><strong>Holmes Cherryman</strong><br><span style="font-size: 0.8rem; color: #999;">holmes@example.com</span></div></td>
+                            <td>#ORD-7828</td><td>$85.50</td><td><span class="status-badge status-progress">Processing</span></td><td>Jan 21, 2026</td><td style="text-align:right;"><i class="fas fa-ellipsis-h" style="cursor: pointer; color: #999;"></i></td>
+                        </tr>
+                        <tr>
+                            <td class="user-cell"><div class="user-img-placeholder">MH</div><div><strong>Malanie Hanvey</strong><br><span style="font-size: 0.8rem; color: #999;">malanie@example.com</span></div></td>
+                            <td>#ORD-7827</td><td>$240.00</td><td><span class="status-badge status-pending">Pending</span></td><td>Jan 20, 2026</td><td style="text-align:right;"><i class="fas fa-ellipsis-h" style="cursor: pointer; color: #999;"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="add-product" class="content-section">
+            <div class="chart-card">
+                <div class="card-header"><h3>Add New Artisan Product</h3></div>
+                <form style="padding: 20px;">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <div>
+                            <label style="display:block; margin-bottom:8px; font-weight:600;">Product Name</label>
+                            <input type="text" placeholder="e.g. Handcrafted Clay Vase" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom:8px; font-weight:600;">Price ($)</label>
+                            <input type="number" placeholder="0.00" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display:block; margin-bottom:8px; font-weight:600;">Description</label>
+                        <textarea rows="4" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;"></textarea>
+                    </div>
+                    <button style="background:var(--primary-accent); color:white; border:none; padding:12px 25px; border-radius:6px; cursor:pointer; font-weight:600;">Publish Product</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="analytics" class="content-section"><div class="placeholder-content"><i class="fas fa-chart-line"></i><h2>Analytics Dashboard</h2><p>Detailed data analysis coming soon.</p></div></div>
+        <div id="live-view" class="content-section"><div class="placeholder-content"><i class="fas fa-globe"></i><h2>Live Store View</h2><p>Real-time visitor map loading...</p></div></div>
+        <div id="all-products" class="content-section"><div class="placeholder-content"><i class="fas fa-box"></i><h2>Product Catalog</h2><p>Manage your inventory here.</p></div></div>
+        <div id="categories" class="content-section"><div class="placeholder-content"><i class="fas fa-tags"></i><h2>Categories</h2><p>Manage product categories.</p></div></div>
+        <div id="inventory" class="content-section"><div class="placeholder-content"><i class="fas fa-warehouse"></i><h2>Inventory Management</h2><p>Stock levels and alerts.</p></div></div>
+        <div id="reviews" class="content-section"><div class="placeholder-content"><i class="fas fa-star"></i><h2>Customer Reviews</h2><p>Manage feedback.</p></div></div>
+        <div id="orders" class="content-section"><div class="placeholder-content"><i class="fas fa-shopping-cart"></i><h2>Order Management</h2><p>Process and track orders.</p></div></div>
+        <div id="invoices" class="content-section"><div class="placeholder-content"><i class="fas fa-file-invoice-dollar"></i><h2>Invoices</h2><p>Billing history.</p></div></div>
+        <div id="shipments" class="content-section"><div class="placeholder-content"><i class="fas fa-shipping-fast"></i><h2>Shipments</h2><p>Track outgoing packages.</p></div></div>
+        <div id="returns" class="content-section"><div class="placeholder-content"><i class="fas fa-undo"></i><h2>Returns</h2><p>Process refunds and returns.</p></div></div>
+        <div id="customers" class="content-section"><div class="placeholder-content"><i class="fas fa-users"></i><h2>Customer Database</h2><p>View client details.</p></div></div>
+        <div id="segments" class="content-section"><div class="placeholder-content"><i class="fas fa-user-tag"></i><h2>Segments</h2><p>Customer segmentation tools.</p></div></div>
+        <div id="staff" class="content-section"><div class="placeholder-content"><i class="fas fa-id-badge"></i><h2>Staff</h2><p>Manage admin access.</p></div></div>
+        <div id="discounts" class="content-section"><div class="placeholder-content"><i class="fas fa-percent"></i><h2>Discounts</h2><p>Create coupon codes.</p></div></div>
+        <div id="campaigns" class="content-section"><div class="placeholder-content"><i class="fas fa-envelope-open-text"></i><h2>Email Campaigns</h2><p>Newsletter management.</p></div></div>
+        <div id="blog" class="content-section"><div class="placeholder-content"><i class="fas fa-pen-nib"></i><h2>Artisan Stories</h2><p>Blog post editor.</p></div></div>
+        <div id="media" class="content-section"><div class="placeholder-content"><i class="fas fa-images"></i><h2>Media Gallery</h2><p>Image and video assets.</p></div></div>
+        <div id="settings" class="content-section"><div class="placeholder-content"><i class="fas fa-cog"></i><h2>Settings</h2><p>System configuration.</p></div></div>
+
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. Sidebar Toggle Logic for Mobile
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.getElementById('sidebarToggle');
+            
+            if(window.innerWidth < 992) {
+                toggleBtn.style.display = 'block';
+            }
+
+            toggleBtn.addEventListener('click', () => {
+                if(sidebar.style.left === '0px') {
+                    sidebar.style.left = '-280px';
+                } else {
+                    sidebar.style.left = '0px';
+                }
+            });
+
+            // 2. Navigation / Tab Switching Logic
+            const navLinks = document.querySelectorAll('.nav-link[data-target]');
+            const sections = document.querySelectorAll('.content-section');
+            const headerTitle = document.getElementById('page-header-title');
+            const headerDesc = document.getElementById('page-header-desc');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    // Remove active class from all links
+                    navLinks.forEach(nav => nav.classList.remove('active'));
+                    
+                    // Add active class to clicked link
+                    this.classList.add('active');
+
+                    // Hide all sections
+                    sections.forEach(section => section.classList.remove('active'));
+
+                    // Show target section
+                    const targetId = this.getAttribute('data-target');
+                    const targetSection = document.getElementById(targetId);
+                    
+                    if (targetSection) {
+                        targetSection.classList.add('active');
+                        
+                        // Update Header Text based on the menu item text
+                        const menuText = this.querySelector('span:not(.sidebar-badge)').innerText;
+                        headerTitle.innerText = menuText;
+                        
+                        // Simple logic to change description based on section
+                        if(targetId === 'dashboard') headerDesc.innerText = "Here is what's happening with your store today.";
+                        else if(targetId === 'add-product') headerDesc.innerText = "Create a new listing for your artisan marketplace.";
+                        else headerDesc.innerText = `Manage your ${menuText.toLowerCase()} details here.`;
+                    }
+
+                    // Close sidebar on mobile after click
+                    if(window.innerWidth < 992) {
+                        sidebar.style.left = '-280px';
+                    }
+                });
+            });
+
+            // 3. Chart.js Initialization
+            if(document.getElementById('revenueChart')) {
+                const ctxRev = document.getElementById('revenueChart').getContext('2d');
+                new Chart(ctxRev, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Revenue ($)',
+                            data: [1200, 1900, 3000, 5000, 2000, 3000, 4500],
+                            backgroundColor: '#8b5e3c',
+                            borderRadius: 4,
+                            barPercentage: 0.6
+                        }, {
+                            label: 'Expenses ($)',
+                            data: [800, 1200, 2000, 3500, 1500, 2200, 3000],
+                            backgroundColor: '#e0e0e0',
+                            borderRadius: 4,
+                            barPercentage: 0.6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top', align: 'end', labels: { usePointStyle: true, boxWidth: 8 } }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: '#f0f0f0' }, border: { display: false } },
+                            x: { grid: { display: false }, border: { display: false } }
+                        }
+                    }
+                });
+
+                const ctxCat = document.getElementById('categoryChart').getContext('2d');
+                new Chart(ctxCat, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Ceramics', 'Textiles', 'Woodwork', 'Metal'],
+                        datasets: [{
+                            data: [45, 25, 20, 10],
+                            backgroundColor: ['#8b5e3c', '#2c2c2c', '#c5a059', '#e0e0e0'],
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } } }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

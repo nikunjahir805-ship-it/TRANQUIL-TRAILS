@@ -1,0 +1,17 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}Reviews{% endblock %}
+{% block page_desc %}Manage customer feedback and ratings.{% endblock %}
+
+{% block content %}
+<div class="card fade-in-up">
+    <h3>Recent Feedback</h3>
+    <div style="border-bottom: 1px solid #eee; padding: 15px 0;">
+        <strong>Sarah Smith</strong> <span style="color:#ff9800;">★★★★★</span>
+        <p style="color:#666; font-size: 0.9rem;">Absolutely love the vase! It arrived perfectly packaged.</p>
+    </div>
+    <div style="border-bottom: 1px solid #eee; padding: 15px 0;">
+        <strong>Mike Johnson</strong> <span style="color:#ff9800;">★★★★☆</span>
+        <p style="color:#666; font-size: 0.9rem;">Great quality, but shipping took a bit longer than expected.</p>
+    </div>
+</div>
+{% endblock %}

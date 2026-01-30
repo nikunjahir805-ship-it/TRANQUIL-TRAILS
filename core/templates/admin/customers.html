@@ -1,0 +1,25 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}Customers{% endblock %}
+{% block page_desc %}View your client base.{% endblock %}
+
+{% block content %}
+<div class="card fade-in-up">
+    <table>
+        <thead>
+            <tr>
+                <th>Avatar</th><th>Name</th><th>Email</th><th>Total Spent</th><th>Joined</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><div style="width:35px; height:35px; background:#ddd; border-radius:50%; display:flex; align-items:center; justify-content:center;">SS</div></td>
+                <td>Sarah Smith</td><td>sarah@example.com</td><td>$1,200</td><td>Jan 10, 2026</td>
+            </tr>
+            <tr>
+                <td><div style="width:35px; height:35px; background:#ddd; border-radius:50%; display:flex; align-items:center; justify-content:center;">MJ</div></td>
+                <td>Mike Johnson</td><td>mike@example.com</td><td>$340</td><td>Dec 12, 2025</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

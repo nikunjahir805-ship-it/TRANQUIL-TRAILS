@@ -1,0 +1,351 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artisan Studio | Handcrafted Project</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    
+    <style>
+        /* Container for the profile section */
+        .nav-user-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        /* The Circular Profile Picture */
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid #8B5E3C; /* Your primary color */
+            transition: transform 0.2s;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        /* The Dropdown Menu (Hidden by default) */
+        .profile-dropdown {
+            display: none; /* Hidden */
+            position: absolute;
+            top: 55px;
+            right: 0;
+            background-color: #ffffff;
+            min-width: 160px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            z-index: 1000;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Dropdown Links */
+        .profile-dropdown a {
+            color: #2d2d2d;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 0.9rem;
+            font-family: 'Poppins', sans-serif;
+            border-bottom: 1px solid #f4f4f4;
+            transition: background 0.2s;
+        }
+
+        .profile-dropdown a:last-child {
+            border-bottom: none;
+            color: #d32f2f; /* Red for logout */
+        }
+
+        .profile-dropdown a:hover {
+            background-color: #f4f1ea; /* Your secondary bg color */
+        }
+
+        /* Class to show the menu */
+        .profile-dropdown.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+      
+    <nav>
+        <a href="#" class="logo-container">
+            <img src="{% static 'Adobe Express - file.png' %}" alt="Logo" class="logo-img">
+            <span class="logo-text">TRANQUIL TRAILS</span>
+        </a>
+        
+        <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
+
+        <ul class="nav-links" id="navLinks">
+            <li class="user-link"><a href="{% url 'shop' %}">Shop</a></li>
+            <li class="user-link"><a href="{% url 'offers' %}">Offers</a></li>
+            <li class="user-link"><a href="{% url 'gallery' %}">Gallery</a></li>
+            
+            <li class="admin-link" style="display: none;">
+                <a href="{% url 'admin_dashboard' %}" style="color: #d32f2f; font-weight: bold;">Admin Panel</a>
+            </li>
+
+            <li><a href="{% url 'about' %}">About</a></li>
+            <li><a href="{% url 'Contact' %}">Contact Us</a></li> 
+            
+            <li id="cartNavItem"><a href="#" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a></li>
+            
+            <li id="guestNav">
+                <a href="{% url 'login' %}" class="login-btn">Log In</a>
+            </li>
+
+            <li id="userNav" style="display: none;">
+                <div class="nav-user-container">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" class="user-avatar" id="userAvatarBtn">
+                    
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <div style="padding: 10px 16px; font-weight: bold; background: #f9f9f9; font-size: 0.8rem;">Hello, User!</div>
+                        <a href="#">My Profile</a>
+                        <a href="#">My Orders</a>
+                        <a href="#" id="logoutLink">Logout</a>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h2 style="font-family: 'Playfair Display';">Your Bag</h2>
+            <button class="close-cart" id="closeCart" aria-label="Close Cart">&times;</button>
+        </div>
+        
+        <div class="cart-body">
+            <ul id="cart-items-list"></ul>
+        </div>
+
+        <div class="cart-footer">
+            <div class="cart-total-row">
+                <span>SubTotal</span>
+                <span class="total-amount">$<span id="total-price">0</span></span>
+            </div>
+            <p class="cart-note"></p>
+            <button class="checkout-btn">Checkout Now</button>
+            <button class="clear-cart-link" onclick="clearCart()">Clear All Items</button>
+        </div>
+    </div>
+
+    <header class="hero">
+        <div class="hero-text">
+            <h1>Elevate Your Space <br>With <span>Artistry</span>.</h1>
+            <p>Thoughtfully crafted by local artisans using sustainable materials.</p>
+            <br>
+            <a href="{% url 'shop' %}" style="color: var(--text); font-weight: bold; text-decoration: underline;">View Collection</a>
+        </div>
+                
+        <div class="hero-image-container">
+            <div class="layer layer-1"></div>
+            <div class="layer layer-2">
+                <img src="{% static '001.jpg' %}" alt="Artisan craft">
+            </div>
+            <div class="layer layer-3">
+                <img src="{% static 'small.jpg' %}" alt="Handcrafted item">
+            </div>
+        </div>
+    </header>
+
+    <section class="carousel-section">
+        <h2 style="font-family: 'Playfair Display'; font-size: 2.5rem;">The Curated Gallery</h2>
+        <div class="slider-outer-wrapper">
+            <div class="slider-container">
+                <div class="slider-wrapper" id="sliderWrapper">
+                    <div class="slide" data-name="Earthen Vase" data-price="85" data-img="1.jpeg"><img src="{% static '1.jpeg' %}" alt="Earthen Vase"><button class="add-to-cart-btn">Add to Cart</button></div>
+                    <div class="slide" data-name="Woven Basket" data-price="45" data-img="3.jpeg"><img src="{% static '3.jpeg' %}" alt="Woven Basket"><button class="add-to-cart-btn">Add to Cart</button></div>
+                    <div class="slide" data-name="Stone Art" data-price="120" data-img="4.jpeg"><img src="{% static '4.jpeg' %}" alt="Stone Art"><button class="add-to-cart-btn">Add to Cart</button></div>
+                    <div class="slide" data-name="Ceramic Bowl" data-price="35" data-img="5.jpeg"><img src="{% static '5.jpeg' %}" alt="Ceramic Bowl"><button class="add-to-cart-btn">Add to Cart</button></div>
+                    <div class="slide" data-name="Oak Tray" data-price="40" data-img="6.jpg"><img src="{% static '6.jpg' %}" alt="Oak Tray"><button class="add-to-cart-btn">Add to Cart</button></div>
+                    <div class="slide" data-name="Handcrafted Bowl" data-price="60" data-img="7.jpeg"><img src="{% static '7.jpeg' %}" alt="Handcrafted Bowl"><button class="add-to-cart-btn">Add to Cart</button></div>
+                    <div class="slide" data-name="Ceramic Plate" data-price="90" data-img="8.jpg"><img src="{% static '8.jpg' %}" alt="Ceramic Plate"><button class="add-to-cart-btn">Add to Cart</button></div>
+                    <div class="slide" data-name="Small Vase" data-price="20" data-img="9.jpg"><img src="{% static '9.jpg' %}" alt="Small Vase"><button class="add-to-cart-btn">Add to Cart</button></div>
+                    <div class="slide" data-name="Decorative Pot" data-price="120" data-img="10.jpg"><img src="{% static '10.jpg' %}" alt="Decorative Pot"><button class="add-to-cart-btn">Add to Cart</button></div>
+                    <div class="slide" data-name="Premium Set" data-price="750" data-img="11.jpg"><img src="{% static '11.jpg' %}" alt="Premium Set"><button class="add-to-cart-btn">Add to Cart</button></div>
+                    <div class="slide" data-name="Clay Cup" data-price="30" data-img="12.jpg"><img src="{% static '12.jpg' %}" alt="Clay Cup"><button class="add-to-cart-btn">Add to Cart</button></div>
+                    <div class="slide" data-name="Artisan Sculpture" data-price="190" data-img="13.jpg"><img src="{% static '13.jpg' %}" alt="Artisan Sculpture"><button class="add-to-cart-btn">Add to Cart</button></div>
+                    <div class="slide" data-name="Woven Art" data-price="60" data-img="14.jpg"><img src="{% static '14.jpg' %}" alt="Woven Art"><button class="add-to-cart-btn">Add to Cart</button></div>
+                </div>
+            </div>
+            <div class="slider-nav">
+                <button class="nav-arrow" id="prevBtn" aria-label="Previous">&#10229;</button>
+                <button class="nav-arrow" id="nextBtn" aria-label="Next">&#10230;</button>
+            </div>
+        </div>
+    </section>
+      
+    <section class="artisan-favorites">
+        <div class="section-container">
+            <div class="gallery-header">
+                <div class="header-title">
+                    <span class="subtitle">Handpicked For You</span>
+                    <h2 class="playfair">Artisan Favorites</h2>
+                </div>
+            </div>
+
+            <div class="filter-container">
+                <div class="filter-track">
+                    <button class="filter-btn active" data-filter="all">All Masterpieces</button>
+                    <button class="filter-btn" data-filter="textiles">Textiles</button>
+                    <button class="filter-btn" data-filter="ceramics">Ceramics</button>
+                    <button class="filter-btn" data-filter="decor">Home Decor</button>
+                    <button class="filter-btn" data-filter="metal">Metal & Brass</button>
+                    <button class="filter-btn" data-filter="wood">Woodwork</button>
+                </div>
+            </div>
+
+            <div class="pro-slider-horizontal" id="proSlider">
+                <div class="pro-card" data-category="ceramics" data-name="Decorative Pot" data-price="120" data-img="10.jpg">
+                    <div class="pro-image-wrapper"><img src="{% static '10.jpg' %}" alt="Decorative Pot"></div>
+                    <div class="pro-info">
+                        <h4>Decorative Pot</h4>
+                        <p class="price">$120</p>
+                        <div class="pro-btn-group">
+                            <button class="add-to-cart-btn">Add to Cart</button>
+                            <button class="buy-now-btn">Buy Now</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pro-card" data-category="textiles" data-name="Pashmina Shawl" data-price="250" data-img="Pashmina Shawl.jpg">
+                    <div class="pro-image-wrapper"><img src="{% static 'Pashmina Shawl.jpg' %}" alt="Pashmina Shawl"></div>
+                    <div class="pro-info"><h4>Pashmina Shawl</h4><p class="price">$250</p><div class="pro-btn-group"><button class="add-to-cart-btn">Add to Cart</button><button class="buy-now-btn">Buy Now</button></div></div>
+                </div>
+
+                <div class="pro-card" data-category="ceramics" data-name="Blue Pottery Vase" data-price="45" data-img="Blue Pottery Vase.jpg">
+                    <div class="pro-image-wrapper"><img src="{% static 'Blue Pottery Vase.jpg' %}" alt="Blue Pottery Vase"></div>
+                    <div class="pro-info"><h4>Blue Pottery Vase</h4><p class="price">$45</p><div class="pro-btn-group"><button class="add-to-cart-btn">Add to Cart</button><button class="buy-now-btn">Buy Now</button></div></div>
+                </div>
+
+                <div class="pro-card" data-category="decor" data-name="Madhubani Painting" data-price="85" data-img="Madhubani Painting.jpg">
+                    <div class="pro-image-wrapper"><img src="{% static 'Madhubani Painting.jpg' %}" alt="Madhubani Painting"></div>
+                    <div class="pro-info"><h4>Madhubani Painting</h4><p class="price">$85</p><div class="pro-btn-group"><button class="add-to-cart-btn">Add to Cart</button><button class="buy-now-btn">Buy Now</button></div></div>
+                </div>
+
+                <div class="pro-card" data-category="metal" data-name="Dhokra Metal Art" data-price="65" data-img="Dhokra Metal Art.jpg">
+                    <div class="pro-image-wrapper"><img src="{% static 'Dhokra Metal Art.jpg' %}" alt="Dhokra Metal Art"></div>
+                    <div class="pro-info"><h4>Dhokra Metal Art</h4><p class="price">$65</p><div class="pro-btn-group"><button class="add-to-cart-btn">Add to Cart</button><button class="buy-now-btn">Buy Now</button></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="main-footer">
+        <div class="footer-container">
+            <div class="footer-section about">
+                <h3 class="footer-logo">TRANQUIL TRAILS</h3>
+                <p>Bringing the soul of artisanal craftsmanship into modern homes.</p>
+                <div class="social-icons" style="display: flex; gap: 15px; margin-top: 20px;">
+                    <a href="#" class="insta-direct"><img src="{% static 'instagram.png' %}" style="width: 24px;" alt="Instagram"></a>
+                    <a href="#" class="insta-direct"><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" style="width: 24px;" alt="Facebook"></a>
+                </div>
+            </div>
+
+            <div class="footer-section links">
+                <h4>Shop</h4>
+                <ul>
+                    <li><a href="{% url 'shop' %}">All Products</a></li>
+                    <li><a href="{% url 'gallery' %}">Gallery</a></li>
+                    <li><a href="{% url 'offers' %}">Offers</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section links">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="{% url 'Contact' %}">Contact Us</a></li>
+                    <li><a href="#">Shipping Policy</a></li>
+                    <li><a href="#">Returns & Exchanges</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section newsletter">
+                <h4>Join the Journey</h4>
+                <p>Subscribe for early access to new collections.</p>
+                <form class="subscribe-form">
+                    <input type="email" placeholder="Your email address" required>
+                    <button type="submit">Join</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 TRANQUIL TRAILS. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{% static 'script.js' %}"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Elements
+            const isAdmin = localStorage.getItem('isAdmin'); // This stores 'true' or 'false' if logged in
+            const guestNav = document.getElementById('guestNav');
+            const userNav = document.getElementById('userNav');
+            const userAvatarBtn = document.getElementById('userAvatarBtn');
+            const profileDropdown = document.getElementById('profileDropdown');
+            const logoutLink = document.getElementById('logoutLink');
+            const adminLink = document.querySelector('.admin-link');
+
+            // 1. Check Login State
+            if (isAdmin) {
+                // User is logged in (either Admin or Normal)
+                if (guestNav) guestNav.style.display = 'none'; // Hide "Log In" button
+                if (userNav) userNav.style.display = 'block';  // Show "Avatar"
+
+                // If explicitly Admin, show the Admin Panel link in nav
+                if (isAdmin === 'true' && adminLink) {
+                    adminLink.style.display = 'block';
+                }
+            } else {
+                // User is NOT logged in
+                if (guestNav) guestNav.style.display = 'block';
+                if (userNav) userNav.style.display = 'none';
+            }
+
+            // 2. Dropdown Toggle Logic
+            if (userAvatarBtn && profileDropdown) {
+                userAvatarBtn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Stop click from closing immediately
+                    profileDropdown.classList.toggle('show');
+                });
+
+                // Close dropdown if clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!userNav.contains(e.target)) {
+                        profileDropdown.classList.remove('show');
+                    }
+                });
+            }
+
+            // 3. Logout Logic
+            if (logoutLink) {
+                logoutLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem('isAdmin'); // Clear session
+                    alert("You have been logged out.");
+                    window.location.reload(); // Reload page to reset UI
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}Discounts{% endblock %}
+{% block page_desc %}Create coupons and sale events.{% endblock %}
+
+{% block content %}
+<div class="card fade-in-up">
+    <h3>Active Coupons</h3>
+    <br>
+    <div style="background:#f4f1ea; padding:15px; border-left:4px solid #8b5e3c; margin-bottom:10px;">
+        <strong>WELCOME20</strong>
+        <p>20% Off for new users. Expires: Never</p>
+    </div>
+    <div style="background:#f4f1ea; padding:15px; border-left:4px solid #8b5e3c;">
+        <strong>SUMMER10</strong>
+        <p>10% Off summer collection. Expires: June 30</p>
+    </div>
+</div>
+{% endblock %}

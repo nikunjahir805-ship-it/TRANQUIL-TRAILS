@@ -1,0 +1,436 @@
+{% load static %} 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join the Studio | TRANQUIL TRAILS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        :root {
+            --primary: #8B5E3C; 
+            --accent: #D4A373;
+            --bg: #F4EFE6;      
+            --white: #ffffff;
+            --text: #2d2d2d;
+            --gray: #a0a0a0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+
+        /* Custom Cursor */
+        .cursor {
+            width: 20px; height: 20px; border: 2px solid var(--primary);
+            border-radius: 50%; position: fixed; pointer-events: none;
+            z-index: 9999; transition: transform 0.1s ease;
+        }
+
+        .login-container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* LEFT SIDE VISUAL */
+        .login-visual {
+            flex: 1.2;
+            background: url('{% static "no.jpg" %}');
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; 
+            padding: 60px;
+            color: white;
+            position: relative;
+        }
+
+        .visual-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 100%);
+            z-index: 1;
+        }
+
+        .product-badge {
+            position: relative;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 25px;
+            width: fit-content;
+            border-radius: 4px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .collection-tag {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent);
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .product-badge h4 {
+            font-family: 'Playfair Display';
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+
+        .visual-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .visual-content h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+
+        .visual-content h2 span {
+            font-style: italic;
+            font-weight: 400;
+            color: #fee500;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        /* RIGHT SIDE FORM */
+        .login-form-section {
+            flex: 1;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            position: relative;
+        }
+
+        .form-box {
+            width: 100%;
+            max-width: 400px;
+            opacity: 0; 
+            transform: translateY(30px);
+        }
+
+        .logo-back {
+            text-decoration: none;
+            color: var(--text);
+            font-family: 'Playfair Display';
+            font-weight: bold;
+            font-size: 1.2rem;
+            display: block;
+            margin-bottom: 50px;
+            letter-spacing: 2px;
+        }
+
+        .form-box h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .form-box p {
+            color: var(--gray);
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            background: transparent;
+            border: 1px solid #d1ccc0;
+            border-radius: 4px;
+            font-family: 'Poppins';
+            transition: 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+        }
+
+        .forgot-pass {
+            display: block;
+            text-align: right;
+            font-size: 0.8rem;
+            color: var(--primary);
+            text-decoration: none;
+            margin-bottom: 30px;
+        }
+
+        .sign-in-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: 0.4s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .sign-in-btn:hover {
+            background: #2D4739;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.9rem;
+        }
+
+        .signup-link a {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        @media (max-width: 900px) {
+            .login-visual { display: none; }
+            .login-form-section { flex: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="cursor"></div>
+
+    <div class="login-container">
+        <div class="login-visual">
+            <div class="visual-overlay"></div>
+            
+            <div class="product-badge">
+                <span class="collection-tag">Limited Edition</span>
+                <h4>The Earth & Fire Series</h4>
+                <p>Hand-thrown stoneware, 2026</p>
+            </div>
+
+            <div class="visual-content">
+                <h2>Curating <br>the <span>Handmade</span>.</h2>
+                <p>Pick up where you left off in your journey of craft.</p>
+            </div>
+        </div>
+
+        <div class="login-form-section">
+            <div class="form-box">
+                <a href="{% url 'home' %}" class="logo-back">← TRANQUIL TRAILS</a>
+                
+                <div id="loginView">
+                    <h3>Log In</h3>
+                    <p>Enter your details to access your account.</p>
+
+                    <form id="loginForm">
+                        <div class="input-group">
+                            <label>Email Address</label>
+                            <input type="email" placeholder="name@example.com" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Password</label>
+                            <input type="password" placeholder="••••••••" required>
+                        </div>
+                        <a href="#" class="forgot-pass">Forgot Password?</a>
+                        <button type="submit" class="sign-in-btn">Enter Gallery</button>
+                    </form>
+
+                    <div class="signup-link">
+                        Don't have an account? <a href="#" onclick="toggleForm()">Create one</a>
+                    </div>
+                </div>
+
+                <div id="signupView" style="display: none;">
+                    <h3>Join the Studio</h3>
+                    <p>Start your journey with handcrafted artistry.</p>
+
+                    <form id="signupForm">
+                        <div class="input-group">
+                            <label>Full Name</label>
+                            <input type="text" placeholder="Your Name" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Email Address</label>
+                            <input type="email" placeholder="name@example.com" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Create Password</label>
+                            <input type="password" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="sign-in-btn">Create Account</button>
+                    </form>
+
+                    <div class="signup-link">
+                        Already a member? <a href="#" onclick="toggleForm()">Log In</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. CSRF Token Helper (Required for Django Security) ---
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        // --- 2. Custom Cursor ---
+        const cursor = document.querySelector('.cursor');
+        document.addEventListener('mousemove', e => {
+            cursor.style.top = e.clientY + 'px';
+            cursor.style.left = e.clientX + 'px';
+        });
+
+        // Cursor Hover Effects
+        function updateCursorEvents() {
+            document.querySelectorAll('input, button, a').forEach(elem => {
+                elem.addEventListener('mouseenter', () => cursor.style.transform = 'scale(2.5)');
+                elem.addEventListener('mouseleave', () => cursor.style.transform = 'scale(1)');
+            });
+        }
+        updateCursorEvents();
+
+        // --- 3. Toggle Form Animation ---
+        function toggleForm() {
+            const loginView = document.getElementById('loginView');
+            const signupView = document.getElementById('signupView');
+            
+            gsap.to(".form-box", {
+                opacity: 0,
+                y: 20,
+                duration: 0.4,
+                onComplete: () => {
+                    if (loginView.style.display === "none") {
+                        loginView.style.display = "block";
+                        signupView.style.display = "none";
+                    } else {
+                        loginView.style.display = "none";
+                        signupView.style.display = "block";
+                    }
+                    
+                    gsap.to(".form-box", {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.6,
+                        ease: "power2.out"
+                    });
+                }
+            });
+        }
+
+        // --- 4. Initial GSAP Load ---
+        window.addEventListener('load', () => {
+            const tl = gsap.timeline();
+            tl.to(".form-box", { opacity: 1, y: 0, duration: 1.2, ease: "power4.out" });
+            tl.from(".visual-content h2", { opacity: 0, x: -50, duration: 1 }, "-=0.8");
+        });
+
+        // --- 5. REAL BACKEND SIGNUP LOGIC ---
+        document.getElementById('signupForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = e.target.querySelector('input[placeholder="Your Name"]').value;
+            const email = e.target.querySelector('input[type="email"]').value;
+            const password = e.target.querySelector('input[type="password"]').value;
+
+            // Send data to Django
+            fetch('/api/signup/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                body: JSON.stringify({ full_name: name, email: email, password: password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Account Created Successfully! Welcome to Tranquil Trails.");
+                    localStorage.setItem('isAdmin', 'false'); // Signups are normal users by default
+                    window.location.href = "{% url 'home' %}";
+                } else {
+                    alert("Error: " + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Something went wrong. Please check your connection.");
+            });
+        });
+
+        // --- 6. REAL BACKEND LOGIN LOGIC ---
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const email = e.target.querySelector('input[type="email"]').value;
+            const password = e.target.querySelector('input[type="password"]').value;
+
+            // Send data to Django
+            fetch('/api/login/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                body: JSON.stringify({ email: email, password: password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Check if the user is Staff/Admin
+                    if (data.is_staff) {
+                        alert("Admin Verified. Opening Management Studio...");
+                        localStorage.setItem('isAdmin', 'true');
+                        window.location.href = "{% url 'admin_dashboard' %}";
+                    } else {
+                        alert("Login Successful! Redirecting to your Studio...");
+                        localStorage.setItem('isAdmin', 'false');
+                        window.location.href = "{% url 'home' %}";
+                    }
+                } else {
+                    alert("Login Failed: " + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Something went wrong. Please check your connection.");
+            });
+        });
+    </script>
+</body>
+</html>

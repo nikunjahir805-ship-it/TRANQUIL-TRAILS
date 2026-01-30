@@ -1,0 +1,186 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}Orders Management{% endblock %}
+
+{% block content %}
+<style>
+    /* Handcraft Theme Animations & Styles */
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .order-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px; /* Spacing between rows */
+    }
+
+    .order-table tr {
+        background: #ffffff;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+
+    .order-table tr:hover {
+        transform: scale(1.01);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .order-table td, .order-table th {
+        padding: 15px;
+        text-align: left;
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .btn-action {
+        border: none;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: 0.2s;
+        margin-left: 5px;
+    }
+
+    .btn-view { background: #f0f0f0; color: #333; }
+    .btn-view:hover { background: #e0e0e0; }
+
+    .btn-delete { background: #ffebee; color: #c62828; }
+    .btn-delete:hover { background: #ffcdd2; }
+
+    .search-container input:focus {
+        border-color: #2c2c2c !important;
+        box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+</style>
+
+<div class="fade-in-up">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
+        <div class="search-container" style="flex-grow: 1;">
+            <i class="fas fa-search" style="position: absolute; margin: 14px; color: #aaa;"></i>
+            <input type="text" id="orderSearch" onkeyup="searchOrders()" placeholder="Search by Order ID or Name..." 
+                   style="padding: 12px 12px 12px 40px; border: 1px solid #ddd; border-radius: 8px; width: 100%; max-width: 400px; outline: none;">
+        </div>
+        
+        <div>
+            <button onclick="exportCSV()" style="background: #fff; border: 1px solid #2c2c2c; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                <i class="fas fa-download"></i> Export CSV
+            </button>
+            <button onclick="alert('Redirecting to add order...')" style="background: #2c2c2c; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-left: 10px;">
+                + New Order
+            </button>
+        </div>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table class="order-table" id="orderTable">
+            <thead>
+                <tr style="color: #888; font-size: 0.9rem;">
+                    <th>ORDER ID</th>
+                    <th>CUSTOMER</th>
+                    <th>DATE</th>
+                    <th>TOTAL</th>
+                    <th>STATUS</th>
+                    <th style="text-align: right;">ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr id="row-{{ order.id }}">
+                    <td style="font-weight: bold; color: #2c2c2c;">#{{ order.order_id }}</td>
+                    <td>
+                        <div style="display: flex; flex-direction: column;">
+                            <strong>{{ order.customer_name }}</strong>
+                            <span style="font-size: 0.75rem; color: #999;">{{ order.customer_email }}</span>
+                        </div>
+                    </td>
+                    <td>{{ order.created_at }}</td>
+                    <td style="font-weight: bold;">${{ order.total_price }}</td>
+                    <td>
+                        <select onchange="updateStatus('{{ order.id }}', this.value)" 
+                                style="border: none; background: #f9f9f9; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                            <option value="Paid" {% if order.status == 'Paid' %}selected{% endif %}>Paid</option>
+                            <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
+                            <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                            <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                    </td>
+                    <td style="text-align: right;">
+                        <button onclick="viewOrder('{{ order.id }}')" class="btn-action btn-view">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button onclick="deleteOrder('{{ order.id }}')" class="btn-action btn-delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // 1. Live Search Functionality
+    function searchOrders() {
+        const input = document.getElementById('orderSearch').value.toLowerCase();
+        const rows = document.querySelectorAll('#orderTable tbody tr');
+
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(input) ? '' : 'none';
+        });
+    }
+
+    // 2. View Order Detail (Redirect)
+    function viewOrder(id) {
+        window.location.href = `/admin/orders/view/${id}/`;
+    }
+
+    // 3. Update Status (Backend Sync)
+    function updateStatus(id, newStatus) {
+        // You would typically use fetch() here to update your database
+        console.log(`Order ${id} changed to ${newStatus}`);
+        
+        // Visual feedback
+        const statusColors = {
+            'Paid': '#2e7d32',
+            'Pending': '#ef6c00',
+            'Shipped': '#1976d2',
+            'Cancelled': '#d32f2f'
+        };
+        
+        alert(`Status for Order #${id} updated to ${newStatus}`);
+    }
+
+    // 4. Delete Order with Animation
+    function deleteOrder(id) {
+        if (confirm("Are you sure you want to remove this handcrafted order?")) {
+            const row = document.getElementById(`row-${id}`);
+            row.style.opacity = '0';
+            row.style.transform = 'translateX(20px)';
+            
+            setTimeout(() => {
+                row.remove();
+                // Add your backend delete logic (fetch/ajax) here
+            }, 300);
+        }
+    }
+
+    // 5. Export Function
+    function exportCSV() {
+        alert("Generating CSV report for your handcrafted items...");
+        // Logic to trigger file download
+    }
+</script>
+{% endblock %}

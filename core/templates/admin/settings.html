@@ -1,0 +1,19 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}Settings{% endblock %}
+{% block page_desc %}Configure your system preferences.{% endblock %}
+
+{% block content %}
+<div class="card fade-in-up" style="max-width: 600px;">
+    <h3>General Settings</h3>
+    <br>
+    <div style="margin-bottom: 15px;">
+        <label style="display:block; font-weight:600; margin-bottom:5px;">Store Name</label>
+        <input type="text" value="Tranquil Trails" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+    </div>
+    <div style="margin-bottom: 15px;">
+        <label style="display:block; font-weight:600; margin-bottom:5px;">Admin Email</label>
+        <input type="email" value="admin@tranquiltrails.com" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+    </div>
+    <button style="background: #4caf50; color: white; padding: 10px 20px; border:none; border-radius:6px; cursor:pointer;">Save Changes</button>
+</div>
+{% endblock %}

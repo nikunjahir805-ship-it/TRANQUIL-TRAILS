@@ -1,0 +1,20 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}Inventory{% endblock %}
+{% block page_desc %}Track stock levels and low-stock alerts.{% endblock %}
+
+{% block content %}
+<div class="card fade-in-up">
+    <h3>Stock Status</h3>
+    <br>
+    <table>
+        <thead>
+            <tr><th>Product</th><th>SKU</th><th>Current Stock</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Desert Bloom Vase</td><td>VASE-001</td><td>24</td><td><span style="background:#e8f5e9; color:#2e7d32; padding:4px 8px; border-radius:4px;">In Stock</span></td></tr>
+            <tr><td>Teakwood Tray</td><td>WOOD-045</td><td>5</td><td><span style="background:#fff3e0; color:#ef6c00; padding:4px 8px; border-radius:4px;">Low Stock</span></td></tr>
+            <tr><td>Woven Art</td><td>TEX-102</td><td>0</td><td><span style="background:#ffebee; color:#c62828; padding:4px 8px; border-radius:4px;">Out of Stock</span></td></tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

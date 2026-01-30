@@ -1,0 +1,15 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}Staff Management{% endblock %}
+{% block page_desc %}Manage admin access and roles.{% endblock %}
+
+{% block content %}
+<div class="card fade-in-up">
+    <table>
+        <thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Status</th></tr></thead>
+        <tbody>
+            <tr><td>Nikunj Ladumor</td><td>Super Admin</td><td>admin@tranquiltrails.com</td><td><span style="color:green;">Active</span></td></tr>
+            <tr><td>John Doe</td><td>Editor</td><td>john@example.com</td><td><span style="color:green;">Active</span></td></tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

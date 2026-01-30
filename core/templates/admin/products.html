@@ -1,0 +1,104 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block page_title %}Product Catalog{% endblock %}
+{% block page_desc %}Manage your current inventory and stock levels.{% endblock %}
+
+{% block content %}
+<style>
+    .action-bar { display: flex; justify-content: space-between; margin-bottom: 20px; gap: 15px; flex-wrap: wrap; }
+    .search-input { padding: 10px 15px; border: 1px solid #ddd; border-radius: 6px; width: 300px; }
+    .add-btn { background: #2c2c2c; color: white; padding: 10px 20px; border-radius: 6px; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+    .add-btn:hover { background: #8b5e3c; transform: translateY(-2px); }
+    
+    /* Table Styling overrides */
+    .product-img { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; background: #eee; }
+    .stock-badge { padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+    .in-stock { background: #e8f5e9; color: #2e7d32; }
+    .low-stock { background: #fff3e0; color: #ef6c00; }
+    .out-of-stock { background: #ffebee; color: #c62828; }
+</style>
+
+<div class="action-bar fade-in-up">
+    <input type="text" class="search-input" placeholder="Search products...">
+    <a href="{% url 'admin_add_product' %}" class="add-btn">
+        <i class="fas fa-plus"></i> Add New Product
+    </a>
+</div>
+
+<div class="card fade-in-up">
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 60px;">Image</th>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Status</th>
+                <th style="text-align: right;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><img src="{% static '1.jpeg' %}" class="product-img" alt="Vase"></td>
+                <td><strong>Desert Bloom Vase</strong><br><small>SKU: VASE-001</small></td>
+                <td>Ceramics</td>
+                <td>$120.00</td>
+                <td>24</td>
+                <td><span class="stock-badge in-stock">In Stock</span></td>
+                <td style="text-align: right;">
+                    <button style="border:none; background:none; cursor:pointer; color:#666;"><i class="fas fa-edit"></i></button>
+                    <button style="border:none; background:none; cursor:pointer; color:#d32f2f; margin-left: 10px;"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+
+            <tr>
+                <td><img src="{% static '6.jpg' %}" class="product-img" alt="Tray"></td>
+                <td><strong>Teakwood Serving Tray</strong><br><small>SKU: WOOD-045</small></td>
+                <td>Woodwork</td>
+                <td>$75.00</td>
+                <td>5</td>
+                <td><span class="stock-badge low-stock">Low Stock</span></td>
+                <td style="text-align: right;">
+                    <button style="border:none; background:none; cursor:pointer; color:#666;"><i class="fas fa-edit"></i></button>
+                    <button style="border:none; background:none; cursor:pointer; color:#d32f2f; margin-left: 10px;"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+
+            <tr>
+                <td><img src="{% static '14.jpg' %}" class="product-img" alt="Textile"></td>
+                <td><strong>Heritage Woven Art</strong><br><small>SKU: TEX-102</small></td>
+                <td>Textiles</td>
+                <td>$95.00</td>
+                <td>0</td>
+                <td><span class="stock-badge out-of-stock">Out of Stock</span></td>
+                <td style="text-align: right;">
+                    <button style="border:none; background:none; cursor:pointer; color:#666;"><i class="fas fa-edit"></i></button>
+                    <button style="border:none; background:none; cursor:pointer; color:#d32f2f; margin-left: 10px;"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+            
+            <tr>
+                <td><img src="{% static '10.jpg' %}" class="product-img" alt="Pot"></td>
+                <td><strong>Decorative Clay Pot</strong><br><small>SKU: POT-088</small></td>
+                <td>Ceramics</td>
+                <td>$60.00</td>
+                <td>18</td>
+                <td><span class="stock-badge in-stock">In Stock</span></td>
+                <td style="text-align: right;">
+                    <button style="border:none; background:none; cursor:pointer; color:#666;"><i class="fas fa-edit"></i></button>
+                    <button style="border:none; background:none; cursor:pointer; color:#d32f2f; margin-left: 10px;"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+        <button style="padding: 5px 10px; border: 1px solid #ddd; background: white; border-radius: 4px;">&laquo; Prev</button>
+        <button style="padding: 5px 10px; border: 1px solid #2c2c2c; background: #2c2c2c; color: white; border-radius: 4px;">1</button>
+        <button style="padding: 5px 10px; border: 1px solid #ddd; background: white; border-radius: 4px;">2</button>
+        <button style="padding: 5px 10px; border: 1px solid #ddd; background: white; border-radius: 4px;">Next &raquo;</button>
+    </div>
+</div>
+{% endblock %}

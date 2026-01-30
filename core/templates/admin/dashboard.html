@@ -1,0 +1,164 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block page_title %}Dashboard{% endblock %}
+{% block page_desc %}Here is what's happening with your store today.{% endblock %}
+
+{% block content %}
+<style>
+    /* Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .stat-card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: flex-start; transition: 0.2s; }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.05); }
+    .stat-info h3 { font-size: 0.85rem; color: #666; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-info .value { font-family: 'Playfair Display'; font-size: 1.8rem; font-weight: 700; color: #2c2c2c; margin-bottom: 5px; }
+    .stat-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    
+    .bg-light-accent { background: rgba(139, 94, 60, 0.1); color: #8b5e3c; }
+    .bg-light-green { background: rgba(76, 175, 80, 0.1); color: #4caf50; }
+    .bg-light-blue { background: rgba(33, 150, 243, 0.1); color: #2196f3; }
+    .bg-light-orange { background: rgba(255, 152, 0, 0.1); color: #ff9800; }
+    
+    .trend-up { color: #4caf50; font-size: 0.8rem; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+    .trend-down { color: #f44336; font-size: 0.8rem; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+
+    /* Tables */
+    .table-container { background: white; padding: 25px; border-radius: 12px; border: 1px solid #e0e0e0; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 15px; border-bottom: 2px solid #f4f1ea; font-size: 0.95rem; color: #1a1a1a; }
+    td { padding: 15px; border-bottom: 1px solid #f0f0f0; color: #666; font-size: 0.9rem; vertical-align: middle; }
+    .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+    .status-completed { background: rgba(76, 175, 80, 0.1); color: #4caf50; }
+    .status-progress { background: rgba(33, 150, 243, 0.1); color: #2196f3; }
+    .status-pending { background: rgba(255, 152, 0, 0.1); color: #ff9800; }
+</style>
+
+<div class="stats-grid fade-in-up">
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Total Revenue</h3>
+            <div class="value">$5,569</div>
+            <div class="trend-up"><i class="fas fa-arrow-up"></i> 12.5% from last month</div>
+        </div>
+        <div class="stat-icon bg-light-accent"><i class="fas fa-dollar-sign"></i></div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Orders</h3>
+            <div class="value">1,240</div>
+            <div class="trend-up"><i class="fas fa-arrow-up"></i> 5.2% from last month</div>
+        </div>
+        <div class="stat-icon bg-light-orange"><i class="fas fa-shopping-bag"></i></div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Pending Projects</h3>
+            <div class="value">16</div>
+            <div class="trend-down"><i class="fas fa-clock"></i> 3 Overdue</div>
+        </div>
+        <div class="stat-icon bg-light-blue"><i class="fas fa-briefcase"></i></div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Site Visitors</h3>
+            <div class="value">45k</div>
+            <div class="trend-up"><i class="fas fa-arrow-up"></i> 18% Traffic Spike</div>
+        </div>
+        <div class="stat-icon bg-light-green"><i class="fas fa-users"></i></div>
+    </div>
+</div>
+
+<div class="fade-in-up" style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px;">
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+            <h3>Revenue vs Expenses</h3>
+            <i class="fas fa-ellipsis-v" style="color: #888; cursor: pointer;"></i>
+        </div>
+        <div style="height: 300px;">
+            <canvas id="revenueChart"></canvas>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Sales by Category</h3>
+        <div style="height: 250px; margin-top: 20px;">
+            <canvas id="categoryChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="table-container fade-in-up">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3>Recent Orders</h3>
+        <button style="padding: 8px 16px; background: #2c2c2c; color: white; border: none; border-radius: 6px; cursor: pointer;">View All</button>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Customer</th>
+                <th>Order ID</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th style="text-align:right;">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Archie Cantones</strong><br><small>archie@example.com</small></td>
+                <td>#ORD-7829</td>
+                <td>$120.00</td>
+                <td><span class="status-badge status-completed">Completed</span></td>
+                <td style="text-align:right;"><i class="fas fa-ellipsis-h"></i></td>
+            </tr>
+            <tr>
+                <td><strong>Holmes Cherryman</strong><br><small>holmes@example.com</small></td>
+                <td>#ORD-7828</td>
+                <td>$85.50</td>
+                <td><span class="status-badge status-progress">Processing</span></td>
+                <td style="text-align:right;"><i class="fas fa-ellipsis-h"></i></td>
+            </tr>
+            <tr>
+                <td><strong>Malanie Hanvey</strong><br><small>malanie@example.com</small></td>
+                <td>#ORD-7827</td>
+                <td>$240.00</td>
+                <td><span class="status-badge status-pending">Pending</span></td>
+                <td style="text-align:right;"><i class="fas fa-ellipsis-h"></i></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    const ctxRev = document.getElementById('revenueChart').getContext('2d');
+    new Chart(ctxRev, {
+        type: 'bar',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Revenue',
+                data: [1200, 1900, 3000, 5000, 2000, 3000, 4500],
+                backgroundColor: '#8b5e3c',
+                borderRadius: 4
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    const ctxCat = document.getElementById('categoryChart').getContext('2d');
+    new Chart(ctxCat, {
+        type: 'doughnut',
+        data: {
+            labels: ['Ceramics', 'Textiles', 'Wood', 'Metal'],
+            datasets: [{
+                data: [45, 25, 20, 10],
+                backgroundColor: ['#8b5e3c', '#2c2c2c', '#c5a059', '#e0e0e0'],
+                borderWidth: 0
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+</script>
+{% endblock %}

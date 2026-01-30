@@ -1,0 +1,104 @@
+{% load static %} <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | Tranquil Trails</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+
+    <style>
+        .contact-container {
+            padding: 80px 10%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 100px;
+        }
+        .contact-info h2 {
+            font-family: 'Playfair Display';
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        .contact-form {
+            background: #fff;
+            padding: 40px;
+            border: 1px solid #eee;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            font-family: 'Poppins';
+            outline: none;
+        }
+        .form-group input:focus { border-color: #2c2c2c; }
+        .submit-btn {
+            background: #2c2c2c;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Poppins';
+            transition: 0.3s;
+        }
+        .submit-btn:hover { background: #555; }
+        @media (max-width: 768px) {
+            .contact-container { grid-template-columns: 1fr; gap: 40px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{% url 'home' %}" class="logo-container">
+            <img src="{% static 'Adobe Express - file.png' %}" alt="Logo" class="logo-img">
+            <span class="logo-text">TRANQUIL TRAILS</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="{% url 'shop' %}">Shop</a></li>
+            <li><a href="{% url 'about' %}">About</a></li>
+            <li><a href="{% url 'Contact' %}" style="font-weight: bold; color: #8B5E3C;">Contact</a></li>
+            <li id="cartNavItem"><a href="#" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a></li>
+        </ul>
+    </nav>
+
+    <section class="contact-container">
+        <div class="contact-info">
+            <h2>Get in Touch</h2>
+            <p>Have a question about a specific piece or an order? We’re here to help you bring artistry into your home.</p>
+            <br>
+            <p><strong>Studio Address:</strong><br>123 Artisan Way, Earth City</p>
+            <p><strong>Email:</strong><br>hello@tranquiltrails.com</p>
+            <p><strong>Hours:</strong><br>Mon — Fri, 9am — 5pm</p>
+        </div>
+
+        <div class="contact-form">
+            <form action="#">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" placeholder="Your Name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" placeholder="email@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea rows="5" placeholder="How can we help?"></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Send Message</button>
+            </form>
+        </div>
+    </section>
+</body>
+</html>

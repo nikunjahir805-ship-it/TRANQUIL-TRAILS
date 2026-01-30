@@ -1,0 +1,79 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block page_title %}Analytics Engine{% endblock %}
+{% block page_desc %}Deep dive into store performance metrics.{% endblock %}
+
+{% block content %}
+<style>
+    .chart-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+    .metric-card { background: white; padding: 20px; border-radius: 12px; text-align: center; border: 1px solid #eee; }
+    .metric-val { font-size: 2.5rem; font-weight: bold; color: #2c2c2c; font-family: 'Playfair Display'; }
+    .metric-label { font-size: 0.8rem; text-transform: uppercase; color: #888; letter-spacing: 1px; }
+</style>
+
+<div class="stats-grid fade-in-up" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px;">
+    <div class="metric-card">
+        <div class="metric-val">15k</div>
+        <div class="metric-label">Total Visits</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-val">2.3m</div>
+        <div class="metric-label">Avg. Session</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-val">18%</div>
+        <div class="metric-label">Conversion Rate</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-val">$84</div>
+        <div class="metric-label">Avg. Order Value</div>
+    </div>
+</div>
+
+<div class="chart-grid fade-in-up">
+    <div class="card" style="height: 400px;">
+        <h3 style="margin-bottom: 20px;">Traffic vs Sales</h3>
+        <canvas id="trafficChart"></canvas>
+    </div>
+
+    <div class="card" style="height: 400px;">
+        <h3 style="margin-bottom: 20px;">Device Breakdown</h3>
+        <canvas id="deviceChart"></canvas>
+    </div>
+</div>
+
+<script>
+    // Traffic Chart
+    const ctx1 = document.getElementById('trafficChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Sales ($)',
+                data: [12000, 19000, 3000, 5000, 20000, 30000],
+                borderColor: '#8b5e3c',
+                tension: 0.4,
+                fill: true,
+                backgroundColor: 'rgba(139, 94, 60, 0.1)'
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    // Device Chart
+    const ctx2 = document.getElementById('deviceChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: ['Mobile', 'Desktop', 'Tablet'],
+            datasets: [{
+                data: [55, 30, 15],
+                backgroundColor: ['#2c2c2c', '#8b5e3c', '#d4a373'],
+                borderWidth: 0
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+</script>
+{% endblock %}

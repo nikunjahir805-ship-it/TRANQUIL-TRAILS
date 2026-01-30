@@ -1,0 +1,218 @@
+{% load static %} <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exclusive Offers | TRANQUIL TRAILS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+
+    <style>
+        :root {
+            --primary: #8B5E3C;
+            --accent: #D4A373;
+            --bg: #F4EFE6;
+            --dark: #2d2d2d;
+        }
+
+        body { background: var(--bg); color: var(--dark); font-family: 'Poppins', sans-serif; }
+
+        /* --- Hero Section --- */
+        .offers-hero {
+            padding: 150px 5% 60px;
+            text-align: center;
+            background: linear-gradient(135deg, #efebe4 0%, #F4EFE6 100%);
+        }
+        .offers-hero h1 { font-family: 'Playfair Display'; font-size: 4rem; margin-bottom: 10px; }
+        .offers-hero h1 span { color: var(--primary); font-style: italic; }
+
+        /* --- Filter Bar --- */
+        .filter-container {
+            display: flex; justify-content: center; gap: 15px; margin-bottom: 50px;
+        }
+        .filter-btn {
+            padding: 10px 25px; border-radius: 50px; border: 1px solid var(--primary);
+            background: transparent; color: var(--primary); font-weight: 600;
+            cursor: pointer; transition: 0.3s;
+        }
+        .filter-btn.active { background: var(--primary); color: white; }
+
+        /* --- Coupon Cards --- */
+        .offers-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 30px; max-width: 1100px; margin: 0 auto 80px; padding: 0 20px;
+        }
+
+        .coupon-card {
+            background: white; border-radius: 20px; display: flex;
+            overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            opacity: 0; transform: translateY(30px);
+        }
+
+        .coupon-left {
+            width: 35%; padding: 30px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; position: relative;
+            background: var(--accent); color: white;
+        }
+
+        /* Perforation Circle Visual */
+        .perforation {
+            position: absolute; right: -10px; height: 100%;
+            display: flex; flex-direction: column; justify-content: space-around;
+        }
+        .dot { width: 20px; height: 20px; background: #fffdfd; border-radius: 50%; }
+
+        .coupon-right { width: 65%; padding: 30px; display: flex; flex-direction: column; }
+        .coupon-right h3 { font-family: 'Playfair Display'; font-size: 1.5rem; margin-bottom: 10px; }
+        .coupon-right p { font-size: 0.9rem; color: #666; margin-bottom: 20px; }
+
+        .code-row {
+            margin-top: auto; display: flex; align-items: center; gap: 10px;
+        }
+        .code-box {
+            flex: 1; border: 1px dashed var(--primary); background: #faf9f7;
+            padding: 8px; text-align: center; border-radius: 8px;
+        }
+        .code-box span { font-family: monospace; font-weight: bold; letter-spacing: 1px; }
+
+        .claim-btn {
+            background: var(--primary); color: white; border: none;
+            padding: 10px 20px; border-radius: 8px; cursor: pointer;
+            font-weight: 600; transition: 0.3s;
+        }
+        .claim-btn:hover { background: var(--dark); }
+        .claim-btn.copied { background: #10b981; }
+
+        /* --- Referral Section --- */
+        .referral-banner {
+            margin: 0 5% 80px; padding: 60px; border-radius: 30px;
+            background: var(--dark); color: white; display: flex;
+            justify-content: space-between; align-items: center;
+        }
+        .ref-content h2 { font-family: 'Playfair Display'; font-size: 2.5rem; margin-bottom: 15px; }
+        .reward-badge {
+            width: 130px; height: 130px; background: var(--accent);
+            border-radius: 50%; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center;
+        }
+
+        @media (max-width: 800px) {
+            .offers-grid { grid-template-columns: 1fr; }
+            .coupon-card { flex-direction: column; }
+            .coupon-left { width: 100%; padding: 20px; }
+            .perforation { display: none; }
+            .referral-banner { flex-direction: column; text-align: center; gap: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="{% url 'home' %}" class="logo-container">
+            <img src="{% static 'Adobe Express - file.png' %}" alt="Logo" class="logo-img">
+            <span class="logo-text">TRANQUIL TRAILS</span>
+        </a>
+        
+        <ul class="nav-links">
+             <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="{% url 'shop' %}">Shop</a></li>
+            <li><a href="{% url 'offers' %}" style="color: var(--primary); font-weight: bold;">Offers</a></li>
+            <li><a href="{% url 'Contact' %}">Contact</a></li>
+            <li id="cartNavItem"><a href="#" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a></li>
+        </ul>
+    </nav>
+
+    <header class="offers-hero">
+        <div class="container">
+            <h1>Heritage <span>Specials</span></h1>
+            <p>Start your journey into Indian artistry with exclusive studio deals.</p>
+        </div>
+    </header>
+
+    <div class="filter-container">
+        <button class="filter-btn active" data-cat="All">All</button>
+        <button class="filter-btn" data-cat="Membership">Membership</button>
+        <button class="filter-btn" data-cat="Training">Workshops</button>
+    </div>
+
+    <section class="offers-grid" id="offersGrid"></section>
+
+    <section class="referral-banner">
+        <div class="ref-content">
+            <span style="color: var(--accent); font-weight: bold; text-transform: uppercase; font-size: 0.8rem;">Studio Special</span>
+            <h2>Refer a Fellow Artisan</h2>
+            <p>Bring a friend to our pottery workshops and both get <b>₹500 Credit</b>.</p>
+        </div>
+        <div class="reward-badge">
+            <span style="font-size: 0.7rem; font-weight: bold;">YOU GET</span>
+            <span style="font-size: 1.8rem; font-weight: 900;">₹500</span>
+            <span style="font-size: 0.7rem;">OFF</span>
+        </div>
+    </section>
+
+    <script src="{% static 'script.js' %}"></script>
+    
+    <script>
+        const studioOffers = [
+            { id: 1, title: "New Year Craft Pack", desc: "Get flat 25% OFF on all Yearly Studio Access.", discount: "25% OFF", code: "CRAFT2026", cat: "Membership", color: "#D4A373", icon: "fa-gem" },
+            { id: 2, title: "Student Potter Pack", desc: "Special rates for BCA and Design students.", discount: "₹500 OFF", code: "STUDENTART", cat: "Membership", color: "#8B5E3C", icon: "fa-graduation-cap" },
+            { id: 3, title: "Workshop Pass", desc: "Book 10 pottery sessions and get 2 free.", discount: "2 FREE", code: "CLAYLOVE", cat: "Training", color: "#D4A373", icon: "fa-palette" },
+            { id: 4, title: "Artisan Intensive", desc: "A 3-month deep dive into heritage crafts.", discount: "₹2000 OFF", code: "HERITAGE", cat: "Training", color: "#8B5E3C", icon: "fa-fire" }
+        ];
+
+        function renderOffers(filter = "All") {
+            const grid = document.getElementById('offersGrid');
+            grid.innerHTML = "";
+            const filtered = filter === "All" ? studioOffers : studioOffers.filter(o => o.cat === filter);
+
+            filtered.forEach(o => {
+                const card = document.createElement('div');
+                card.className = 'coupon-card';
+                card.innerHTML = `
+                    <div class="coupon-left" style="background:${o.color}">
+                        <i class="fa-solid ${o.icon}" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
+                        <h3 style="font-weight: 900; font-size: 1.4rem;">${o.discount}</h3>
+                        <div class="perforation">${Array(6).fill('<div class="dot"></div>').join('')}</div>
+                    </div>
+                    <div class="coupon-right">
+                        <span style="font-size: 0.7rem; color: var(--primary); font-weight: bold; text-transform: uppercase;">${o.cat}</span>
+                        <h3>${o.title}</h3>
+                        <p>${o.desc}</p>
+                        <div class="code-row">
+                            <div class="code-box"><span>${o.code}</span></div>
+                            <button class="claim-btn" onclick="copyCoupon('${o.code}', this)">Claim</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            gsap.to(".coupon-card", { opacity: 1, y: 0, stagger: 0.15, duration: 0.8, ease: "power2.out" });
+        }
+
+        function copyCoupon(code, btn) {
+            navigator.clipboard.writeText(code);
+            const originalText = btn.innerText;
+            btn.innerText = "Copied!";
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.classList.remove('copied');
+            }, 2500);
+        }
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderOffers(btn.dataset.cat);
+            });
+        });
+
+        window.onload = () => renderOffers();
+    </script>
+</body>
+</html>

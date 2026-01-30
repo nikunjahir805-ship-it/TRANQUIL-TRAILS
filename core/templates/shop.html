@@ -1,0 +1,164 @@
+{% load static %} <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop | TRANQUIL TRAILS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+
+    <style>
+        /* Keep your internal styles, they are fine */
+        .shop-container { padding: 120px 5% 60px; background: #F4EFE6; min-height: 100vh; }
+        .shop-header { text-align: center; margin-bottom: 50px; }
+        .shop-header h1 { font-family: 'Playfair Display'; font-size: 3.5rem; }
+
+        .product-grid { 
+            columns: 3; column-gap: 30px; max-width: 1200px; margin: 0 auto; 
+        }
+        
+        @media (max-width: 900px) { .product-grid { columns: 2; } }
+        @media (max-width: 600px) { .product-grid { columns: 1; } }
+
+        .product-card {
+            break-inside: avoid; background: white; margin-bottom: 30px;
+            padding: 15px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            opacity: 0; transform: translateY(40px);
+        }
+        .product-img-box { width: 100%; border-radius: 8px; overflow: hidden; margin-bottom: 15px; }
+        .product-img-box img { width: 100%; display: block; transition: 0.5s; }
+        .product-card:hover img { transform: scale(1.08); }
+        
+        .product-card h3 { font-family: 'Playfair Display'; font-size: 1.3rem; margin-bottom: 5px; }
+        .product-card .price { font-weight: 600; color: #8B5E3C; margin-bottom: 15px; }
+        
+        .add-btn {
+            width: 100%; padding: 10px; background: #8B5E3C; color: white;
+            border: none; border-radius: 5px; cursor: pointer; transition: 0.3s;
+        }
+        .add-btn:hover { background: #2d2d2d; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="{% url 'home' %}" class="logo-container">
+            <img src="{% static 'Adobe Express - file.png' %}" alt="Logo" class="logo-img">
+            <span class="logo-text">TRANQUIL TRAILS</span>
+        </a>
+        
+        <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
+
+        <ul class="nav-links" id="navLinks">
+             <li><a href="{% url 'home' %}">Home</a></li>
+            <li class="user-link"><a href="{% url 'shop' %}" style="color: #8B5E3C; font-weight: bold;">Shop</a></li>
+            <li class="user-link"><a href="{% url 'gallery' %}">Gallery</a></li>
+            <li class="admin-link" style="display: none;"><a href="#">Manage Products</a></li>
+            <li><a href="{% url 'about' %}">About</a></li>
+            <li><a href="{% url 'Contact' %}">Contact Us</a></li> 
+            <li id="cartNavItem"><a href="#" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a></li>
+            <li><a href="{% url 'login' %}" class="login-btn" id="authBtn">Log In</a></li>
+        </ul>
+    </nav>
+
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h2 style="font-family: 'Playfair Display';">Your Bag</h2>
+            <button class="close-cart" id="closeCart">&times;</button>
+        </div>
+        <ul id="cart-items-list"></ul>
+        <div class="cart-footer">
+            <div class="cart-total-row">
+                <span>Total</span>
+                <span>$<span id="total-price">0</span></span>
+            </div>
+            <button class="login-btn" style="width: 100%;">Checkout Now</button>
+        </div>
+    </div>
+
+    <section class="shop-container">
+        <div class="shop-header">
+            <h1>The Artisan Archive</h1>
+            <p>15 Curated Handcrafted Pieces</p>
+        </div>
+
+        <div class="product-grid" id="shopGrid">
+            </div>
+    </section>
+
+    <footer class="main-footer">
+        <div class="footer-container">
+            <div class="footer-section about">
+                <h3 class="footer-logo">TRANQUIL TRAILS</h3>
+                <p>Preserving Indian heritage from Ahmedabad to your home.</p>
+            </div>
+            <div class="footer-section links">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="{% url 'Contact' %}">Contact Us</a></li>
+                    <li><a href="{% url 'about' %}">Our Story</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 TRANQUIL TRAILS. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{% static 'script.js' %}"></script>
+    
+    <script>
+        // 6. THIS IS IMPORTANT: Tell JS where the static folder is
+        const staticBasePath = "/static/"; 
+
+        const products = [
+            { name: "Desert Bloom Vase", price: 120, img: "1.jpeg" },
+            { name: "Teakwood Tray", price: 75, img: "6.jpg" },
+            { name: "Indigo Plate", price: 45, img: "8.jpg" },
+            { name: "Bamboo Basket", price: 45, img: "3.jpeg" },
+            { name: "Stone Sculpture", price: 150, img: "13.jpg" },
+            { name: "Clay Pot", price: 60, img: "10.jpg" },
+            { name: "Oak Gallery Set", price: 110, img: "6.jpg" },
+            { name: "Artisan Mug", price: 25, img: "12.jpg" },
+            { name: "Premium Set", price: 750, img: "11.jpg" },
+            { name: "Minimalist Bowl", price: 35, img: "5.jpeg" },
+            { name: "Heritage Tapestry", price: 95, img: "14.jpg" },
+            { name: "Sandstone Art", price: 210, img: "4.jpeg" },
+            { name: "Small Earth Vase", price: 20, img: "9.jpg" },
+            { name: "Hand-thrown Set", price: 135, img: "1.jpeg" },
+            { name: "Copper Accent", price: 80, img: "10.jpg" }
+        ];
+
+        function renderShop() {
+            const grid = document.getElementById('shopGrid');
+            products.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                // 7. FIXED IMAGE PATH IN JAVASCRIPT
+                // We add staticBasePath before the image name
+                card.innerHTML = `
+                    <div class="product-img-box"><img src="${staticBasePath}${p.img}"></div>
+                    <h3>${p.name}</h3>
+                    <p class="price">$${p.price}</p>
+                    <button class="add-btn" onclick="addToCart({name:'${p.name}', price:${p.price}, img:'${p.img}'})">Add to Cart</button>
+                `;
+                grid.appendChild(card);
+            });
+
+            gsap.to(".product-card", {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                stagger: 0.15,
+                ease: "power2.out"
+            });
+        }
+        window.onload = renderShop;
+    </script>
+</body>
+</html>

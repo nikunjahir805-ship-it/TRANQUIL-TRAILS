@@ -1,0 +1,15 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+{% block page_title %}Media Gallery{% endblock %}
+{% block page_desc %}Manage your images and assets.{% endblock %}
+
+{% block content %}
+<div class="card fade-in-up">
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+        <div style="height:100px; background:#eee; border-radius:6px;"></div>
+        <div style="height:100px; background:#eee; border-radius:6px;"></div>
+        <div style="height:100px; background:#eee; border-radius:6px;"></div>
+        <div style="height:100px; border:2px dashed #ccc; border-radius:6px; display:flex; align-items:center; justify-content:center; cursor:pointer;">+ Upload</div>
+    </div>
+</div>
+{% endblock %}

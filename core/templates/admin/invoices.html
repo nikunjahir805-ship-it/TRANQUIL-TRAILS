@@ -1,0 +1,15 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}Invoices{% endblock %}
+{% block page_desc %}View and download past billing statements.{% endblock %}
+
+{% block content %}
+<div class="card fade-in-up">
+    <table>
+        <thead><tr><th>Invoice #</th><th>Date</th><th>Client</th><th>Amount</th><th>Download</th></tr></thead>
+        <tbody>
+            <tr><td>INV-2026-001</td><td>Jan 26, 2026</td><td>Archie Cantones</td><td>$120.00</td><td><i class="fas fa-file-pdf" style="color: #d32f2f; cursor:pointer;"></i> PDF</td></tr>
+            <tr><td>INV-2026-002</td><td>Jan 25, 2026</td><td>Holmes Cherryman</td><td>$85.50</td><td><i class="fas fa-file-pdf" style="color: #d32f2f; cursor:pointer;"></i> PDF</td></tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

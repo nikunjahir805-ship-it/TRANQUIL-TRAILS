@@ -1,0 +1,16 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}Artisan Stories{% endblock %}
+{% block page_desc %}Manage your blog posts.{% endblock %}
+
+{% block content %}
+<div class="card fade-in-up">
+    <h3>Published Stories</h3>
+    <table>
+        <thead><tr><th>Title</th><th>Date</th><th>Views</th><th>Action</th></tr></thead>
+        <tbody>
+            <tr><td>The Art of Clay</td><td>Jan 10, 2026</td><td>1,204</td><td><i class="fas fa-edit"></i></td></tr>
+            <tr><td>Sustainable Woodworking</td><td>Dec 05, 2025</td><td>980</td><td><i class="fas fa-edit"></i></td></tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

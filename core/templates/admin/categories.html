@@ -1,0 +1,22 @@
+{% extends 'admin/base_admin.html' %}
+{% block page_title %}Categories{% endblock %}
+{% block page_desc %}Organize your products into collections.{% endblock %}
+
+{% block content %}
+<div class="card fade-in-up">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+        <h3>Product Collections</h3>
+        <button style="background: #2c2c2c; color: white; padding: 10px 20px; border-radius: 6px; border:none;">+ New Category</button>
+    </div>
+    <table>
+        <thead>
+            <tr><th>Category Name</th><th>Products</th><th>Status</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Ceramics</strong></td><td>45 Items</td><td><span style="color:green;">Active</span></td><td><i class="fas fa-edit"></i></td></tr>
+            <tr><td><strong>Textiles</strong></td><td>25 Items</td><td><span style="color:green;">Active</span></td><td><i class="fas fa-edit"></i></td></tr>
+            <tr><td><strong>Woodwork</strong></td><td>20 Items</td><td><span style="color:green;">Active</span></td><td><i class="fas fa-edit"></i></td></tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}
