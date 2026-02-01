@@ -1,20 +1,179 @@
 {% extends 'admin/base_admin.html' %}
-{% block page_title %}Inventory{% endblock %}
-{% block page_desc %}Track stock levels and low-stock alerts.{% endblock %}
+{% load static %}
+{% block page_title %}Inventory Control{% endblock %}
+{% block page_desc %}Monitor stock levels and manage replenishment.{% endblock %}
 
 {% block content %}
-<div class="card fade-in-up">
-    <h3>Stock Status</h3>
-    <br>
-    <table>
+<style>
+    /* --- SHARED MODERN TABLE STYLES --- */
+    .modern-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+    .modern-table thead th { color: #888; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; padding: 0 20px 10px 20px; text-align: left; }
+    
+    .table-row { background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.02); border-radius: 8px; transition: 0.2s; }
+    .table-row:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+    
+    .table-row td { padding: 15px 20px; vertical-align: middle; }
+    .table-row td:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+    .table-row td:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+
+    /* Product Mini Image */
+    .prod-thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; background: #f4f4f4; margin-right: 15px; }
+    
+    /* Stock Status Badges */
+    .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .status-in { background: #e8f5e9; color: #2e7d32; }   /* Green */
+    .status-low { background: #fff3e0; color: #ef6c00; }  /* Orange */
+    .status-out { background: #ffebee; color: #c62828; }  /* Red */
+
+    /* Quick Filter Buttons */
+    .filter-chip {
+        background: white; border: 1px solid #eee; padding: 8px 16px; border-radius: 20px; 
+        font-size: 0.85rem; color: #555; cursor: pointer; transition: 0.2s;
+    }
+    .filter-chip:hover, .filter-chip.active { background: #2c2c2c; color: white; border-color: #2c2c2c; }
+
+    /* Update Stock Input */
+    .stock-input {
+        width: 60px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; text-align: center;
+        transition: 0.2s;
+    }
+    .stock-input:focus { border-color: #8b5e3c; outline: none; }
+</style>
+
+<div class="fade-in-up">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 20px;">
+        
+        <div style="position: relative;">
+            <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #aaa;"></i>
+            <input type="text" id="invSearch" placeholder="Search SKU or Name..." 
+                   style="padding: 10px 10px 10px 35px; border: 1px solid #eee; border-radius: 8px; width: 280px; outline: none;">
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <button class="filter-chip active" onclick="filterTable('all', this)">All Stock</button>
+            <button class="filter-chip" onclick="filterTable('low', this)">Low Stock</button>
+            <button class="filter-chip" onclick="filterTable('out', this)">Out of Stock</button>
+        </div>
+    </div>
+
+    <table class="modern-table">
         <thead>
-            <tr><th>Product</th><th>SKU</th><th>Current Stock</th><th>Status</th></tr>
+            <tr>
+                <th>Product Name</th>
+                <th>SKU</th>
+                <th>Category</th>
+                <th>Stock Level</th>
+                <th>Status</th>
+                <th style="text-align: right;">Update</th>
+            </tr>
         </thead>
-        <tbody>
-            <tr><td>Desert Bloom Vase</td><td>VASE-001</td><td>24</td><td><span style="background:#e8f5e9; color:#2e7d32; padding:4px 8px; border-radius:4px;">In Stock</span></td></tr>
-            <tr><td>Teakwood Tray</td><td>WOOD-045</td><td>5</td><td><span style="background:#fff3e0; color:#ef6c00; padding:4px 8px; border-radius:4px;">Low Stock</span></td></tr>
-            <tr><td>Woven Art</td><td>TEX-102</td><td>0</td><td><span style="background:#ffebee; color:#c62828; padding:4px 8px; border-radius:4px;">Out of Stock</span></td></tr>
+        <tbody id="inventoryBody">
+            {% for p in products %}
+            <tr class="table-row" 
+                data-stock="{{ p.stock|default:0 }}" 
+                data-name="{{ p.name|lower }}"
+                data-sku="SKU-{{ p.id }}"> <td style="display: flex; align-items: center;">
+                    {% if p.image %}
+                        <img src="{{ p.image.url }}" class="prod-thumb">
+                    {% else %}
+                        <div class="prod-thumb" style="display:flex; align-items:center; justify-content:center;"><i class="fas fa-box" style="color:#ccc;"></i></div>
+                    {% endif %}
+                    <span style="font-weight: 600; color: #333;">{{ p.name }}</span>
+                </td>
+
+                <td style="color: #666; font-family: monospace;">SKU-{{ p.id }}00X</td>
+
+                <td style="color: #666;">
+                    {% if p.category %}{{ p.category.name }}{% else %}Uncategorized{% endif %}
+                </td>
+
+                <td>
+                    <input type="number" value="{{ p.stock|default:0 }}" class="stock-input">
+                </td>
+
+                <td>
+                    {% if p.stock > 10 %}
+                        <span class="status-badge status-in">In Stock</span>
+                    {% elif p.stock > 0 %}
+                        <span class="status-badge status-low">Low Stock</span>
+                    {% else %}
+                        {% if p.stock == 0 %}
+                             <span class="status-badge status-out">Out of Stock</span>
+                        {% else %}
+                             <span class="status-badge status-out">Out of Stock</span>
+                        {% endif %}
+                    {% endif %}
+                </td>
+
+                <td style="text-align: right;">
+                    <button style="background: none; border: 1px solid #ddd; padding: 6px 12px; border-radius: 6px; cursor: pointer; color: #555; transition: 0.2s;"
+                            onmouseover="this.style.background='#2c2c2c'; this.style.color='white'"
+                            onmouseout="this.style.background='none'; this.style.color='#555'">
+                        Save
+                    </button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 40px; color: #999;">
+                    No products found in inventory.
+                </td>
+            </tr>
+            {% endfor %}
         </tbody>
     </table>
+
 </div>
+
+<script>
+    // --- 1. ANIMATION ENTRY ---
+    document.addEventListener("DOMContentLoaded", () => {
+        gsap.from(".table-row", {
+            opacity: 0,
+            y: 20,
+            duration: 0.5,
+            stagger: 0.05,
+            ease: "power2.out"
+        });
+    });
+
+    // --- 2. SEARCH LOGIC ---
+    document.getElementById('invSearch').addEventListener('keyup', function() {
+        let val = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#inventoryBody tr');
+
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase();
+            row.style.display = text.indexOf(val) > -1 ? "" : "none";
+        });
+    });
+
+    // --- 3. FILTER LOGIC (All / Low / Out) ---
+    function filterTable(type, btn) {
+        // Update active button
+        document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        let rows = document.querySelectorAll('#inventoryBody tr');
+
+        rows.forEach(row => {
+            // Get stock number from data attribute or input value
+            // Since backend stock might be None, we rely on the rendered badge class for filtering
+            let badge = row.querySelector('.status-badge');
+            
+            if (type === 'all') {
+                row.style.display = "";
+            } 
+            else if (type === 'low') {
+                if (badge && badge.classList.contains('status-low')) row.style.display = "";
+                else row.style.display = "none";
+            } 
+            else if (type === 'out') {
+                if (badge && badge.classList.contains('status-out')) row.style.display = "";
+                else row.style.display = "none";
+            }
+        });
+    }
+</script>
 {% endblock %}

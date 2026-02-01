@@ -116,12 +116,16 @@
             <span class="logo-text">TRANQUIL TRAILS</span>
         </a>
         
-        <ul class="nav-links">
-             <li><a href="{% url 'home' %}">Home</a></li>
-            <li><a href="{% url 'shop' %}">Shop</a></li>
-            <li><a href="{% url 'offers' %}" style="color: var(--primary); font-weight: bold;">Offers</a></li>
-            <li><a href="{% url 'Contact' %}">Contact</a></li>
+         <ul class="nav-links" id="navLinks">
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li class="user-link"><a href="{% url 'shop' %}" >Shop</a></li>
+            <li class="user-link"><a href="{% url 'offers' %}" style="color: #8B5E3C; font-weight: bold;">offers</a></li>
+            <li class="user-link"><a href="{% url 'gallery' %}">Gallery</a></li>
+            <li class="admin-link" style="display: none;"><a href="#">Manage Products</a></li>
+            <li><a href="{% url 'about' %}">About</a></li>
+            <li><a href="{% url 'Contact' %}">Contact Us</a></li> 
             <li id="cartNavItem"><a href="#" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a></li>
+            <li><a href="{% url 'login' %}" class="login-btn" id="authBtn">Log In</a></li>
         </ul>
     </nav>
 

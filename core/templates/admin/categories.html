@@ -1,22 +1,241 @@
 {% extends 'admin/base_admin.html' %}
-{% block page_title %}Categories{% endblock %}
-{% block page_desc %}Organize your products into collections.{% endblock %}
+{% load static %}
+{% block page_title %}Collections{% endblock %}
+{% block page_desc %}Organize your inventory into curated groups.{% endblock %}
 
 {% block content %}
-<div class="card fade-in-up">
-    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-        <h3>Product Collections</h3>
-        <button style="background: #2c2c2c; color: white; padding: 10px 20px; border-radius: 6px; border:none;">+ New Category</button>
+<style>
+    /* --- MODERN TABLE STYLES --- */
+    .modern-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px; /* Space between rows */
+    }
+
+    .modern-table thead th {
+        color: #888;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 0 20px 10px 20px;
+        text-align: left;
+    }
+
+    .table-row {
+        background: white;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        border-radius: 8px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .table-row:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .table-row td {
+        padding: 15px 20px;
+        vertical-align: middle;
+    }
+
+    .table-row td:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+    .table-row td:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+
+    /* Category Image */
+    .cat-avatar {
+        width: 50px; height: 50px;
+        border-radius: 8px;
+        object-fit: cover;
+        background: #f4f4f4;
+        border: 1px solid #eee;
+    }
+
+    /* Badge Style */
+    .badge {
+        background: #eef2ff;
+        color: #4f46e5;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    /* Action Buttons */
+    .action-btn {
+        width: 35px; height: 35px;
+        border-radius: 50%;
+        border: none;
+        display: inline-flex;
+        align-items: center; justify-content: center;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .btn-delete { background: #fff1f2; color: #e11d48; }
+    .btn-delete:hover { background: #e11d48; color: white; }
+
+    /* --- MODAL STYLES --- */
+    .modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5); z-index: 1000;
+        display: none; justify-content: center; align-items: center;
+        opacity: 0; transition: opacity 0.3s;
+    }
+    .modal-box {
+        background: white; width: 400px; padding: 30px; border-radius: 12px;
+        transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .modal-overlay.active { display: flex; opacity: 1; }
+    .modal-overlay.active .modal-box { transform: scale(1); }
+
+    .modal-input {
+        width: 100%; padding: 12px; margin-bottom: 15px;
+        border: 1px solid #eee; border-radius: 6px;
+        background: #fafafa;
+    }
+</style>
+
+<div class="fade-in-up">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div style="position: relative;">
+            <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #aaa;"></i>
+            <input type="text" id="searchInput" placeholder="Search categories..." 
+                   style="padding: 12px 12px 12px 40px; border: 1px solid #eee; border-radius: 30px; width: 300px; outline: none; transition: 0.3s;"
+                   onfocus="this.style.borderColor='#8b5e3c'; this.style.width='320px'"
+                   onblur="this.style.borderColor='#eee'; this.style.width='300px'">
+        </div>
+
+        <button onclick="openModal()" 
+                style="background: #2c2c2c; color: white; padding: 12px 25px; border-radius: 30px; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-plus"></i> New Collection
+        </button>
     </div>
-    <table>
+
+    <table class="modern-table">
         <thead>
-            <tr><th>Category Name</th><th>Products</th><th>Status</th><th>Action</th></tr>
+            <tr>
+                <th>Cover</th>
+                <th>Collection Name</th>
+                <th>Slug (URL)</th>
+                <th>Inventory</th>
+                <th style="text-align: right;">Actions</th>
+            </tr>
         </thead>
-        <tbody>
-            <tr><td><strong>Ceramics</strong></td><td>45 Items</td><td><span style="color:green;">Active</span></td><td><i class="fas fa-edit"></i></td></tr>
-            <tr><td><strong>Textiles</strong></td><td>25 Items</td><td><span style="color:green;">Active</span></td><td><i class="fas fa-edit"></i></td></tr>
-            <tr><td><strong>Woodwork</strong></td><td>20 Items</td><td><span style="color:green;">Active</span></td><td><i class="fas fa-edit"></i></td></tr>
+        <tbody id="categoryTableBody">
+            {% for cat in categories %}
+            <tr class="table-row">
+                <td>
+                    {% if cat.image %}
+                        <img src="{{ cat.image.url }}" class="cat-avatar">
+                    {% else %}
+                        <div class="cat-avatar" style="display: flex; align-items: center; justify-content: center; color: #ccc;">
+                            <i class="fas fa-image"></i>
+                        </div>
+                    {% endif %}
+                </td>
+                
+                <td style="font-weight: 600; font-size: 1.05rem; color: #333;">
+                    {{ cat.name }}
+                </td>
+
+                <td style="color: #888; font-family: monospace;">
+                    /{{ cat.slug }}
+                </td>
+
+                <td>
+                    <span class="badge">{{ cat.product_count }} Products</span>
+                </td>
+
+                <td style="text-align: right;">
+                    <form action="{% url 'admin_delete_category' cat.id %}" method="POST" onsubmit="return confirm('Delete {{ cat.name }}? Products in this category will remain but become uncategorized.');" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="action-btn btn-delete" title="Delete Collection">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 40px; color: #999;">
+                    No collections found. Create your first one!
+                </td>
+            </tr>
+            {% endfor %}
         </tbody>
     </table>
 </div>
+
+<div class="modal-overlay" id="addModal">
+    <div class="modal-box">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+            <h3 style="margin: 0;">New Collection</h3>
+            <button onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <label style="font-size: 0.85rem; font-weight: 600; color: #555; display: block; margin-bottom: 5px;">Name</label>
+            <input type="text" name="name" class="modal-input" placeholder="e.g. Handmade Ceramics" required>
+
+            <label style="font-size: 0.85rem; font-weight: 600; color: #555; display: block; margin-bottom: 5px;">Cover Image</label>
+            <div style="border: 2px dashed #ddd; padding: 20px; text-align: center; border-radius: 6px; margin-bottom: 20px; cursor: pointer;"
+                 onclick="document.getElementById('catImageInput').click()">
+                <i class="fas fa-cloud-upload-alt" style="color: #8b5e3c; font-size: 1.5rem;"></i>
+                <p style="margin: 5px 0 0; font-size: 0.8rem; color: #888;">Click to upload image</p>
+            </div>
+            <input type="file" name="image" id="catImageInput" style="display: none;" accept="image/*">
+
+            <button type="submit" style="width: 100%; background: #8b5e3c; color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                Create Collection
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // --- MODAL LOGIC ---
+    const modal = document.getElementById('addModal');
+
+    function openModal() {
+        modal.classList.add('active');
+    }
+
+    function closeModal() {
+        modal.classList.remove('active');
+    }
+
+    // Close if clicking outside
+    modal.addEventListener('click', (e) => {
+        if(e.target === modal) closeModal();
+    });
+
+    // --- LIVE SEARCH LOGIC ---
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#categoryTableBody tr');
+
+        rows.forEach(row => {
+            let name = row.querySelector('td:nth-child(2)').innerText.toLowerCase();
+            if (name.indexOf(filter) > -1) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    });
+
+    // --- ANIMATION ON LOAD ---
+    document.addEventListener("DOMContentLoaded", () => {
+        gsap.from(".table-row", {
+            opacity: 0,
+            y: 20,
+            duration: 0.5,
+            stagger: 0.1,
+            ease: "power2.out"
+        });
+    });
+</script>
+
 {% endblock %}

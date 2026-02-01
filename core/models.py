@@ -96,3 +96,19 @@ class ShippingAddress(models.Model):
 
     def __str__(self):
         return self.address
+
+# --- 7. GALLERY MODEL (NEW) ---
+class GalleryItem(models.Model):
+    CATEGORY_CHOICES = [
+        ('ceramics', 'Ceramics'),
+        ('wood', 'Woodwork'),
+        ('textiles', 'Textiles'),
+    ]
+    
+    title = models.CharField(max_length=100, blank=True)
+    image = models.ImageField(upload_to='gallery/')
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='ceramics')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title or f"Gallery Item {self.id}"

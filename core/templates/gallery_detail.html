@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ item.title }} | Gallery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        .detail-container { padding: 150px 10%; display: flex; gap: 50px; background: #F4EFE6; min-height: 100vh; align-items: center; }
+        .detail-img { flex: 1; border-radius: 12px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .detail-img img { width: 100%; height: auto; display: block; }
+        .detail-info { flex: 1; }
+        .detail-category { color: #8B5E3C; text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem; font-weight: bold; }
+        .detail-title { font-family: 'Playfair Display'; font-size: 3.5rem; color: #2d2d2d; margin: 10px 0 20px; }
+        .back-btn { display: inline-block; text-decoration: none; color: #2d2d2d; border: 1px solid #2d2d2d; padding: 10px 30px; border-radius: 50px; transition: 0.3s; margin-top: 30px; }
+        .back-btn:hover { background: #2d2d2d; color: white; }
+        @media (max-width: 900px) { .detail-container { flex-direction: column; padding: 100px 5%; } }
+    </style>
+</head>
+<body>
+
+    <nav style="background: white; padding: 20px 5%; display: flex; justify-content: space-between; align-items: center;">
+        <a href="{% url 'home' %}" class="logo-text" style="font-family: 'Playfair Display'; font-weight: bold; font-size: 1.5rem; color: #2d2d2d; text-decoration: none;">TRANQUIL TRAILS</a>
+        <a href="{% url 'gallery' %}" style="text-decoration: none; color: #8B5E3C; font-weight: bold;">Back to Gallery</a>
+    </nav>
+
+    <div class="detail-container">
+        <div class="detail-img">
+            <img src="{{ item.image.url }}" alt="{{ item.title }}">
+        </div>
+        <div class="detail-info">
+            <span class="detail-category">{{ item.get_category_display }}</span>
+            <h1 class="detail-title">{{ item.title|default:"Untitled Artwork" }}</h1>
+            <p style="line-height: 1.8; color: #555;">
+                This unique piece is part of our curated {{ item.category }} collection. 
+                Handcrafted with precision, it represents the timeless tradition of Indian artisan heritage.
+            </p>
+            <a href="{% url 'gallery' %}" class="back-btn">← Back to Gallery</a>
+        </div>
+    </div>
+
+</body>
+</html>

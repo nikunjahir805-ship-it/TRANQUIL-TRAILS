@@ -1,15 +1,333 @@
 {% extends 'admin/base_admin.html' %}
 {% load static %}
-{% block page_title %}Media Gallery{% endblock %}
-{% block page_desc %}Manage your images and assets.{% endblock %}
+{% block page_title %}Media Library{% endblock %}
+{% block page_desc %}Manage, organize, and retrieve your digital assets.{% endblock %}
 
 {% block content %}
-<div class="card fade-in-up">
-    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
-        <div style="height:100px; background:#eee; border-radius:6px;"></div>
-        <div style="height:100px; background:#eee; border-radius:6px;"></div>
-        <div style="height:100px; background:#eee; border-radius:6px;"></div>
-        <div style="height:100px; border:2px dashed #ccc; border-radius:6px; display:flex; align-items:center; justify-content:center; cursor:pointer;">+ Upload</div>
+<style>
+    /* --- LAYOUT & GRID --- */
+    .media-toolbar {
+        display: flex; justify-content: space-between; align-items: center; 
+        margin-bottom: 30px; flex-wrap: wrap; gap: 20px;
+    }
+
+    .media-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    /* --- ASSET CARD --- */
+    .asset-card {
+        background: white; border-radius: 12px; overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: 0.3s;
+        position: relative; border: 1px solid #eee;
+        height: 240px; 
+        display: flex; flex-direction: column;
+    }
+
+    .asset-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+
+    .asset-img-wrapper {
+        height: 160px; width: 100%; position: relative; overflow: hidden; background: #f4f4f4;
+    }
+
+    .asset-img {
+        width: 100%; height: 100%; object-fit: cover; transition: 0.5s;
+    }
+
+    /* Hover Overlay */
+    .asset-overlay {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.6); opacity: 0; transition: 0.3s;
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .asset-card:hover .asset-overlay { opacity: 1; }
+    .asset-card:hover .asset-img { transform: scale(1.1); }
+
+    /* Action Buttons (Round) */
+    .icon-btn {
+        width: 40px; height: 40px; border-radius: 50%; border: none;
+        background: white; color: #333; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: 0.2s; font-size: 1rem;
+    }
+    .icon-btn:hover { background: #8b5e3c; color: white; }
+    .btn-del:hover { background: #dc3545; color: white; }
+
+    /* Asset Info (Bottom) */
+    .asset-info { padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    .asset-title { font-weight: 600; font-size: 0.9rem; color: #333; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .asset-meta { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+
+    /* --- UPLOAD AREA --- */
+    .upload-trigger {
+        background: #2c2c2c; color: white; padding: 12px 25px; border-radius: 30px;
+        font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s;
+    }
+    .upload-trigger:hover { background: #8b5e3c; }
+
+    /* --- FILTERS --- */
+    .filter-group { display: flex; gap: 10px; flex-wrap: wrap; }
+    .filter-chip {
+        background: white; border: 1px solid #ddd; padding: 8px 16px; border-radius: 20px;
+        font-size: 0.85rem; color: #555; cursor: pointer; transition: 0.2s;
+    }
+    .filter-chip.active, .filter-chip:hover {
+        background: #2c2c2c; color: white; border-color: #2c2c2c;
+    }
+
+    /* --- MODALS --- */
+    .modal-backdrop {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.8); z-index: 2000;
+        display: none; justify-content: center; align-items: center;
+        opacity: 0; transition: opacity 0.3s;
+    }
+    .modal-backdrop.active { display: flex; opacity: 1; }
+
+    .upload-box {
+        background: white; width: 450px; padding: 30px; border-radius: 12px;
+        transform: scale(0.9); transition: transform 0.3s;
+    }
+    .modal-backdrop.active .upload-box { transform: scale(1); }
+
+    .drop-zone {
+        border: 2px dashed #ccc; border-radius: 8px; padding: 30px; text-align: center;
+        cursor: pointer; margin-bottom: 20px; transition: 0.2s; background: #fafafa;
+    }
+    .drop-zone:hover { border-color: #8b5e3c; background: #fff8f0; }
+
+    /* Preview Lightbox */
+    .lightbox-img { max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+    
+    /* TOASTS */
+    .toast-container { position: fixed; top: 20px; right: 20px; z-index: 3000; display: flex; flex-direction: column; gap: 10px; }
+    .toast { background: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.15); border-left: 4px solid #333; transform: translateX(100%); transition: 0.4s; opacity: 0; display:flex; gap:10px; align-items:center; }
+    .toast.show { transform: translateX(0); opacity: 1; }
+    .toast.success { border-left-color: #28a745; }
+    .toast.error { border-left-color: #dc3545; }
+
+</style>
+
+<div class="toast-container" id="toastContainer">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="toast {{ message.tags }}">
+                {% if message.tags == 'success' %}<i class="fas fa-check-circle" style="color:#28a745"></i>
+                {% else %}<i class="fas fa-info-circle"></i>{% endif %}
+                <span>{{ message }}</span>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<div class="fade-in-up">
+
+    <div class="media-toolbar">
+        <div style="display: flex; gap: 15px; align-items: center; flex: 1;">
+            <div style="position: relative;">
+                <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #aaa;"></i>
+                <input type="text" id="mediaSearch" placeholder="Search assets..." 
+                       style="padding: 10px 10px 10px 35px; border: 1px solid #ddd; border-radius: 30px; width: 250px; outline: none;">
+            </div>
+            
+            <div class="filter-group">
+                <button class="filter-chip active" data-filter="all" onclick="filterGallery('all', this)">All</button>
+                
+                {% for cat in categories %}
+                    <button class="filter-chip" data-filter="{{ cat.name|lower }}" onclick="filterGallery('{{ cat.name|lower }}', this)">{{ cat.name }}</button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <button class="upload-trigger" onclick="openUploadModal()">
+            <i class="fas fa-cloud-upload-alt"></i> Upload Asset
+        </button>
+    </div>
+
+    <div class="media-grid" id="mediaGrid">
+        {% for item in gallery_items %}
+        <div class="asset-card" 
+             data-category="{{ item.category|lower }}" 
+             data-title="{{ item.title|default:'Untitled'|lower }}">
+            
+            <div class="asset-img-wrapper">
+                <img src="{{ item.image.url }}" class="asset-img" loading="lazy">
+                
+                <div class="asset-overlay">
+                    <button class="icon-btn" onclick="openLightbox('{{ item.image.url }}')" title="View Fullsize">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    
+                    <button class="icon-btn" onclick="copyLink('{{ request.scheme }}://{{ request.get_host }}{{ item.image.url }}')" title="Copy Link">
+                        <i class="fas fa-link"></i>
+                    </button>
+                    
+                    <form action="{% url 'admin_delete_gallery_item' item.id %}" method="POST" onsubmit="return confirm('Delete this asset?');">
+                        {% csrf_token %}
+                        <button type="submit" class="icon-btn btn-del" title="Delete Asset">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="asset-info">
+                <div class="asset-title">{{ item.title|default:"Untitled Asset" }}</div>
+                <div class="asset-meta">{{ item.category }}</div>
+            </div>
+        </div>
+        {% empty %}
+            <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #999;">
+                <i class="far fa-images" style="font-size: 3rem; margin-bottom: 10px; opacity: 0.5;"></i>
+                <p>No media assets found. Upload your first one!</p>
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<div class="modal-backdrop" id="uploadModal">
+    <div class="upload-box">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+            <h3>Upload New Asset</h3>
+            <button onclick="closeUploadModal()" style="border: none; background: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #8b5e3c; margin-bottom: 10px;"></i>
+                <p id="fileNameDisplay" style="color: #666; font-size: 0.9rem;">Click to browse files</p>
+                <input type="file" name="image" id="fileInput" style="display: none;" accept="image/*" onchange="updateFileName(this)">
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 5px;">Title</label>
+                <input type="text" name="title" placeholder="e.g. Vintage Vase" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 5px;">Category</label>
+                
+                <select name="category" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                    <option value="" disabled selected>Select Category...</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat.name }}">{{ cat.name }}</option>
+                    {% empty %}
+                        <option value="uncategorized">Uncategorized</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" style="width: 100%; padding: 12px; background: #8b5e3c; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                Upload to Gallery
+            </button>
+        </form>
     </div>
 </div>
+
+<div class="modal-backdrop" id="lightboxModal" onclick="closeLightbox(event)">
+    <img id="lightboxImage" class="lightbox-img">
+</div>
+
+<script>
+    // --- SEARCH & FILTER LOGIC ---
+    const searchInput = document.getElementById('mediaSearch');
+    
+    function filterGallery(category, btn) {
+        // Update Buttons
+        document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+        if(btn) btn.classList.add('active');
+
+        const items = document.querySelectorAll('.asset-card');
+        const searchTerm = searchInput.value.toLowerCase();
+
+        items.forEach(item => {
+            const itemCat = item.getAttribute('data-category');
+            const itemTitle = item.getAttribute('data-title');
+            
+            const matchesCategory = (category === 'all' || itemCat === category);
+            const matchesSearch = itemTitle.includes(searchTerm);
+
+            if (matchesCategory && matchesSearch) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    searchInput.addEventListener('keyup', () => {
+        // Re-run filter based on currently active category button
+        const activeBtn = document.querySelector('.filter-chip.active');
+        // Use the data attribute to be safe
+        const activeCat = activeBtn ? activeBtn.getAttribute('data-filter') : 'all';
+        filterGallery(activeCat, null); 
+    });
+
+    // --- MODAL LOGIC ---
+    function openUploadModal() {
+        document.getElementById('uploadModal').classList.add('active');
+    }
+    function closeUploadModal() {
+        document.getElementById('uploadModal').classList.remove('active');
+    }
+    
+    function updateFileName(input) {
+        if(input.files && input.files[0]) {
+            document.getElementById('fileNameDisplay').innerText = input.files[0].name;
+            document.getElementById('fileNameDisplay').style.color = "#28a745";
+            document.getElementById('fileNameDisplay').style.fontWeight = "bold";
+        }
+    }
+
+    // --- LIGHTBOX LOGIC ---
+    function openLightbox(url) {
+        document.getElementById('lightboxImage').src = url;
+        document.getElementById('lightboxModal').classList.add('active');
+    }
+    function closeLightbox(e) {
+        if(e.target.id === 'lightboxModal') {
+            document.getElementById('lightboxModal').classList.remove('active');
+        }
+    }
+
+    // --- CLIPBOARD LOGIC ---
+    function copyLink(url) {
+        navigator.clipboard.writeText(url).then(() => {
+            showCustomToast('Link copied to clipboard!');
+        });
+    }
+
+    // --- TOAST LOGIC ---
+    // Handle Django messages on load
+    document.addEventListener("DOMContentLoaded", () => {
+        const toasts = document.querySelectorAll('.toast');
+        toasts.forEach((t, i) => {
+            setTimeout(() => t.classList.add('show'), 100 * i);
+            setTimeout(() => {
+                t.classList.remove('show');
+                setTimeout(() => t.remove(), 400);
+            }, 4000);
+        });
+    });
+
+    // Custom JS Toast
+    function showCustomToast(msg) {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = 'toast show';
+        toast.style.borderLeftColor = '#8b5e3c';
+        toast.innerHTML = `<i class="fas fa-check"></i> <span>${msg}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        }, 3000);
+    }
+</script>
+
 {% endblock %}

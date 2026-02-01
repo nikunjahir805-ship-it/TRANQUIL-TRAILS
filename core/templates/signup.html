@@ -9,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     
     <style>
+        /* --- CSS VARIABLES & RESET --- */
         :root {
             --primary: #8B5E3C; 
             --accent: #D4A373;
@@ -18,20 +19,26 @@
             --gray: #a0a0a0;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; /* Custom cursor everywhere */ }
         body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
 
-        .login-container {
+        /* --- CUSTOM CURSOR --- */
+        .cursor {
+            width: 20px; height: 20px; border: 2px solid var(--primary);
+            border-radius: 50%; position: fixed; pointer-events: none;
+            z-index: 9999; transition: transform 0.1s ease;
+        }
+
+        .container {
             display: flex;
             height: 100vh;
             width: 100%;
         }
 
-        /* --- LEFT SIDE VISUAL --- */
-        .login-visual {
+        /* --- LEFT VISUAL SIDE --- */
+        .visual {
             flex: 1.2;
-            /* Make sure 'no.jpg' exists in your static folder, or use a placeholder */
-            background: url('{% static "no.jpg" %}'); 
+            background: url('{% static "no.jpg" %}'); /* Ensure this image exists */
             background-position: center;
             background-size: cover;
             background-repeat: no-repeat;
@@ -50,6 +57,7 @@
             z-index: 1;
         }
 
+        /* Floating Badge Animation */
         .product-badge {
             position: relative;
             z-index: 2;
@@ -102,8 +110,8 @@
             50% { transform: translateY(-15px); }
         }
 
-        /* --- RIGHT SIDE FORM --- */
-        .login-form-section {
+        /* --- RIGHT FORM SIDE --- */
+        .form-section {
             flex: 1;
             background: var(--bg);
             display: flex;
@@ -117,7 +125,7 @@
             width: 100%;
             max-width: 400px;
             opacity: 0; 
-            transform: translateY(30px);
+            transform: translateY(30px); /* Start low for animation */
         }
 
         .logo-back {
@@ -172,7 +180,7 @@
             background: white;
         }
 
-        .sign-in-btn {
+        .action-btn {
             width: 100%;
             padding: 16px;
             background: var(--primary);
@@ -184,106 +192,84 @@
             transition: 0.4s;
             text-transform: uppercase;
             letter-spacing: 1px;
-            cursor: pointer;
+            cursor: pointer; /* Hidden by custom cursor but kept for functionality */
         }
 
-        .sign-in-btn:hover {
+        .action-btn:hover {
             background: #2D4739;
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
 
-        .sign-in-btn:disabled {
+        .action-btn:disabled {
             background: #a0a0a0;
             cursor: not-allowed;
             transform: none;
         }
 
-        .signup-link {
+        .bottom-link {
             text-align: center;
             margin-top: 30px;
             font-size: 0.9rem;
         }
 
-        .signup-link a {
+        .bottom-link a {
             color: var(--primary);
             font-weight: 600;
             text-decoration: none;
-            cursor: pointer;
         }
 
         @media (max-width: 900px) {
-            .login-visual { display: none; }
-            .login-form-section { flex: 1; }
+            .visual { display: none; }
+            .form-section { flex: 1; }
         }
     </style>
 </head>
 <body>
+    
+    <div class="cursor"></div>
 
-    <div class="login-container">
-        <div class="login-visual">
+    <div class="container">
+        <div class="visual">
             <div class="visual-overlay"></div>
             
             <div class="product-badge">
-                <span class="collection-tag">Limited Edition</span>
-                <h4>The Earth & Fire Series</h4>
-                <p>Hand-thrown stoneware, 2026</p>
+                <span class="collection-tag">New Arrivals</span>
+                <h4>The Clay & Soul Series</h4>
+                <p>Curated for 2026</p>
             </div>
 
             <div class="visual-content">
-                <h2>Curating <br>the <span>Handmade</span>.</h2>
-                <p>Pick up where you left off in your journey of craft.</p>
+                <h2>Begin Your <br><span>Journey</span>.</h2>
+                <p>Join our community of mindful collectors.</p>
             </div>
         </div>
 
-        <div class="login-form-section">
+        <div class="form-section">
             <div class="form-box">
                 <a href="{% url 'home' %}" class="logo-back">← TRANQUIL TRAILS</a>
                 
-                <div id="loginView">
-                    <h3>Log In</h3>
-                    <p>Enter your details to access your account.</p>
+                <h3>Join the Studio</h3>
+                <p>Create an account to curate your collection.</p>
 
-                    <form id="loginForm">
-                        <div class="input-group">
-                            <label>Email Address</label>
-                            <input type="email" placeholder="name@example.com" required>
-                        </div>
-                        <div class="input-group">
-                            <label>Password</label>
-                            <input type="password" placeholder="••••••••" required>
-                        </div>
-                        <button type="submit" class="sign-in-btn" id="loginBtn">Enter Gallery</button>
-                    </form>
-
-                    <div class="signup-link">
-                        Don't have an account? <a onclick="toggleForm()">Create one</a>
+                <form id="signupForm">
+                    <div class="input-group">
+                        <label>Full Name</label>
+                        <input type="text" placeholder="e.g. John Doe" required>
                     </div>
-                </div>
-
-                <div id="signupView" style="display: none;">
-                    <h3>Join the Studio</h3>
-                    <p>Start your journey with handcrafted artistry.</p>
-
-                    <form id="signupForm">
-                        <div class="input-group">
-                            <label>Full Name</label>
-                            <input type="text" placeholder="Your Name" required>
-                        </div>
-                        <div class="input-group">
-                            <label>Email Address</label>
-                            <input type="email" placeholder="name@example.com" required>
-                        </div>
-                        <div class="input-group">
-                            <label>Create Password</label>
-                            <input type="password" placeholder="••••••••" required>
-                        </div>
-                        <button type="submit" class="sign-in-btn" id="signupBtn">Create Account</button>
-                    </form>
-
-                    <div class="signup-link">
-                        Already a member? <a onclick="toggleForm()">Log In</a>
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <input type="email" placeholder="name@example.com" required>
                     </div>
+                    <div class="input-group">
+                        <label>Create Password</label>
+                        <input type="password" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="action-btn" id="signupBtn">Create Account</button>
+                </form>
+
+                <div class="bottom-link">
+                    Already a member? <a href="{% url 'login' %}">Log In</a>
                 </div>
             </div>
         </div>
@@ -307,43 +293,29 @@
         }
         const csrftoken = getCookie('csrftoken');
 
-        // --- 2. Animations ---
+        // --- 2. Custom Cursor Logic ---
+        const cursor = document.querySelector('.cursor');
+        document.addEventListener('mousemove', e => {
+            cursor.style.top = e.clientY + 'px';
+            cursor.style.left = e.clientX + 'px';
+        });
+
+        // Add hover effect to interactive elements
+        document.querySelectorAll('input, button, a').forEach(elem => {
+            elem.addEventListener('mouseenter', () => cursor.style.transform = 'scale(2.5)');
+            elem.addEventListener('mouseleave', () => cursor.style.transform = 'scale(1)');
+        });
+
+        // --- 3. Page Entry Animation (GSAP) ---
         window.addEventListener('load', () => {
             const tl = gsap.timeline();
+            // Animate Form In
             tl.to(".form-box", { opacity: 1, y: 0, duration: 1.2, ease: "power4.out" });
+            // Animate Text In
             tl.from(".visual-content h2", { opacity: 0, x: -50, duration: 1 }, "-=0.8");
         });
 
-        function toggleForm() {
-            const loginView = document.getElementById('loginView');
-            const signupView = document.getElementById('signupView');
-            
-            gsap.to(".form-box", {
-                opacity: 0,
-                y: 20,
-                duration: 0.4,
-                onComplete: () => {
-                    if (loginView.style.display === "none") {
-                        loginView.style.display = "block";
-                        signupView.style.display = "none";
-                    } else {
-                        loginView.style.display = "none";
-                        signupView.style.display = "block";
-                    }
-                    
-                    gsap.to(".form-box", {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        ease: "power2.out"
-                    });
-                }
-            });
-        }
-
-        // --- 3. BACKEND INTEGRATION ---
-        
-        // SIGNUP LOGIC
+        // --- 4. Backend Signup Integration ---
         document.getElementById('signupForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const btn = document.getElementById('signupBtn');
@@ -351,18 +323,21 @@
             btn.innerText = "Creating Account...";
             btn.disabled = true;
             
-            const name = e.target.querySelector('input[placeholder="Your Name"]').value;
+            // Get values from inputs
+            const name = e.target.querySelector('input[type="text"]').value;
             const email = e.target.querySelector('input[type="email"]').value;
             const password = e.target.querySelector('input[type="password"]').value;
 
+            // Send to Django API
             fetch('/api/signup/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
                 body: JSON.stringify({ full_name: name, email: email, password: password })
             })
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
                 if (data.success) {
+                    alert("Welcome! Redirecting to home...");
                     localStorage.setItem('isAdmin', 'false');
                     window.location.href = "{% url 'home' %}";
                 } else {
@@ -373,47 +348,7 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert("Connection error.");
-                btn.innerText = originalText;
-                btn.disabled = false;
-            });
-        });
-
-        // LOGIN LOGIC
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('loginBtn');
-            const originalText = btn.innerText;
-            btn.innerText = "Verifying...";
-            btn.disabled = true;
-
-            const email = e.target.querySelector('input[type="email"]').value;
-            const password = e.target.querySelector('input[type="password"]').value;
-
-            fetch('/api/login/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
-                body: JSON.stringify({ email: email, password: password })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    if (data.is_staff) {
-                        localStorage.setItem('isAdmin', 'true');
-                        window.location.href = "{% url 'admin_dashboard' %}";
-                    } else {
-                        localStorage.setItem('isAdmin', 'false');
-                        window.location.href = "{% url 'home' %}";
-                    }
-                } else {
-                    alert("Login Failed: " + data.error);
-                    btn.innerText = originalText;
-                    btn.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert("Connection error.");
+                alert("Something went wrong. Please check your connection.");
                 btn.innerText = originalText;
                 btn.disabled = false;
             });

@@ -2,103 +2,156 @@
 {% load static %}
 
 {% block page_title %}Product Catalog{% endblock %}
-{% block page_desc %}Manage your current inventory and stock levels.{% endblock %}
+{% block page_desc %}Manage your complete product inventory.{% endblock %}
 
 {% block content %}
 <style>
-    .action-bar { display: flex; justify-content: space-between; margin-bottom: 20px; gap: 15px; flex-wrap: wrap; }
-    .search-input { padding: 10px 15px; border: 1px solid #ddd; border-radius: 6px; width: 300px; }
-    .add-btn { background: #2c2c2c; color: white; padding: 10px 20px; border-radius: 6px; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
-    .add-btn:hover { background: #8b5e3c; transform: translateY(-2px); }
+    /* --- MODERN TABLE STYLES --- */
+    .modern-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+    .modern-table thead th { color: #888; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; padding: 0 20px 10px 20px; text-align: left; }
     
-    /* Table Styling overrides */
-    .product-img { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; background: #eee; }
-    .stock-badge { padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
-    .in-stock { background: #e8f5e9; color: #2e7d32; }
-    .low-stock { background: #fff3e0; color: #ef6c00; }
-    .out-of-stock { background: #ffebee; color: #c62828; }
+    .table-row { background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.02); border-radius: 8px; transition: 0.2s; }
+    .table-row:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+    
+    .table-row td { padding: 15px 20px; vertical-align: middle; }
+    .table-row td:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+    .table-row td:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+
+    /* Product Image */
+    .prod-img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; background: #f4f4f4; border: 1px solid #eee; }
+
+    /* Badges */
+    .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+    .status-in { background: #e8f5e9; color: #2e7d32; }
+    .status-low { background: #fff3e0; color: #ef6c00; }
+    .status-out { background: #ffebee; color: #c62828; }
+
+    /* Action Buttons */
+    .action-btn { width: 35px; height: 35px; border-radius: 50%; border: none; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; background: #f9f9f9; color: #555; }
+    .action-btn:hover { background: #2c2c2c; color: white; }
+    .btn-delete:hover { background: #c62828; color: white; }
+
 </style>
 
-<div class="action-bar fade-in-up">
-    <input type="text" class="search-input" placeholder="Search products...">
-    <a href="{% url 'admin_add_product' %}" class="add-btn">
-        <i class="fas fa-plus"></i> Add New Product
-    </a>
-</div>
+<div class="fade-in-up">
 
-<div class="card fade-in-up">
-    <table>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
+        
+        <div style="position: relative;">
+            <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #aaa;"></i>
+            <input type="text" id="productSearch" placeholder="Search by name, SKU, or category..." 
+                   style="padding: 12px 12px 12px 40px; border: 1px solid #eee; border-radius: 30px; width: 350px; outline: none; transition: 0.3s;"
+                   onfocus="this.style.borderColor='#8b5e3c'; this.style.width='370px'"
+                   onblur="this.style.borderColor='#eee'; this.style.width='350px'">
+        </div>
+
+        <a href="{% url 'admin_add_product' %}" 
+           style="background: #2c2c2c; color: white; padding: 12px 25px; border-radius: 30px; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.3s;">
+            <i class="fas fa-plus"></i> Add Product
+        </a>
+    </div>
+
+    <table class="modern-table">
         <thead>
             <tr>
-                <th style="width: 60px;">Image</th>
-                <th>Product Name</th>
+                <th>Product</th>
                 <th>Category</th>
                 <th>Price</th>
-                <th>Stock</th>
-                <th>Status</th>
+                <th>Stock Status</th>
                 <th style="text-align: right;">Actions</th>
             </tr>
         </thead>
-        <tbody>
-            <tr>
-                <td><img src="{% static '1.jpeg' %}" class="product-img" alt="Vase"></td>
-                <td><strong>Desert Bloom Vase</strong><br><small>SKU: VASE-001</small></td>
-                <td>Ceramics</td>
-                <td>$120.00</td>
-                <td>24</td>
-                <td><span class="stock-badge in-stock">In Stock</span></td>
-                <td style="text-align: right;">
-                    <button style="border:none; background:none; cursor:pointer; color:#666;"><i class="fas fa-edit"></i></button>
-                    <button style="border:none; background:none; cursor:pointer; color:#d32f2f; margin-left: 10px;"><i class="fas fa-trash"></i></button>
+        <tbody id="productTableBody">
+            {% for p in products %}
+            <tr class="table-row">
+                
+                <td style="display: flex; align-items: center; gap: 15px;">
+                    {% if p.image %}
+                        <img src="{{ p.image.url }}" class="prod-img" alt="{{ p.name }}">
+                    {% else %}
+                        <div class="prod-img" style="display: flex; align-items: center; justify-content: center; color: #ccc;">
+                            <i class="fas fa-image"></i>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <strong style="display: block; color: #333; font-size: 0.95rem;">{{ p.name }}</strong>
+                        <small style="color: #888; font-family: monospace;">SKU-{{ p.id }}00X</small>
+                    </div>
                 </td>
-            </tr>
 
-            <tr>
-                <td><img src="{% static '6.jpg' %}" class="product-img" alt="Tray"></td>
-                <td><strong>Teakwood Serving Tray</strong><br><small>SKU: WOOD-045</small></td>
-                <td>Woodwork</td>
-                <td>$75.00</td>
-                <td>5</td>
-                <td><span class="stock-badge low-stock">Low Stock</span></td>
-                <td style="text-align: right;">
-                    <button style="border:none; background:none; cursor:pointer; color:#666;"><i class="fas fa-edit"></i></button>
-                    <button style="border:none; background:none; cursor:pointer; color:#d32f2f; margin-left: 10px;"><i class="fas fa-trash"></i></button>
+                <td style="color: #666;">
+                    {% if p.category %}
+                        {{ p.category.name }}
+                    {% else %}
+                        <span style="color: #aaa; font-style: italic;">Uncategorized</span>
+                    {% endif %}
                 </td>
-            </tr>
 
-            <tr>
-                <td><img src="{% static '14.jpg' %}" class="product-img" alt="Textile"></td>
-                <td><strong>Heritage Woven Art</strong><br><small>SKU: TEX-102</small></td>
-                <td>Textiles</td>
-                <td>$95.00</td>
-                <td>0</td>
-                <td><span class="stock-badge out-of-stock">Out of Stock</span></td>
+                <td style="font-weight: 600; color: #333;">${{ p.price }}</td>
+
+                <td>
+                    {% if p.stock > 10 %}
+                        <span class="badge status-in">{{ p.stock }} In Stock</span>
+                    {% elif p.stock > 0 %}
+                        <span class="badge status-low">{{ p.stock }} Low Stock</span>
+                    {% else %}
+                        <span class="badge status-out">Out of Stock</span>
+                    {% endif %}
+                </td>
+
                 <td style="text-align: right;">
-                    <button style="border:none; background:none; cursor:pointer; color:#666;"><i class="fas fa-edit"></i></button>
-                    <button style="border:none; background:none; cursor:pointer; color:#d32f2f; margin-left: 10px;"><i class="fas fa-trash"></i></button>
+                    <button class="action-btn" title="Edit Details">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    
+                    <form action="{% url 'admin_delete_product' p.id %}" method="POST" onsubmit="return confirm('Are you sure you want to delete {{ p.name }}?');" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="action-btn btn-delete" title="Delete Product" style="margin-left: 5px;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
                 </td>
             </tr>
-            
+            {% empty %}
             <tr>
-                <td><img src="{% static '10.jpg' %}" class="product-img" alt="Pot"></td>
-                <td><strong>Decorative Clay Pot</strong><br><small>SKU: POT-088</small></td>
-                <td>Ceramics</td>
-                <td>$60.00</td>
-                <td>18</td>
-                <td><span class="stock-badge in-stock">In Stock</span></td>
-                <td style="text-align: right;">
-                    <button style="border:none; background:none; cursor:pointer; color:#666;"><i class="fas fa-edit"></i></button>
-                    <button style="border:none; background:none; cursor:pointer; color:#d32f2f; margin-left: 10px;"><i class="fas fa-trash"></i></button>
+                <td colspan="5" style="text-align: center; padding: 50px; color: #999;">
+                    <div style="font-size: 2rem; margin-bottom: 10px; color: #ddd;"><i class="fas fa-box-open"></i></div>
+                    No products found. <a href="{% url 'admin_add_product' %}" style="color: #8b5e3c; font-weight: bold;">Add your first one!</a>
                 </td>
             </tr>
+            {% endfor %}
         </tbody>
     </table>
-    
-    <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
-        <button style="padding: 5px 10px; border: 1px solid #ddd; background: white; border-radius: 4px;">&laquo; Prev</button>
-        <button style="padding: 5px 10px; border: 1px solid #2c2c2c; background: #2c2c2c; color: white; border-radius: 4px;">1</button>
-        <button style="padding: 5px 10px; border: 1px solid #ddd; background: white; border-radius: 4px;">2</button>
-        <button style="padding: 5px 10px; border: 1px solid #ddd; background: white; border-radius: 4px;">Next &raquo;</button>
-    </div>
+
 </div>
+
+<script>
+    // --- 1. ANIMATION ON LOAD ---
+    document.addEventListener("DOMContentLoaded", () => {
+        gsap.from(".table-row", {
+            opacity: 0,
+            y: 20,
+            duration: 0.5,
+            stagger: 0.05,
+            ease: "power2.out"
+        });
+    });
+
+    // --- 2. LIVE SEARCH LOGIC ---
+    document.getElementById('productSearch').addEventListener('keyup', function() {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#productTableBody tr');
+
+        rows.forEach(row => {
+            // Combine all text in the row to search against
+            let text = row.innerText.toLowerCase();
+            if (text.indexOf(filter) > -1) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    });
+</script>
+
 {% endblock %}
