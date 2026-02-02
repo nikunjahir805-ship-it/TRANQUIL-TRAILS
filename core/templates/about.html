@@ -88,7 +88,7 @@
             .stats-grid { grid-template-columns: 1fr; gap: 30px; }
         }
 
-            /* --- Updated Process Styles --- */
+        /* --- Updated Process Styles --- */
         .process-img {
             width: 100%;
             height: 180px;
@@ -282,7 +282,7 @@
             }
         }
 
-        /* Nav Dropdown Styles (Copied from Index) */
+        /* --- CART SIDEBAR & DROPDOWN CSS (ADDED) --- */
         .nav-user-container { position: relative; display: flex; align-items: center; }
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid #8B5E3C; transition: transform 0.2s; }
         .user-avatar:hover { transform: scale(1.1); }
@@ -296,6 +296,23 @@
         .profile-dropdown a:hover { background-color: #f4f1ea; }
         .profile-dropdown a.logout-btn { color: #d32f2f; border-bottom: none; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cart Sidebar */
+        .cart-sidebar {
+            position: fixed; top: 0; right: -450px; width: 400px; height: 100%;
+            background: var(--white); z-index: 2000; box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+            transition: 0.5s cubic-bezier(0.77, 0, 0.175, 1); display: flex; flex-direction: column;
+        }
+        .cart-sidebar.open { right: 0; }
+        .cart-header { display: flex; justify-content: space-between; align-items: center; padding: 40px 40px 20px; border-bottom: 1px solid #eee; }
+        .cart-body { flex-grow: 1; overflow-y: auto; padding: 0 30px; }
+        .cart-footer { padding: 30px; background: #fdfaf7; border-top: 1px solid #eee; }
+        .cart-total-row { display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2rem; margin-bottom: 20px; }
+        .checkout-btn { width: 100%; background: var(--primary); color: white; padding: 15px; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; }
+        .clear-cart-link { display: block; width: 100%; background: none; border: none; margin-top: 15px; text-decoration: underline; font-size: 0.85rem; color: #999; cursor: pointer; }
+        .close-cart { background: none; border: none; font-size: 2rem; cursor: pointer; }
+        
+        @media (max-width: 480px) { .cart-sidebar { width: 100%; } }
     </style>
 </head>
 <body>
@@ -348,6 +365,24 @@
             </li>
         </ul>
     </nav>
+
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h2 style="font-family: 'Playfair Display';">Your Bag</h2>
+            <button class="close-cart" id="closeCart">&times;</button>
+        </div>
+        <div class="cart-body">
+            <ul id="cart-items-list"></ul>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total-row">
+                <span>Total</span>
+                <span>$<span id="total-price">0</span></span>
+            </div>
+            <button class="checkout-btn" style="width: 100%;">Checkout Now</button>
+            <button class="clear-cart-link" onclick="clearCart()">Clear All Items</button>
+        </div>
+    </div>
 
     <header class="about-hero">
         <div>
@@ -493,6 +528,12 @@
     </footer>
 
     <script>
+        window.djangoUser = "{{ user.username|default:'guest' }}";
+    </script>
+
+    <script src="{% static 'script.js' %}"></script>
+
+    <script>
         // --- 1. DROPDOWN TOGGLE (Local script for page specific elements) ---
         const userAvatarBtn = document.getElementById('userAvatarBtn');
         const profileDropdown = document.getElementById('profileDropdown');
@@ -521,17 +562,6 @@
                 }
             });
         }
-
-        // Sync Cart Count from LocalStorage
-        function syncCartCount() {
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-            const pill = document.getElementById('cart-count');
-            if (pill) pill.innerText = count;
-        }
-
-        // Run count on load
-        window.addEventListener('DOMContentLoaded', syncCartCount);
 
         // Simple Fade-in Animation on Scroll
         const observerOptions = { threshold: 0.1 };

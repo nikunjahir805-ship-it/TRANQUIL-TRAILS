@@ -7,93 +7,6 @@
     <title>Artisan Studio | Handcrafted Project</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles.css' %}">
-    
-    <style>
-        /* --- NAVBAR ALIGNMENT FIXES --- */
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 5%;
-            background: #fff;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .nav-links {
-            display: flex;
-            align-items: center;
-            list-style: none;
-            gap: 30px; /* Space between items */
-            margin-left: auto; /* Pushes links to the right */
-        }
-
-        .nav-links li a {
-            text-decoration: none;
-            color: #2d2d2d;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
-        /* --- USER DROPDOWN STYLES --- */
-        .nav-user-container {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .user-avatar {
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            cursor: pointer;
-            border: 2px solid #8B5E3C;
-            transition: transform 0.2s;
-        }
-
-        .user-avatar:hover { transform: scale(1.1); }
-
-        .profile-dropdown {
-            display: none;
-            position: absolute;
-            top: 55px;
-            right: 0;
-            background-color: #ffffff;
-            min-width: 180px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-            border-radius: 8px;
-            z-index: 1000;
-            overflow: hidden;
-            border: 1px solid #e0e0e0;
-        }
-
-        .profile-dropdown.show { display: block; animation: fadeIn 0.3s ease; }
-
-        .profile-dropdown a {
-            color: #2d2d2d;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            font-size: 0.9rem;
-            border-bottom: 1px solid #f4f4f4;
-            transition: 0.2s;
-        }
-
-        .profile-dropdown a:hover { background-color: #f4f1ea; }
-        .profile-dropdown a.logout-btn { color: #d32f2f; border-bottom: none; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Responsive */
-        @media (max-width: 900px) {
-            .nav-links { display: none; } /* Mobile menu handling handled by script.js */
-        }
-    </style>
 </head>
 <body>
       
@@ -108,6 +21,7 @@
         </button>
 
         <ul class="nav-links" id="navLinks">
+            <li><a href="{% url 'home' %}">Home</a></li>
             <li><a href="{% url 'shop' %}">Shop</a></li>
             <li><a href="{% url 'offers' %}">Offers</a></li>
             <li><a href="{% url 'gallery' %}">Gallery</a></li>
@@ -180,7 +94,7 @@
         <h2 style="font-family: 'Playfair Display'; font-size: 2.5rem;">The Curated Gallery</h2>
         <div class="slider-outer-wrapper">
             <div class="slider-container">
-                 <div class="slider-wrapper" id="sliderWrapper">
+                <div class="slider-wrapper" id="sliderWrapper">
                     <div class="slide" data-name="Earthen Vase" data-price="85" data-img="{% static '1.jpeg' %}"><img src="{% static '1.jpeg' %}" alt="Earthen Vase"><button class="add-to-cart-btn">Add to Cart</button></div>
                     <div class="slide" data-name="Woven Basket" data-price="45" data-img="{% static '3.jpeg' %}"><img src="{% static '3.jpeg' %}" alt="Woven Basket"><button class="add-to-cart-btn">Add to Cart</button></div>
                     <div class="slide" data-name="Stone Art" data-price="120" data-img="{% static '4.jpeg' %}"><img src="{% static '4.jpeg' %}" alt="Stone Art"><button class="add-to-cart-btn">Add to Cart</button></div>
@@ -195,7 +109,7 @@
         </div>
     </section>
       
-      <section class="wood-section">
+    <section class="wood-section">
         <div class="section-container">
             <div class="wood-header">
                 <span class="subtitle">Nature's Touch</span>
@@ -204,57 +118,50 @@
             </div>
 
             <div class="wood-scroll-wrapper" id="woodWrapper">
-                
-                <div class="wood-card" data-name="Mahogany Table" data-price="450" data-img="https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=600">
-                    <img src="https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=600" alt="Mahogany Table">
+                {% for product in wood_products %}
+                <div class="wood-card" data-name="{{ product.name }}" data-price="{{ product.price }}" data-img="{{ product.image.url }}">
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
                     <div class="wood-overlay">
-                        <h3>Mahogany Table</h3>
-                        <p class="wood-price">$450</p>
+                        <h3>{{ product.name }}</h3>
+                        <p class="wood-price">${{ product.price }}</p>
                         <button class="add-to-cart-btn">Add to Bag</button>
                     </div>
                 </div>
+                {% empty %}
+                <div class="wood-scroll-wrapper" id="woodWrapper">
+    
+    <div class="wood-card" data-name="Mahogany Table" data-price="450" data-img="{% static 'Sculpted Grace_ Wooden.jpg' %}">
+        <img src="{% static 'Sculpted Grace_ Wooden.jpg' %}" alt="Mahogany Table">
+        <div class="wood-overlay">
+            <h3>Mahogany Table</h3>
+            <p class="wood-price">$450</p>
+            <button class="add-to-cart-btn">Add to Bag</button>
+        </div>
+    </div>
 
-                <div class="wood-card" data-name="Carved Panel" data-price="180" data-img="https://images.unsplash.com/photo-1582239634289-e58a74e6f42a?w=600">
-                    <img src="https://images.unsplash.com/photo-1582239634289-e58a74e6f42a?w=600" alt="Carved Panel">
-                    <div class="wood-overlay">
-                        <h3>Carved Panel</h3>
-                        <p class="wood-price">$180</p>
-                        <button class="add-to-cart-btn">Add to Bag</button>
-                    </div>
-                </div>
+    <div class="wood-card" data-name="Teak Chair" data-price="220" data-img="{% static 'Sculpted Wooden Vase.jpg' %}">
+        <img src="{% static 'Sculpted Wooden Vase.jpg' %}" alt="Teak Chair">
+        <div class="wood-overlay">
+            <h3>Teak Chair</h3>
+            <p class="wood-price">$220</p>
+            <button class="add-to-cart-btn">Add to Bag</button>
+        </div>
+    </div>
 
-                <div class="wood-card" data-name="Teak Chair" data-price="220" data-img="https://images.unsplash.com/photo-1592078615290-033ee584e267?w=600">
-                    <img src="https://images.unsplash.com/photo-1592078615290-033ee584e267?w=600" alt="Teak Chair">
-                    <div class="wood-overlay">
-                        <h3>Teak Chair</h3>
-                        <p class="wood-price">$220</p>
-                        <button class="add-to-cart-btn">Add to Bag</button>
-                    </div>
-                </div>
+    <div class="wood-card" data-name="Oak Shelf" data-price="120" data-img="{% static 'Flowers Wood Carving.jpg' %}">
+        <img src="{% static 'Flowers Wood Carving.jpg' %}" alt="Oak Shelf">
+        <div class="wood-overlay">
+            <h3>Oak Shelf</h3>
+            <p class="wood-price">$120</p>
+            <button class="add-to-cart-btn">Add to Bag</button>
+        </div>
+    </div>
 
-                <div class="wood-card" data-name="Wooden Bowl" data-price="55" data-img="https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=600">
-                    <img src="https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=600" alt="Wooden Bowl">
-                    <div class="wood-overlay">
-                        <h3>Wooden Bowl</h3>
-                        <p class="wood-price">$55</p>
-                        <button class="add-to-cart-btn">Add to Bag</button>
-                    </div>
-                </div>
-                
-                <div class="wood-card" data-name="Oak Shelf" data-price="120" data-img="https://images.unsplash.com/photo-1594235048255-a681c6e1fb42?w=600">
-                    <img src="https://images.unsplash.com/photo-1594235048255-a681c6e1fb42?w=600" alt="Oak Shelf">
-                    <div class="wood-overlay">
-                        <h3>Oak Shelf</h3>
-                        <p class="wood-price">$120</p>
-                        <button class="add-to-cart-btn">Add to Bag</button>
-                    </div>
-                </div>
-
+</div>
+                {% endfor %}
             </div>
         </div>
     </section>
-     
-    
 
     <section class="artisan-favorites">
         <div class="section-container">
@@ -275,35 +182,16 @@
             </div>
 
             <div class="pro-slider-horizontal" id="proSlider">
-
-                 <div class="pro-card" data-category="ceramics" data-name="Decorative Pot" data-price="120" data-img="{% static '10.jpg' %}">
+                <div class="pro-card" data-category="ceramics" data-name="Decorative Pot" data-price="120" data-img="{% static '10.jpg' %}">
                     <div class="pro-image-wrapper"><img src="{% static '10.jpg' %}" alt="Decorative Pot"></div>
-                    <div class="pro-info">
-                        <h4>Decorative Pot</h4>
-                        <p class="price">$120</p>
-                        <div class="pro-btn-group">
-                            <button class="add-to-cart-btn">Add to Cart</button>
-                            <button class="buy-now-btn">Buy Now</button>
-                        </div>
-                    </div>
+                    <div class="pro-info"><h4>Decorative Pot</h4><p class="price">$120</p><div class="pro-btn-group"><button class="add-to-cart-btn">Add to Cart</button><button class="buy-now-btn">Buy Now</button></div></div>
                 </div>
-
                 <div class="pro-card" data-category="textiles" data-name="Pashmina Shawl" data-price="250" data-img="{% static 'Pashmina Shawl.jpg' %}">
                     <div class="pro-image-wrapper"><img src="{% static 'Pashmina Shawl.jpg' %}" alt="Pashmina Shawl"></div>
-                    <div class="pro-info">
-                        <h4>Pashmina Shawl</h4>
-                        <p class="price">$250</p>
-                        <div class="pro-btn-group">
-                            <button class="add-to-cart-btn">Add to Cart</button>
-                            <button class="buy-now-btn">Buy Now</button>
-                        </div>
-                    </div>
+                    <div class="pro-info"><h4>Pashmina Shawl</h4><p class="price">$250</p><div class="pro-btn-group"><button class="add-to-cart-btn">Add to Cart</button><button class="buy-now-btn">Buy Now</button></div></div>
                 </div>
-
             </div>
-
         </div>
-
     </section>
 
     <footer class="main-footer">
@@ -328,7 +216,7 @@
     </footer>
 
     <script src="{% static 'script.js' %}"></script>
-
+    
     <script>
         // --- 1. DROPDOWN TOGGLE ---
         const userAvatarBtn = document.getElementById('userAvatarBtn');
@@ -347,14 +235,16 @@
             });
         }
 
-        // --- 2. BACKEND LOGOUT LOGIC ---
+        // --- 2. BACKEND LOGOUT LOGIC (WITH CART FIX) ---
         function logoutUser() {
             fetch('/api/logout/')
             .then(res => res.json())
             .then(data => {
                 if(data.success) {
-                    // Remove local flags and reload to show "Login" button again
+                    // CLEAR LOCAL DATA TO PREVENT ADMIN CART LEAKING TO USER
                     localStorage.removeItem('isAdmin');
+                    localStorage.removeItem('cart'); // <--- CRITICAL FIX
+                    
                     window.location.href = "{% url 'home' %}";
                 }
             });

@@ -50,8 +50,6 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            
-            /* ANIMATION START STATE (Preserved) */
             opacity: 0; 
             transform: translateY(30px);
         }
@@ -115,11 +113,10 @@
             background: #2d2d2d; 
         }
 
-        /* Nav Dropdown Styles (Copied from Index) */
+        /* Nav Dropdown Styles */
         .nav-user-container { position: relative; display: flex; align-items: center; }
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid #8B5E3C; transition: transform 0.2s; }
         .user-avatar:hover { transform: scale(1.1); }
-        
         .profile-dropdown {
             display: none; position: absolute; top: 55px; right: 0; background-color: #ffffff;
             min-width: 180px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); border-radius: 8px; z-index: 1000; overflow: hidden; border: 1px solid #e0e0e0;
@@ -161,7 +158,6 @@
                 <li>
                     <div class="nav-user-container">
                         <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" class="user-avatar" id="userAvatarBtn">
-                        
                         <div class="profile-dropdown" id="profileDropdown">
                             <div style="padding: 10px 16px; font-weight: bold; background: #f9f9f9; font-size: 0.8rem; border-bottom: 1px solid #eee;">
                                 Hi, {{ user.first_name|default:user.username }}
@@ -191,14 +187,9 @@
             <h2 style="font-family: 'Playfair Display';">Your Bag</h2>
             <button class="close-cart" id="closeCart">&times;</button>
         </div>
-        <div class="cart-body">
-            <ul id="cart-items-list"></ul>
-        </div>
+        <div class="cart-body"><ul id="cart-items-list"></ul></div>
         <div class="cart-footer">
-            <div class="cart-total-row">
-                <span>Total</span>
-                <span>$<span id="total-price">0</span></span>
-            </div>
+            <div class="cart-total-row"><span>Total</span><span>$<span id="total-price">0</span></span></div>
             <button class="checkout-btn" style="width: 100%;">Checkout Now</button>
             <button class="clear-cart-link" onclick="clearCart()">Clear All Items</button>
         </div>
@@ -260,10 +251,14 @@
         </div>
     </footer>
 
+    <script>
+        window.djangoUser = "{{ user.username|default:'guest' }}";
+    </script>
+
     <script src="{% static 'script.js' %}"></script>
     
     <script>
-        // --- 1. DROPDOWN TOGGLE (Local script for shop page specific elements) ---
+        // --- 1. DROPDOWN TOGGLE ---
         const userAvatarBtn = document.getElementById('userAvatarBtn');
         const profileDropdown = document.getElementById('profileDropdown');
 
@@ -287,31 +282,14 @@
             .then(data => {
                 if(data.success) {
                     localStorage.removeItem('isAdmin');
+                    // We DO NOT wipe the cart here because script.js uses 'cart_username'
                     window.location.href = "{% url 'home' %}";
                 }
             });
         }
 
-        // --- 3. SHOP SPECIFIC LOGIC ---
+        // --- 3. PAGE ANIMATIONS ONLY ---
         document.addEventListener("DOMContentLoaded", () => {
-            
-            // Add To Cart Listeners
-            document.querySelectorAll('.add-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const product = {
-                        id: e.target.dataset.id,
-                        name: e.target.dataset.name,
-                        price: parseFloat(e.target.dataset.price),
-                        img: e.target.dataset.img,
-                        quantity: 1
-                    };
-                    if(typeof handleAddToCart === "function") {
-                        handleAddToCart(product);
-                    }
-                });
-            });
-
-            // GSAP Animations
             gsap.to(".shop-header", {
                 opacity: 1,
                 y: 0,

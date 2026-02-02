@@ -46,11 +46,10 @@
         .author { display: block; letter-spacing: 3px; text-transform: uppercase; font-size: 0.9rem; opacity: 0.8; }
         @media (max-width: 768px) { .gallery-container { padding: 80px 5%; } .item-img { height: 280px; } }
 
-        /* Nav Dropdown Styles (Copied from Index) */
+        /* Nav Dropdown Styles */
         .nav-user-container { position: relative; display: flex; align-items: center; }
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid #8B5E3C; transition: transform 0.2s; }
         .user-avatar:hover { transform: scale(1.1); }
-        
         .profile-dropdown {
             display: none; position: absolute; top: 55px; right: 0; background-color: #ffffff;
             min-width: 180px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); border-radius: 8px; z-index: 1000; overflow: hidden; border: 1px solid #e0e0e0;
@@ -92,7 +91,6 @@
                 <li>
                     <div class="nav-user-container">
                         <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" class="user-avatar" id="userAvatarBtn">
-                        
                         <div class="profile-dropdown" id="profileDropdown">
                             <div style="padding: 10px 16px; font-weight: bold; background: #f9f9f9; font-size: 0.8rem; border-bottom: 1px solid #eee;">
                                 Hi, {{ user.first_name|default:user.username }}
@@ -122,14 +120,9 @@
             <h2 style="font-family: 'Playfair Display';">Your Bag</h2>
             <button class="close-cart" id="closeCart">&times;</button>
         </div>
-        <div class="cart-body">
-            <ul id="cart-items-list"></ul>
-        </div>
+        <div class="cart-body"><ul id="cart-items-list"></ul></div>
         <div class="cart-footer">
-            <div class="cart-total-row">
-                <span>Total</span>
-                <span>$<span id="total-price">0</span></span>
-            </div>
+            <div class="cart-total-row"><span>Total</span><span>$<span id="total-price">0</span></span></div>
             <button class="checkout-btn" style="width: 100%;">Checkout Now</button>
             <button class="clear-cart-link" onclick="clearCart()">Clear All Items</button>
         </div>
@@ -183,10 +176,14 @@
         <p>&copy; 2026 TRANQUIL TRAILS. All Rights Reserved.</p>
     </footer>
 
+    <script>
+        window.djangoUser = "{{ user.username|default:'guest' }}";
+    </script>
+
     <script src="{% static 'script.js' %}"></script>
     
     <script>
-        // --- 1. DROPDOWN TOGGLE (Local script for page specific elements) ---
+        // --- 1. DROPDOWN TOGGLE ---
         const userAvatarBtn = document.getElementById('userAvatarBtn');
         const profileDropdown = document.getElementById('profileDropdown');
 
@@ -216,37 +213,25 @@
         }
 
         // --- 3. GALLERY SPECIFIC LOGIC ---
-        
-        // Initialize AOS
         AOS.init({ duration: 1000, once: true });
 
-        // GSAP Animation on Page Load
         window.addEventListener('load', () => {
             gsap.to(".gallery-item", {
                 opacity: 1,
                 y: 0,
                 duration: 0.8,
-                stagger: 0.1, // Faster stagger for more items
+                stagger: 0.1, 
                 ease: "power2.out"
             });
-            
-            // Cart count logic (Optional if script.js handles it)
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-            const badge = document.getElementById('cart-count');
-            if(badge) badge.innerText = count;
         });
 
-        // Filtering Logic
         function filterItems(category, event) {
             const items = document.querySelectorAll('.gallery-item');
             const btns = document.querySelectorAll('.filter-btn');
 
-            // Update active button
             btns.forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
 
-            // Filter items with a "fade and scale" animation
             gsap.to(items, {
                 scale: 0.8,
                 opacity: 0,
@@ -260,7 +245,6 @@
                         }
                     });
                     
-                    // Reveal filtered items
                     gsap.to(".gallery-item[style*='display: block']", {
                         scale: 1,
                         opacity: 1,

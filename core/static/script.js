@@ -1,13 +1,18 @@
 /**
  * TRANQUIL TRAILS - MASTER SCRIPT
- * Final Clean Version: Navigation, 3D Slider, Filtering, Enhanced Cart, and Login Logic
+ * Handles Navigation, Cart, Slider, and Checkout Logic
  */
 
-// --- Global State ---
-let cart = JSON.parse(localStorage.getItem('cart')) || [];
-const staticBasePath = "/static/"; // Helper for Django images
+// --- 1. User & Cart Setup ---
+// Get the current user from the HTML (or default to 'guest')
+const currentUser = window.djangoUser || 'guest';
+const cartKey = `cart_${currentUser}`; 
 
-// --- 1. Navigation & Hamburger Menu ---
+// Load cart specific to this user
+let cart = JSON.parse(localStorage.getItem(cartKey)) || [];
+const staticBasePath = "/static/"; 
+
+// --- 2. Navigation & Hamburger Menu ---
 const hamburger = document.getElementById('hamburger');
 const navLinks = document.getElementById('navLinks');
 
@@ -18,16 +23,6 @@ if(hamburger) {
     });
 }
 
-// Close menu when clicking links or clicking outside
-if(navLinks) {
-    navLinks.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-            hamburger.classList.remove('active');
-            navLinks.classList.remove('active');
-        });
-    });
-}
-
 document.addEventListener('click', (e) => {
     if (navLinks && hamburger && !navLinks.contains(e.target) && !hamburger.contains(e.target)) {
         hamburger.classList.remove('active');
@@ -35,7 +30,7 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// --- 2. 3D Carousel Slider Logic ---
+// --- 3. 3D Carousel Slider Logic ---
 const slides = document.querySelectorAll('.slide');
 const nextBtn = document.getElementById('nextBtn');
 const prevBtn = document.getElementById('prevBtn');
@@ -63,7 +58,7 @@ if (nextBtn && prevBtn) {
     prevBtn.addEventListener('click', () => { currentIndex = (currentIndex - 1 + slides.length) % slides.length; updateSlider(); });
 }
 
-// Touch support for mobile swipe
+// Touch support
 let touchStartX = 0;
 if (sliderWrapper) {
     sliderWrapper.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
@@ -75,24 +70,42 @@ if (sliderWrapper) {
     });
 }
 
-// --- 3. Unified Enhanced Cart Logic ---
+// --- 4. Unified Cart Logic ---
 
-// Handles clicks on all "Add to Cart" and "Buy Now" buttons
 document.addEventListener('click', (e) => {
-    const btn = e.target;
-    if (btn.classList.contains('add-to-cart-btn') || btn.classList.contains('buy-now-btn')) {
-        const parent = btn.closest('.pro-card') || btn.closest('.slide');
-        if (!parent) return;
+    // Robust check for buttons using .closest()
+    const btn = e.target.closest('.add-btn, .add-to-cart-btn, .buy-now-btn');
+    
+    if (btn) {
+        e.preventDefault(); 
 
-        const product = {
-            name: parent.getAttribute('data-name'),
-            price: parseFloat(parent.getAttribute('data-price')),
-            img: parent.getAttribute('data-img'),
-            quantity: 1
-        };
+        let name, price, img;
 
-        handleAddToCart(product);
-        if (btn.classList.contains('buy-now-btn')) openCartSidebar();
+        if (btn.dataset.name) {
+            // Data is on the button itself (Shop Page)
+            name = btn.dataset.name;
+            price = parseFloat(btn.dataset.price);
+            img = btn.dataset.img;
+        } else {
+            // Data is on the parent card (Home/Offers Page)
+            const parent = btn.closest('.product-card, .slide, .wood-card, .pro-card');
+            if (!parent) return;
+            name = parent.getAttribute('data-name');
+            price = parseFloat(parent.getAttribute('data-price'));
+            img = parent.getAttribute('data-img');
+        }
+
+        if (name && price) {
+            const product = { name, price, img, quantity: 1 };
+            handleAddToCart(product);
+            
+            // Visual Feedback
+            const originalText = btn.innerText;
+            btn.innerText = "Added!";
+            setTimeout(() => btn.innerText = originalText, 1000);
+
+            if (btn.classList.contains('buy-now-btn')) openCartSidebar();
+        }
     }
 });
 
@@ -129,8 +142,9 @@ function clearCart() {
 }
 
 function saveAndUpdate() {
-    localStorage.setItem('cart', JSON.stringify(cart));
+    localStorage.setItem(cartKey, JSON.stringify(cart));
     renderCartUI();
+    
     const cartIcon = document.getElementById('cart-link');
     if(cartIcon) {
         cartIcon.classList.add('cart-shake');
@@ -142,6 +156,7 @@ function renderCartUI() {
     const list = document.getElementById('cart-items-list');
     const totalEl = document.getElementById('total-price');
     const countEl = document.getElementById('cart-count');
+    
     if (!list) return;
 
     list.innerHTML = '';
@@ -152,9 +167,8 @@ function renderCartUI() {
         subtotal += item.price * item.quantity;
         totalItems += item.quantity;
 
-        // Fix image path for cart display
         let displayImg = item.img;
-        if (!displayImg.startsWith('/static/') && !displayImg.startsWith('http')) {
+        if (displayImg && !displayImg.startsWith('/static/') && !displayImg.startsWith('http')) {
             displayImg = staticBasePath + displayImg;
         }
 
@@ -175,6 +189,7 @@ function renderCartUI() {
         `;
         list.appendChild(li);
     });
+
     if(totalEl) totalEl.innerText = subtotal.toFixed(2);
     if(countEl) countEl.innerText = totalItems;
 }
@@ -204,7 +219,27 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// --- 4. Filtering & Admin ---
+// --- 5. Checkout Logic (Updated) ---
+const checkoutBtn = document.querySelector('.checkout-btn');
+if(checkoutBtn) {
+    checkoutBtn.addEventListener('click', () => {
+        if (cart.length === 0) {
+            alert("Your bag is empty!");
+            return;
+        }
+
+        // Check if user is logged in (using window.djangoUser from HTML)
+        if (currentUser === 'guest') {
+            alert("Please log in to complete your purchase.");
+            window.location.href = '/login/';
+        } else {
+            alert("Proceeding to payment...");
+            // window.location.href = '/payment/'; 
+        }
+    });
+}
+
+// --- 6. Filter Logic (Gallery/Shop) ---
 document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         const filterValue = btn.getAttribute('data-filter');
@@ -222,94 +257,46 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
                 setTimeout(() => card.style.display = "none", 400);
             }
         });
+        
+        // Scroll horizontal slider to start
         const slider = document.getElementById('proSlider');
         if(slider) slider.scrollTo({ left: 0, behavior: 'smooth' });
     });
 });
 
-function addNewProduct() {
-    const name = document.getElementById('pName').value;
-    const price = document.getElementById('pPrice').value;
-    const img = document.getElementById('pImg').value;
-    const slider = document.getElementById('proSlider');
+// --- 7. Wood Section Interaction ---
+document.addEventListener("DOMContentLoaded", () => {
+    updateSlider(); // Init 3D slider
+    renderCartUI(); // Init Cart
 
-    if(name && price && img) {
-        const newCard = document.createElement('div');
-        newCard.className = 'pro-card';
-        newCard.setAttribute('data-name', name);
-        newCard.setAttribute('data-price', price);
-        newCard.setAttribute('data-img', img);
-        
-        // Ensure image has path
-        let displayImg = img;
-        if (!displayImg.startsWith('/static/')) {
-            displayImg = staticBasePath + displayImg;
-        }
+    const woodWrapper = document.getElementById('woodWrapper');
+    const woodCards = document.querySelectorAll('.wood-card');
 
-        newCard.innerHTML = `<div class="pro-image-wrapper"><img src="${displayImg}"></div><div class="pro-info"><h4>${name}</h4><p class="price">$${price}</p><div class="pro-btn-group"><button class="add-to-cart-btn">Add to Cart</button><button class="buy-now-btn">Buy Now</button></div></div>`;
-        slider.prepend(newCard); 
-        alert("Product Added!");
-    }
-}
+    if (woodWrapper && woodCards.length > 0) {
+        woodCards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                if(e.target.closest('.add-to-cart-btn')) return;
 
-// --- 5. INITIAL LOAD & LOGIN CHECK ---
-window.addEventListener('DOMContentLoaded', () => {
-    updateSlider();
-    renderCartUI();
+                const isActive = card.classList.contains('active');
+                woodCards.forEach(c => c.classList.remove('active'));
+                woodWrapper.classList.remove('has-active');
 
-    // Check Login State from LocalStorage
-    // 'true' = Admin, 'false' = Normal User, null = Not Logged In
-    const isAdmin = localStorage.getItem('isAdmin'); 
-    const authBtn = document.getElementById('authBtn');
-
-    // IF LOGGED IN (As Admin OR Normal User)
-    if (isAdmin) {
-        if (authBtn) {
-            // Change "Log In" to "Logout"
-            authBtn.innerHTML = "Logout";
-            authBtn.href = "#";
-            authBtn.classList.add('logout-mode');
-            
-            // Logout Functionality
-            authBtn.onclick = (e) => { 
-                e.preventDefault(); 
-                localStorage.removeItem('isAdmin'); 
-                alert("You have been logged out.");
-                window.location.reload(); 
-            };
-        }
-
-        // SPECIAL ADMIN FEATURES (Only if isAdmin is exactly 'true')
-        if (isAdmin === 'true') {
-            const adminForm = document.getElementById('adminForm');
-            if (adminForm) adminForm.style.display = 'flex';
-            
-            document.querySelectorAll('.admin-link').forEach(link => {
-                link.style.display = 'block';
+                if (!isActive) {
+                    card.classList.add('active');
+                    woodWrapper.classList.add('has-active');
+                    setTimeout(() => {
+                        card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    }, 100);
+                }
             });
-        }
+        });
+        
+        // Reset wood section on outside click
+        document.addEventListener('click', (e) => {
+            if (woodWrapper && !woodWrapper.contains(e.target)) {
+                woodCards.forEach(c => c.classList.remove('active'));
+                woodWrapper.classList.remove('has-active');
+            }
+        });
     }
 });
-
-// --- Updated Checkout Logic ---
-const checkoutBtn = document.querySelector('.checkout-btn');
-if(checkoutBtn) {
-    checkoutBtn.addEventListener('click', () => {
-        const isAdmin = localStorage.getItem('isAdmin'); 
-        
-        if (cart.length === 0) {
-            alert("Your bag is empty!");
-            return;
-        }
-
-        if (isAdmin) {
-            // Logged in (Admin or User) -> Proceed to Payment
-            alert("Proceeding to payment...");
-            // window.location.href = 'payment.html'; // Uncomment when payment page exists
-        } else {
-            // Not Logged in -> Send to Login
-            alert("Please log in to complete your purchase.");
-            window.location.href = '/login/'; // Using Django URL path
-        }
-    });
-}
