@@ -1,15 +1,19 @@
+import json
+from datetime import timedelta
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.text import slugify
+from django.utils import timezone
 from django.contrib import messages
-from django.db.models import Count
-import json
+from django.db.models import Count, Sum, F
+from django.db.models.functions import TruncMonth
 
 # IMPORT YOUR MODELS
-from .models import Product, Customer, Category, GalleryItem
+from .models import Product, Customer, Category, GalleryItem, Order, OrderItem, Offer, Review
 
 # --- MAIN SITE VIEWS ---
 
@@ -32,7 +36,27 @@ def gallery_detail(request, pk):
     item = get_object_or_404(GalleryItem, pk=pk)
     return render(request, 'gallery_detail.html', {'item': item})
 
-def offers(request): return render(request, 'offers.html')
+def offers(request):
+    # 1. Fetch data
+    offers_queryset = Offer.objects.filter(active=True)
+    
+    # 2. Convert to a list of dictionaries (Clean JSON for Frontend)
+    offers_data = []
+    for o in offers_queryset:
+        offers_data.append({
+            'id': o.id,
+            'title': o.title,
+            'desc': o.description,
+            'discount': o.discount_text,
+            'code': o.code,
+            'cat': o.category,
+            'color': o.color,
+            'icon': o.icon_class
+        })
+        
+    # 3. Send the list to the template
+    return render(request, 'offers.html', {'offers_data': offers_data})
+
 def about(request): return render(request, 'about.html')
 def contact(request): return render(request, 'contact.html')
 
@@ -40,9 +64,121 @@ def contact(request): return render(request, 'contact.html')
 def login_page(request): return render(request, 'login.html')
 def signup_page(request): return render(request, 'signup.html')
 
-# --- ADMIN DASHBOARD ---
-def admin_dashboard(request): return render(request, 'admin/dashboard.html')
-def admin_analytics(request): return render(request, 'admin/analytics.html')
+# --- ADMIN DASHBOARD (REAL DATA) ---
+
+@login_required
+def admin_dashboard(request):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    # 1. KPI Cards Data
+    total_orders = Order.objects.filter(complete=True).count()
+    pending_count = Order.objects.filter(status='Pending').count()
+    
+    # Calculate Total Revenue
+    total_revenue = OrderItem.objects.filter(order__complete=True).aggregate(
+        total=Sum(F('quantity') * F('product__price'))
+    )['total'] or 0
+
+    # 2. Recent Orders Table (Fetch last 5)
+    recent_orders = Order.objects.filter(complete=True).order_by('-date_ordered')[:5]
+
+    # 3. Chart Data: Revenue Last 7 Days
+    today = timezone.now().date()
+    dates = [today - timedelta(days=i) for i in range(6, -1, -1)]
+    revenue_labels = [] 
+    revenue_data = []   
+
+    for date in dates:
+        revenue_labels.append(date.strftime("%a")) # Mon, Tue
+        daily_sum = OrderItem.objects.filter(
+            order__complete=True, 
+            order__date_ordered__date=date
+        ).aggregate(total=Sum(F('quantity') * F('product__price')))['total'] or 0
+        revenue_data.append(float(daily_sum))
+
+    # 4. Chart Data: Sales by Category
+    categories = Category.objects.all()
+    cat_labels = []
+    cat_data = []
+
+    for cat in categories:
+        count = OrderItem.objects.filter(
+            order__complete=True, 
+            product__category=cat
+        ).aggregate(qty=Sum('quantity'))['qty'] or 0
+        
+        if count > 0:
+            cat_labels.append(cat.name)
+            cat_data.append(count)
+
+    context = {
+        'total_revenue': total_revenue,
+        'total_orders': total_orders,
+        'pending_count': pending_count,
+        'recent_orders': recent_orders,
+        'revenue_labels': revenue_labels,
+        'revenue_data': revenue_data,
+        'cat_labels': cat_labels,
+        'cat_data': cat_data,
+    }
+    # Using 'base_dashboard.html' as per your file structure
+    return render(request, 'admin/dashboard.html', context)
+
+# --- ADMIN ANALYTICS (REAL DATA) ---
+
+@login_required
+def admin_analytics(request):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    # 1. KPI Metrics
+    total_revenue = OrderItem.objects.filter(order__complete=True).aggregate(
+        total=Sum(F('quantity') * F('product__price'))
+    )['total'] or 0
+
+    total_orders = Order.objects.filter(complete=True).count()
+    avg_order_value = round(total_revenue / total_orders, 2) if total_orders > 0 else 0
+
+    # 2. Top Performing Products
+    top_products_query = OrderItem.objects.filter(order__complete=True).values(
+        'product__name'
+    ).annotate(
+        sales_count=Sum('quantity'),
+        total_revenue=Sum(F('quantity') * F('product__price'))
+    ).order_by('-total_revenue')[:5]
+
+    top_products = []
+    if top_products_query:
+        max_rev = top_products_query[0]['total_revenue']
+        for item in top_products_query:
+            item['percentage'] = f"{(item['total_revenue'] / max_rev) * 100}%"
+            top_products.append(item)
+
+    # 3. Chart Data (Monthly Sales)
+    monthly_sales = Order.objects.filter(complete=True).annotate(
+        month=TruncMonth('date_ordered')
+    ).values('month').annotate(
+        total=Sum(F('orderitem__quantity') * F('orderitem__product__price'))
+    ).order_by('month')
+
+    sales_labels = []
+    sales_data = []
+
+    for entry in monthly_sales:
+        sales_labels.append(entry['month'].strftime('%b')) 
+        sales_data.append(float(entry['total']))
+
+    context = {
+        'total_revenue': total_revenue,
+        'total_visits': 12540, 
+        'conversion_rate': 3.5, 
+        'avg_order_value': avg_order_value,
+        'top_products': top_products,
+        'sales_data_json': sales_data, 
+        'sales_labels_json': sales_labels,
+    }
+    return render(request, 'admin/analytics.html', context)
 
 # --- PRODUCT MANAGEMENT ---
 
@@ -74,7 +210,7 @@ def admin_add_product(request):
                 description=description,
                 category=category_obj,
                 image=image,
-                stock=0 # Default stock
+                stock=0 
             )
             messages.success(request, "Product added successfully!")
             return redirect('admin_products')
@@ -139,13 +275,11 @@ def admin_update_stock(request, pk):
 # --- MEDIA GALLERY MANAGEMENT ---
 
 def admin_media(request): 
-    # 1. Fetch Categories for the Dropdown
     categories = Category.objects.all()
 
-    # 2. Handle Upload
     if request.method == "POST":
         image = request.FILES.get('image')
-        category_name = request.POST.get('category') # Getting the name directly
+        category_name = request.POST.get('category')
         title = request.POST.get('title', '')
 
         if image:
@@ -155,12 +289,11 @@ def admin_media(request):
         else:
             messages.error(request, "Please select an image.")
 
-    # 3. Fetch Items
     gallery_items = GalleryItem.objects.all().order_by('-created_at')
     
     return render(request, 'admin/media.html', {
         'gallery_items': gallery_items,
-        'categories': categories # <-- Sending categories to HTML
+        'categories': categories 
     })
 
 def admin_delete_gallery_item(request, pk):
@@ -169,6 +302,49 @@ def admin_delete_gallery_item(request, pk):
         item.delete()
         messages.success(request, "Image deleted successfully.")
     return redirect('admin_media')
+
+# --- DISCOUNT / OFFERS MANAGEMENT (REAL DATA) ---
+
+def admin_discounts(request):
+    # 1. Handle Form Submission (Add New Offer)
+    if request.method == "POST":
+        title = request.POST.get('title')
+        code = request.POST.get('code')
+        discount_text = request.POST.get('discount_text')
+        category = request.POST.get('category')
+        description = request.POST.get('description')
+        color = request.POST.get('color', '#8B5E3C')
+        icon = request.POST.get('icon', 'fa-gift')
+
+        if title and code:
+            try:
+                Offer.objects.create(
+                    title=title,
+                    code=code,
+                    discount_text=discount_text,
+                    category=category,
+                    description=description,
+                    color=color,
+                    icon_class=icon
+                )
+                messages.success(request, "New coupon created successfully!")
+            except Exception as e:
+                messages.error(request, f"Error creating coupon: {e}")
+            return redirect('admin_discounts')
+        else:
+            messages.error(request, "Title and Code are required.")
+
+    # 2. Fetch All Offers
+    offers = Offer.objects.all().order_by('-created_at')
+    
+    return render(request, 'admin/discounts.html', {'offers': offers})
+
+def admin_delete_discount(request, pk):
+    if request.method == 'POST':
+        offer = get_object_or_404(Offer, pk=pk)
+        offer.delete()
+        messages.success(request, "Coupon deleted.")
+    return redirect('admin_discounts')
 
 
 # --- PLACEHOLDER VIEWS ---
@@ -180,7 +356,6 @@ def admin_returns(request): return render(request, 'admin/returns.html')
 def admin_customers(request): return render(request, 'admin/customers.html')
 def admin_segments(request): return render(request, 'admin/segments.html')
 def admin_staff(request): return render(request, 'admin/staff.html')
-def admin_discounts(request): return render(request, 'admin/discounts.html')
 def admin_campaigns(request): return render(request, 'admin/campaigns.html')
 def admin_blog(request): return render(request, 'admin/blog.html')
 def admin_settings(request): return render(request, 'admin/settings.html')
@@ -233,3 +408,50 @@ def login_api(request):
 def logout_api(request):
     logout(request)
     return JsonResponse({'success': True})
+
+# core/views.py - Find and Replace the 'admin_reviews' section
+
+def admin_reviews(request):
+    # 1. Handle "Add Review" Form
+    if request.method == "POST":
+        customer_id = request.POST.get('customer')
+        product_id = request.POST.get('product')
+        rating = request.POST.get('rating')
+        comment = request.POST.get('comment')
+
+        if customer_id and product_id and rating:
+            Review.objects.create(
+                customer_id=customer_id,
+                product_id=product_id,
+                rating=rating,
+                comment=comment
+            )
+            messages.success(request, "Review added successfully!")
+            return redirect('admin_reviews')
+        else:
+            messages.error(request, "Please fill all fields.")
+
+    # 2. Fetch Data
+    reviews = Review.objects.all().order_by('-created_at')
+    customers = Customer.objects.all()
+    products = Product.objects.all()
+
+    return render(request, 'admin/reviews.html', {
+        'reviews': reviews, 
+        'customers': customers, 
+        'products': products
+    })
+
+def admin_delete_review(request, pk):
+    if request.method == "POST":
+        review = get_object_or_404(Review, pk=pk)
+        review.delete()
+        messages.success(request, "Review deleted.")
+    return redirect('admin_reviews')
+
+def admin_toggle_heart(request, pk):
+    # This toggles the "Like/Heart" status
+    review = get_object_or_404(Review, pk=pk)
+    review.is_liked = not review.is_liked
+    review.save()
+    return redirect('admin_reviews')

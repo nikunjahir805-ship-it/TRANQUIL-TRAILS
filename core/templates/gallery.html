@@ -45,6 +45,21 @@
         .quote-box p { font-family: 'Playfair Display'; font-size: clamp(1.5rem, 4vw, 2.5rem); font-style: italic; max-width: 900px; margin: 0 auto 30px; line-height: 1.4; }
         .author { display: block; letter-spacing: 3px; text-transform: uppercase; font-size: 0.9rem; opacity: 0.8; }
         @media (max-width: 768px) { .gallery-container { padding: 80px 5%; } .item-img { height: 280px; } }
+
+        /* Nav Dropdown Styles (Copied from Index) */
+        .nav-user-container { position: relative; display: flex; align-items: center; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid #8B5E3C; transition: transform 0.2s; }
+        .user-avatar:hover { transform: scale(1.1); }
+        
+        .profile-dropdown {
+            display: none; position: absolute; top: 55px; right: 0; background-color: #ffffff;
+            min-width: 180px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); border-radius: 8px; z-index: 1000; overflow: hidden; border: 1px solid #e0e0e0;
+        }
+        .profile-dropdown.show { display: block; animation: fadeIn 0.3s ease; }
+        .profile-dropdown a { color: #2d2d2d; padding: 12px 16px; text-decoration: none; display: block; font-size: 0.9rem; border-bottom: 1px solid #f4f4f4; transition: 0.2s; }
+        .profile-dropdown a:hover { background-color: #f4f1ea; }
+        .profile-dropdown a.logout-btn { color: #d32f2f; border-bottom: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -54,17 +69,71 @@
             <img src="{% static 'Adobe Express - file.png' %}" alt="Logo" class="logo-img">
             <span class="logo-text">TRANQUIL TRAILS</span>
         </a>
+        
+        <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
+
         <ul class="nav-links" id="navLinks">
             <li><a href="{% url 'home' %}">Home</a></li>
-            <li class="user-link"><a href="{% url 'shop' %}">Shop</a></li>
-            <li class="user-link"><a href="{% url 'gallery' %}" style="color: #8B5E3C; font-weight: bold;">Gallery</a></li>
-            <li class="admin-link" style="display: none;"><a href="#">Manage Products</a></li>
+            <li><a href="{% url 'shop' %}">Shop</a></li>
+            <li><a href="{% url 'offers' %}">Offers</a></li>
+            <li><a href="{% url 'gallery' %}" style="color: #8B5E3C; font-weight: bold;">Gallery</a></li>
             <li><a href="{% url 'about' %}">About</a></li>
-            <li><a href="{% url 'Contact' %}">Contact Us</a></li> 
-            <li id="cartNavItem"><a href="#" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a></li>
-            <li><a href="{% url 'login' %}" class="login-btn" id="authBtn">Log In</a></li>
+            <li><a href="{% url 'Contact' %}">Contact</a></li>
+
+            {% if user.is_staff %}
+            <li>
+                <a href="{% url 'admin_dashboard' %}" style="color: #d32f2f; font-weight: bold;">Admin Panel</a>
+            </li>
+            {% endif %}
+
+            {% if user.is_authenticated %}
+                <li>
+                    <div class="nav-user-container">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" class="user-avatar" id="userAvatarBtn">
+                        
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div style="padding: 10px 16px; font-weight: bold; background: #f9f9f9; font-size: 0.8rem; border-bottom: 1px solid #eee;">
+                                Hi, {{ user.first_name|default:user.username }}
+                            </div>
+                            <a href="#">My Orders</a>
+                            <a href="#" onclick="logoutUser()" class="logout-btn">Logout</a>
+                        </div>
+                    </div>
+                </li>
+            {% else %}
+                <li><a href="{% url 'login' %}">Log In</a></li>
+                <li>
+                    <a href="{% url 'signup' %}" style="background: #8B5E3C; color: white; padding: 10px 25px; border-radius: 50px; font-weight: bold; transition: 0.3s;">
+                        Join
+                    </a>
+                </li>
+            {% endif %}
+            
+            <li id="cartNavItem">
+                <a href="#" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a>
+            </li>
         </ul>
     </nav>
+
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h2 style="font-family: 'Playfair Display';">Your Bag</h2>
+            <button class="close-cart" id="closeCart">&times;</button>
+        </div>
+        <div class="cart-body">
+            <ul id="cart-items-list"></ul>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total-row">
+                <span>Total</span>
+                <span>$<span id="total-price">0</span></span>
+            </div>
+            <button class="checkout-btn" style="width: 100%;">Checkout Now</button>
+            <button class="clear-cart-link" onclick="clearCart()">Clear All Items</button>
+        </div>
+    </div>
 
     <section class="gallery-container">
         <div class="gallery-header" style="text-align: center; margin-bottom: 40px;">
@@ -100,7 +169,7 @@
             {% empty %}
                 <p style="text-align: center; grid-column: 1/-1;">No artwork in the gallery yet.</p>
             {% endfor %}
-            </div>
+        </div>
     </section>
 
     <section class="quote-section">
@@ -115,7 +184,39 @@
     </footer>
 
     <script src="{% static 'script.js' %}"></script>
+    
     <script>
+        // --- 1. DROPDOWN TOGGLE (Local script for page specific elements) ---
+        const userAvatarBtn = document.getElementById('userAvatarBtn');
+        const profileDropdown = document.getElementById('profileDropdown');
+
+        if (userAvatarBtn) {
+            userAvatarBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('show');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!userAvatarBtn.contains(e.target)) {
+                    profileDropdown.classList.remove('show');
+                }
+            });
+        }
+
+        // --- 2. BACKEND LOGOUT LOGIC ---
+        function logoutUser() {
+            fetch('/api/logout/')
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    localStorage.removeItem('isAdmin');
+                    window.location.href = "{% url 'home' %}";
+                }
+            });
+        }
+
+        // --- 3. GALLERY SPECIFIC LOGIC ---
+        
         // Initialize AOS
         AOS.init({ duration: 1000, once: true });
 

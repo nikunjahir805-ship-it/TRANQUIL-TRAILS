@@ -97,7 +97,7 @@ class ShippingAddress(models.Model):
     def __str__(self):
         return self.address
 
-# --- 7. GALLERY MODEL (NEW) ---
+# --- 7. GALLERY MODEL ---
 class GalleryItem(models.Model):
     CATEGORY_CHOICES = [
         ('ceramics', 'Ceramics'),
@@ -112,3 +112,39 @@ class GalleryItem(models.Model):
 
     def __str__(self):
         return self.title or f"Gallery Item {self.id}"
+
+# --- 8. OFFER MODEL (NEW) ---
+class Offer(models.Model):
+    CATEGORY_CHOICES = (
+        ('Membership', 'Membership'),
+        ('Training', 'Workshops'),
+        ('Merchandise', 'Merchandise'),
+    )
+    
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    discount_text = models.CharField(max_length=50, help_text="E.g. '25% OFF' or '₹500 OFF'")
+    code = models.CharField(max_length=20)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    
+    # Visuals for the card
+    color = models.CharField(max_length=20, default="#8B5E3C", help_text="Hex Code (e.g. #8B5E3C)")
+    icon_class = models.CharField(max_length=50, default="fa-gift", help_text="FontAwesome class (e.g. fa-gift)")
+    
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+    
+    # --- 9. REVIEW MODEL (NEW) ---
+class Review(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    rating = models.IntegerField(default=5) # 1 to 5
+    comment = models.TextField()
+    is_liked = models.BooleanField(default=False) # The "Heart" status
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.customer.full_name} - {self.product.name}"

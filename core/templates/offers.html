@@ -1,4 +1,5 @@
-{% load static %} <!DOCTYPE html>
+{% load static %} 
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -11,6 +12,7 @@
     <link rel="stylesheet" href="{% static 'styles.css' %}">
 
     <style>
+        /* --- KEEPING YOUR EXACT STYLES --- */
         :root {
             --primary: #8B5E3C;
             --accent: #D4A373;
@@ -31,7 +33,7 @@
 
         /* --- Filter Bar --- */
         .filter-container {
-            display: flex; justify-content: center; gap: 15px; margin-bottom: 50px;
+            display: flex; justify-content: center; gap: 15px; margin-bottom: 50px; flex-wrap: wrap;
         }
         .filter-btn {
             padding: 10px 25px; border-radius: 50px; border: 1px solid var(--primary);
@@ -40,16 +42,21 @@
         }
         .filter-btn.active { background: var(--primary); color: white; }
 
-        /* --- Coupon Cards --- */
+        /* --- Coupon Cards Grid --- */
         .offers-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-            gap: 30px; max-width: 1100px; margin: 0 auto 80px; padding: 0 20px;
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px; 
+            max-width: 1100px; 
+            margin: 0 auto 80px; 
+            padding: 0 20px;
         }
 
         .coupon-card {
             background: white; border-radius: 20px; display: flex;
             overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            opacity: 0; transform: translateY(30px);
+            opacity: 0; transform: translateY(30px); 
+            min-height: 220px;
         }
 
         .coupon-left {
@@ -58,15 +65,14 @@
             background: var(--accent); color: white;
         }
 
-        /* Perforation Circle Visual */
         .perforation {
             position: absolute; right: -10px; height: 100%;
             display: flex; flex-direction: column; justify-content: space-around;
         }
         .dot { width: 20px; height: 20px; background: #fffdfd; border-radius: 50%; }
 
-        .coupon-right { width: 65%; padding: 30px; display: flex; flex-direction: column; }
-        .coupon-right h3 { font-family: 'Playfair Display'; font-size: 1.5rem; margin-bottom: 10px; }
+        .coupon-right { width: 65%; padding: 30px; display: flex; flex-direction: column; justify-content: center; }
+        .coupon-right h3 { font-family: 'Playfair Display'; font-size: 1.5rem; margin-bottom: 10px; line-height: 1.2; }
         .coupon-right p { font-size: 0.9rem; color: #666; margin-bottom: 20px; }
 
         .code-row {
@@ -74,13 +80,13 @@
         }
         .code-box {
             flex: 1; border: 1px dashed var(--primary); background: #faf9f7;
-            padding: 8px; text-align: center; border-radius: 8px;
+            padding: 10px; text-align: center; border-radius: 8px;
         }
-        .code-box span { font-family: monospace; font-weight: bold; letter-spacing: 1px; }
+        .code-box span { font-family: monospace; font-weight: bold; letter-spacing: 1px; font-size: 1rem; }
 
         .claim-btn {
             background: var(--primary); color: white; border: none;
-            padding: 10px 20px; border-radius: 8px; cursor: pointer;
+            padding: 12px 25px; border-radius: 8px; cursor: pointer;
             font-weight: 600; transition: 0.3s;
         }
         .claim-btn:hover { background: var(--dark); }
@@ -97,12 +103,30 @@
             width: 130px; height: 130px; background: var(--accent);
             border-radius: 50%; display: flex; flex-direction: column;
             align-items: center; justify-content: center; text-align: center;
+            flex-shrink: 0;
         }
 
-        @media (max-width: 800px) {
+        /* Nav Dropdown (Copied from Shop) */
+        .nav-user-container { position: relative; display: flex; align-items: center; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid #8B5E3C; transition: transform 0.2s; }
+        .user-avatar:hover { transform: scale(1.1); }
+        
+        .profile-dropdown {
+            display: none; position: absolute; top: 55px; right: 0; background-color: #ffffff;
+            min-width: 180px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); border-radius: 8px; z-index: 1000; overflow: hidden; border: 1px solid #e0e0e0;
+        }
+        .profile-dropdown.show { display: block; animation: fadeIn 0.3s ease; }
+        .profile-dropdown a { color: #2d2d2d; padding: 12px 16px; text-decoration: none; display: block; font-size: 0.9rem; border-bottom: 1px solid #f4f4f4; transition: 0.2s; }
+        .profile-dropdown a:hover { background-color: #f4f1ea; }
+        .profile-dropdown a.logout-btn { color: #d32f2f; border-bottom: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 850px) {
             .offers-grid { grid-template-columns: 1fr; }
-            .coupon-card { flex-direction: column; }
-            .coupon-left { width: 100%; padding: 20px; }
+            .coupon-card { flex-direction: column; min-height: auto; }
+            .coupon-left { width: 100%; padding: 20px; flex-direction: row; gap: 15px; justify-content: center; }
+            .coupon-left i { margin-bottom: 0 !important; }
             .perforation { display: none; }
             .referral-banner { flex-direction: column; text-align: center; gap: 30px; }
         }
@@ -116,16 +140,50 @@
             <span class="logo-text">TRANQUIL TRAILS</span>
         </a>
         
-         <ul class="nav-links" id="navLinks">
+        <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
+
+        <ul class="nav-links" id="navLinks">
             <li><a href="{% url 'home' %}">Home</a></li>
-            <li class="user-link"><a href="{% url 'shop' %}" >Shop</a></li>
-            <li class="user-link"><a href="{% url 'offers' %}" style="color: #8B5E3C; font-weight: bold;">offers</a></li>
-            <li class="user-link"><a href="{% url 'gallery' %}">Gallery</a></li>
-            <li class="admin-link" style="display: none;"><a href="#">Manage Products</a></li>
+            <li><a href="{% url 'shop' %}">Shop</a></li>
+            <li><a href="{% url 'offers' %}" style="color: #8B5E3C; font-weight: bold;">Offers</a></li>
+            <li><a href="{% url 'gallery' %}">Gallery</a></li>
             <li><a href="{% url 'about' %}">About</a></li>
-            <li><a href="{% url 'Contact' %}">Contact Us</a></li> 
-            <li id="cartNavItem"><a href="#" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a></li>
-            <li><a href="{% url 'login' %}" class="login-btn" id="authBtn">Log In</a></li>
+            <li><a href="{% url 'Contact' %}">Contact</a></li>
+
+            {% if user.is_staff %}
+            <li>
+                <a href="{% url 'admin_dashboard' %}" style="color: #d32f2f; font-weight: bold;">Admin Panel</a>
+            </li>
+            {% endif %}
+
+            {% if user.is_authenticated %}
+                <li>
+                    <div class="nav-user-container">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" class="user-avatar" id="userAvatarBtn">
+                        
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div style="padding: 10px 16px; font-weight: bold; background: #f9f9f9; font-size: 0.8rem; border-bottom: 1px solid #eee;">
+                                Hi, {{ user.first_name|default:user.username }}
+                            </div>
+                            <a href="#">My Orders</a>
+                            <a href="#" onclick="logoutUser()" class="logout-btn">Logout</a>
+                        </div>
+                    </div>
+                </li>
+            {% else %}
+                <li><a href="{% url 'login' %}">Log In</a></li>
+                <li>
+                    <a href="{% url 'signup' %}" style="background: #8B5E3C; color: white; padding: 10px 25px; border-radius: 50px; font-weight: bold; transition: 0.3s;">
+                        Join
+                    </a>
+                </li>
+            {% endif %}
+            
+            <li id="cartNavItem">
+                <a href="#" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a>
+            </li>
         </ul>
     </nav>
 
@@ -140,6 +198,7 @@
         <button class="filter-btn active" data-cat="All">All</button>
         <button class="filter-btn" data-cat="Membership">Membership</button>
         <button class="filter-btn" data-cat="Training">Workshops</button>
+        <button class="filter-btn" data-cat="Shop">Shop Deals</button>
     </div>
 
     <section class="offers-grid" id="offersGrid"></section>
@@ -159,32 +218,64 @@
 
     <script src="{% static 'script.js' %}"></script>
     
+    {{ offers_data|json_script:"offers-json" }}
+
     <script>
-        const studioOffers = [
-            { id: 1, title: "New Year Craft Pack", desc: "Get flat 25% OFF on all Yearly Studio Access.", discount: "25% OFF", code: "CRAFT2026", cat: "Membership", color: "#D4A373", icon: "fa-gem" },
-            { id: 2, title: "Student Potter Pack", desc: "Special rates for BCA and Design students.", discount: "₹500 OFF", code: "STUDENTART", cat: "Membership", color: "#8B5E3C", icon: "fa-graduation-cap" },
-            { id: 3, title: "Workshop Pass", desc: "Book 10 pottery sessions and get 2 free.", discount: "2 FREE", code: "CLAYLOVE", cat: "Training", color: "#D4A373", icon: "fa-palette" },
-            { id: 4, title: "Artisan Intensive", desc: "A 3-month deep dive into heritage crafts.", discount: "₹2000 OFF", code: "HERITAGE", cat: "Training", color: "#8B5E3C", icon: "fa-fire" }
-        ];
+        // --- 1. DROPDOWN TOGGLE (Local script for this page) ---
+        const userAvatarBtn = document.getElementById('userAvatarBtn');
+        const profileDropdown = document.getElementById('profileDropdown');
+
+        if (userAvatarBtn) {
+            userAvatarBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('show');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!userAvatarBtn.contains(e.target)) {
+                    profileDropdown.classList.remove('show');
+                }
+            });
+        }
+
+        // --- 2. BACKEND LOGOUT LOGIC ---
+        function logoutUser() {
+            fetch('/api/logout/')
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    localStorage.removeItem('isAdmin');
+                    window.location.href = "{% url 'home' %}";
+                }
+            });
+        }
+
+        // --- 3. OFFERS LOGIC ---
+        const studioOffers = JSON.parse(document.getElementById('offers-json').textContent);
 
         function renderOffers(filter = "All") {
             const grid = document.getElementById('offersGrid');
             grid.innerHTML = "";
-            const filtered = filter === "All" ? studioOffers : studioOffers.filter(o => o.cat === filter);
+            const filtered = filter === "All" ? studioOffers : studioOffers.filter(o => o.category === filter);
+
+            if (filtered.length === 0) {
+                grid.innerHTML = "<p style='text-align:center; grid-column:1/-1; color:#666; font-size:1.1rem; padding:40px;'>No offers available in this category currently.</p>";
+                return;
+            }
 
             filtered.forEach(o => {
                 const card = document.createElement('div');
                 card.className = 'coupon-card';
                 card.innerHTML = `
                     <div class="coupon-left" style="background:${o.color}">
-                        <i class="fa-solid ${o.icon}" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
-                        <h3 style="font-weight: 900; font-size: 1.4rem;">${o.discount}</h3>
+                        <i class="fa-solid ${o.icon_class}" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
+                        <h3 style="font-weight: 900; font-size: 1.4rem;">${o.discount_text}</h3>
                         <div class="perforation">${Array(6).fill('<div class="dot"></div>').join('')}</div>
                     </div>
                     <div class="coupon-right">
-                        <span style="font-size: 0.7rem; color: var(--primary); font-weight: bold; text-transform: uppercase;">${o.cat}</span>
+                        <span style="font-size: 0.7rem; color: var(--primary); font-weight: bold; text-transform: uppercase;">${o.category}</span>
                         <h3>${o.title}</h3>
-                        <p>${o.desc}</p>
+                        <p>${o.description}</p>
                         <div class="code-row">
                             <div class="code-box"><span>${o.code}</span></div>
                             <button class="claim-btn" onclick="copyCoupon('${o.code}', this)">Claim</button>
@@ -194,7 +285,12 @@
                 grid.appendChild(card);
             });
 
-            gsap.to(".coupon-card", { opacity: 1, y: 0, stagger: 0.15, duration: 0.8, ease: "power2.out" });
+            // Animation
+            if (typeof gsap !== "undefined") {
+                gsap.to(".coupon-card", { opacity: 1, y: 0, stagger: 0.15, duration: 0.8, ease: "power2.out" });
+            } else {
+                 document.querySelectorAll('.coupon-card').forEach(c => { c.style.opacity = 1; c.style.transform = 'translateY(0)'; });
+            }
         }
 
         function copyCoupon(code, btn) {

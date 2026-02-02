@@ -1,17 +1,169 @@
 {% extends 'admin/base_admin.html' %}
-{% block page_title %}Reviews{% endblock %}
-{% block page_desc %}Manage customer feedback and ratings.{% endblock %}
+{% load static %}
+
+{% block page_title %}Customer Reviews{% endblock %}
+{% block page_desc %}Manage feedback, ratings, and featured reviews.{% endblock %}
 
 {% block content %}
-<div class="card fade-in-up">
-    <h3>Recent Feedback</h3>
-    <div style="border-bottom: 1px solid #eee; padding: 15px 0;">
-        <strong>Sarah Smith</strong> <span style="color:#ff9800;">★★★★★</span>
-        <p style="color:#666; font-size: 0.9rem;">Absolutely love the vase! It arrived perfectly packaged.</p>
+<style>
+    .split-layout { display: grid; grid-template-columns: 350px 1fr; gap: 30px; }
+    
+    /* Form Card */
+    .form-card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #e0e0e0; height: fit-content; position: sticky; top: 20px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; color: #444; }
+    .form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Poppins'; }
+    .btn-submit { width: 100%; padding: 12px; background: #2c2c2c; color: white; border: none; border-radius: 6px; cursor: pointer; transition: 0.3s; }
+    .btn-submit:hover { background: #8b5e3c; }
+
+    /* Review Grid */
+    .reviews-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    
+    .review-card {
+        background: white; border-radius: 12px; padding: 20px;
+        border: 1px solid #eee; position: relative;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        opacity: 0; transform: translateY(20px); /* For GSAP */
+    }
+    .review-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+
+    .review-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+    .user-avatar { 
+        width: 50px; height: 50px; border-radius: 50%; object-fit: cover; 
+        background: #eee; border: 2px solid #f4f1ea;
+    }
+    .user-info h4 { font-size: 0.95rem; color: #2c2c2c; margin-bottom: 2px; }
+    .user-info span { font-size: 0.75rem; color: #888; }
+
+    .stars { color: #ffb400; font-size: 0.9rem; margin-bottom: 10px; }
+    .review-text { color: #555; font-size: 0.9rem; line-height: 1.5; margin-bottom: 20px; min-height: 60px; }
+
+    .review-footer { 
+        display: flex; justify-content: space-between; align-items: center; 
+        border-top: 1px solid #f9f9f9; padding-top: 15px; 
+    }
+
+    /* Actions */
+    .action-btn { background: none; border: none; cursor: pointer; transition: 0.2s; font-size: 1.1rem; }
+    .heart-btn { color: #ccc; }
+    .heart-btn.liked { color: #e91e63; animation: pop 0.3s ease; }
+    .delete-btn { color: #ff4d4d; opacity: 0.6; }
+    .delete-btn:hover { opacity: 1; }
+
+    @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+    @media (max-width: 900px) { .split-layout { grid-template-columns: 1fr; } .form-card { position: relative; top: 0; } }
+</style>
+
+{% if messages %}
+    {% for message in messages %}
+    <div style="padding: 15px; background: #d4edda; color: #155724; border-radius: 8px; margin-bottom: 20px;">
+        {{ message }}
     </div>
-    <div style="border-bottom: 1px solid #eee; padding: 15px 0;">
-        <strong>Mike Johnson</strong> <span style="color:#ff9800;">★★★★☆</span>
-        <p style="color:#666; font-size: 0.9rem;">Great quality, but shipping took a bit longer than expected.</p>
+    {% endfor %}
+{% endif %}
+
+<div class="split-layout">
+    
+    <div class="form-card fade-in-up">
+        <h3 style="margin-bottom: 20px;">Add Manual Review</h3>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Customer</label>
+                <select name="customer" class="form-control" required>
+                    <option value="">Select Customer</option>
+                    {% for c in customers %}
+                        <option value="{{ c.id }}">{{ c.full_name }} ({{ c.email }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Product</label>
+                <select name="product" class="form-control" required>
+                    <option value="">Select Product</option>
+                    {% for p in products %}
+                        <option value="{{ p.id }}">{{ p.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Rating</label>
+                <select name="rating" class="form-control">
+                    <option value="5">★★★★★ (5 Stars)</option>
+                    <option value="4">★★★★☆ (4 Stars)</option>
+                    <option value="3">★★★☆☆ (3 Stars)</option>
+                    <option value="2">★★☆☆☆ (2 Stars)</option>
+                    <option value="1">★☆☆☆☆ (1 Star)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Comment</label>
+                <textarea name="comment" class="form-control" rows="4" placeholder="What did they say?" required></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">Post Review</button>
+        </form>
+    </div>
+
+    <div>
+        <div class="reviews-grid">
+            {% for review in reviews %}
+            <div class="review-card">
+                <div class="review-header">
+                    {% if review.customer.profile_pic %}
+                        <img src="{{ review.customer.profile_pic.url }}" class="user-avatar" alt="User">
+                    {% else %}
+                        <div class="user-avatar" style="display:flex; align-items:center; justify-content:center; color:#888; font-weight:bold;">
+                            {{ review.customer.full_name|slice:":1" }}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="user-info">
+                        <h4>{{ review.customer.full_name }}</h4>
+                        <span>{{ review.created_at|date:"M d, Y" }} on <strong>{{ review.product.name }}</strong></span>
+                    </div>
+                </div>
+
+                <div class="stars">
+                    {% if review.rating == 5 %}★★★★★
+                    {% elif review.rating == 4 %}★★★★☆
+                    {% elif review.rating == 3 %}★★★☆☆
+                    {% elif review.rating == 2 %}★★☆☆☆
+                    {% else %}★☆☆☆☆{% endif %}
+                </div>
+
+                <p class="review-text">"{{ review.comment }}"</p>
+
+                <div class="review-footer">
+                    <a href="{% url 'admin_toggle_heart' review.id %}" class="action-btn heart-btn {% if review.is_liked %}liked{% endif %}">
+                        <i class="fas fa-heart"></i>
+                    </a>
+
+                    <form action="{% url 'admin_delete_review' review.id %}" method="POST" onsubmit="return confirm('Delete this review?');">
+                        {% csrf_token %}
+                        <button type="submit" class="action-btn delete-btn"><i class="fas fa-trash"></i></button>
+                    </form>
+                </div>
+            </div>
+            {% empty %}
+            <p style="color:#888; margin-top:20px;">No reviews yet.</p>
+            {% endfor %}
+        </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Animate the layout (Form comes in first)
+        gsap.to(".fade-in-up", { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" });
+
+        // Stagger the reviews
+        gsap.to(".review-card", {
+            opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: "power2.out", delay: 0.2
+        });
+    });
+</script>
 {% endblock %}

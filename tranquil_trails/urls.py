@@ -36,7 +36,7 @@ urlpatterns = [
 
     # Categories (Management)
     path('admin-categories/', views.admin_categories, name='admin_categories'),
-    path('admin-delete-category/<int:pk>/', views.admin_delete_category, name='admin_delete_category'), # <--- ADDED
+    path('admin-delete-category/<int:pk>/', views.admin_delete_category, name='admin_delete_category'),
 
     # Gallery Management
     path('admin-media/', views.admin_media, name='admin_media'),
@@ -52,7 +52,12 @@ urlpatterns = [
     path('admin-customers/', views.admin_customers, name='admin_customers'),
     path('admin-segments/', views.admin_segments, name='admin_segments'),
     path('admin-staff/', views.admin_staff, name='admin_staff'),
+    
+    # --- DISCOUNTS & OFFERS (Fixed) ---
     path('admin-discounts/', views.admin_discounts, name='admin_discounts'),
+    # This line was missing, causing the error:
+    path('admin-discounts/delete/<int:pk>/', views.admin_delete_discount, name='admin_delete_discount'),
+
     path('admin-campaigns/', views.admin_campaigns, name='admin_campaigns'),
     path('admin-blog/', views.admin_blog, name='admin_blog'),
     path('admin-settings/', views.admin_settings, name='admin_settings'),
@@ -61,8 +66,15 @@ urlpatterns = [
     path('api/signup/', views.signup_api, name='signup_api'),
     path('api/login/', views.login_api, name='login_api'),
     path('api/logout/', views.logout_api, name='logout_api'),
+
+    # Reviews Management
+    path('admin-dashboard/reviews/', views.admin_reviews, name='admin_reviews'),
+    path('admin-dashboard/reviews/delete/<int:pk>/', views.admin_delete_review, name='admin_delete_review'),
+    path('admin-dashboard/reviews/toggle-heart/<int:pk>/', views.admin_toggle_heart, name='admin_toggle_heart'),
 ]
 
 # Enable Image Loading
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+    

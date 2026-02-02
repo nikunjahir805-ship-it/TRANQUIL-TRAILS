@@ -180,12 +180,12 @@
         <h2 style="font-family: 'Playfair Display'; font-size: 2.5rem;">The Curated Gallery</h2>
         <div class="slider-outer-wrapper">
             <div class="slider-container">
-                <div class="slider-wrapper" id="sliderWrapper">
-                    <div class="slide" data-name="Earthen Vase" data-price="85" data-img="1.jpeg"><img src="{% static '1.jpeg' %}" alt="Earthen Vase"><button class="add-to-cart-btn">Add to Cart</button></div>
-                    <div class="slide" data-name="Woven Basket" data-price="45" data-img="3.jpeg"><img src="{% static '3.jpeg' %}" alt="Woven Basket"><button class="add-to-cart-btn">Add to Cart</button></div>
-                    <div class="slide" data-name="Stone Art" data-price="120" data-img="4.jpeg"><img src="{% static '4.jpeg' %}" alt="Stone Art"><button class="add-to-cart-btn">Add to Cart</button></div>
-                    <div class="slide" data-name="Ceramic Bowl" data-price="35" data-img="5.jpeg"><img src="{% static '5.jpeg' %}" alt="Ceramic Bowl"><button class="add-to-cart-btn">Add to Cart</button></div>
-                    <div class="slide" data-name="Oak Tray" data-price="40" data-img="6.jpg"><img src="{% static '6.jpg' %}" alt="Oak Tray"><button class="add-to-cart-btn">Add to Cart</button></div>
+                 <div class="slider-wrapper" id="sliderWrapper">
+                    <div class="slide" data-name="Earthen Vase" data-price="85" data-img="{% static '1.jpeg' %}"><img src="{% static '1.jpeg' %}" alt="Earthen Vase"><button class="add-to-cart-btn">Add to Cart</button></div>
+                    <div class="slide" data-name="Woven Basket" data-price="45" data-img="{% static '3.jpeg' %}"><img src="{% static '3.jpeg' %}" alt="Woven Basket"><button class="add-to-cart-btn">Add to Cart</button></div>
+                    <div class="slide" data-name="Stone Art" data-price="120" data-img="{% static '4.jpeg' %}"><img src="{% static '4.jpeg' %}" alt="Stone Art"><button class="add-to-cart-btn">Add to Cart</button></div>
+                    <div class="slide" data-name="Ceramic Bowl" data-price="35" data-img="{% static '5.jpeg' %}"><img src="{% static '5.jpeg' %}" alt="Ceramic Bowl"><button class="add-to-cart-btn">Add to Cart</button></div>
+                    <div class="slide" data-name="Oak Tray" data-price="40" data-img="{% static '6.jpg' %}"><img src="{% static '6.jpg' %}" alt="Oak Tray"><button class="add-to-cart-btn">Add to Cart</button></div>
                 </div>
             </div>
             <div class="slider-nav">
@@ -195,6 +195,67 @@
         </div>
     </section>
       
+      <section class="wood-section">
+        <div class="section-container">
+            <div class="wood-header">
+                <span class="subtitle">Nature's Touch</span>
+                <h2 class="playfair">Timeless Woodwork</h2>
+                <p>Click an item to explore details.</p>
+            </div>
+
+            <div class="wood-scroll-wrapper" id="woodWrapper">
+                
+                <div class="wood-card" data-name="Mahogany Table" data-price="450" data-img="https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=600">
+                    <img src="https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=600" alt="Mahogany Table">
+                    <div class="wood-overlay">
+                        <h3>Mahogany Table</h3>
+                        <p class="wood-price">$450</p>
+                        <button class="add-to-cart-btn">Add to Bag</button>
+                    </div>
+                </div>
+
+                <div class="wood-card" data-name="Carved Panel" data-price="180" data-img="https://images.unsplash.com/photo-1582239634289-e58a74e6f42a?w=600">
+                    <img src="https://images.unsplash.com/photo-1582239634289-e58a74e6f42a?w=600" alt="Carved Panel">
+                    <div class="wood-overlay">
+                        <h3>Carved Panel</h3>
+                        <p class="wood-price">$180</p>
+                        <button class="add-to-cart-btn">Add to Bag</button>
+                    </div>
+                </div>
+
+                <div class="wood-card" data-name="Teak Chair" data-price="220" data-img="https://images.unsplash.com/photo-1592078615290-033ee584e267?w=600">
+                    <img src="https://images.unsplash.com/photo-1592078615290-033ee584e267?w=600" alt="Teak Chair">
+                    <div class="wood-overlay">
+                        <h3>Teak Chair</h3>
+                        <p class="wood-price">$220</p>
+                        <button class="add-to-cart-btn">Add to Bag</button>
+                    </div>
+                </div>
+
+                <div class="wood-card" data-name="Wooden Bowl" data-price="55" data-img="https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=600">
+                    <img src="https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=600" alt="Wooden Bowl">
+                    <div class="wood-overlay">
+                        <h3>Wooden Bowl</h3>
+                        <p class="wood-price">$55</p>
+                        <button class="add-to-cart-btn">Add to Bag</button>
+                    </div>
+                </div>
+                
+                <div class="wood-card" data-name="Oak Shelf" data-price="120" data-img="https://images.unsplash.com/photo-1594235048255-a681c6e1fb42?w=600">
+                    <img src="https://images.unsplash.com/photo-1594235048255-a681c6e1fb42?w=600" alt="Oak Shelf">
+                    <div class="wood-overlay">
+                        <h3>Oak Shelf</h3>
+                        <p class="wood-price">$120</p>
+                        <button class="add-to-cart-btn">Add to Bag</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+     
+    
+
     <section class="artisan-favorites">
         <div class="section-container">
             <div class="gallery-header">
@@ -214,16 +275,35 @@
             </div>
 
             <div class="pro-slider-horizontal" id="proSlider">
-                <div class="pro-card" data-category="ceramics" data-name="Decorative Pot" data-price="120" data-img="10.jpg">
+
+                 <div class="pro-card" data-category="ceramics" data-name="Decorative Pot" data-price="120" data-img="{% static '10.jpg' %}">
                     <div class="pro-image-wrapper"><img src="{% static '10.jpg' %}" alt="Decorative Pot"></div>
-                    <div class="pro-info"><h4>Decorative Pot</h4><p class="price">$120</p><div class="pro-btn-group"><button class="add-to-cart-btn">Add to Cart</button><button class="buy-now-btn">Buy Now</button></div></div>
+                    <div class="pro-info">
+                        <h4>Decorative Pot</h4>
+                        <p class="price">$120</p>
+                        <div class="pro-btn-group">
+                            <button class="add-to-cart-btn">Add to Cart</button>
+                            <button class="buy-now-btn">Buy Now</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="pro-card" data-category="textiles" data-name="Pashmina Shawl" data-price="250" data-img="Pashmina Shawl.jpg">
+
+                <div class="pro-card" data-category="textiles" data-name="Pashmina Shawl" data-price="250" data-img="{% static 'Pashmina Shawl.jpg' %}">
                     <div class="pro-image-wrapper"><img src="{% static 'Pashmina Shawl.jpg' %}" alt="Pashmina Shawl"></div>
-                    <div class="pro-info"><h4>Pashmina Shawl</h4><p class="price">$250</p><div class="pro-btn-group"><button class="add-to-cart-btn">Add to Cart</button><button class="buy-now-btn">Buy Now</button></div></div>
+                    <div class="pro-info">
+                        <h4>Pashmina Shawl</h4>
+                        <p class="price">$250</p>
+                        <div class="pro-btn-group">
+                            <button class="add-to-cart-btn">Add to Cart</button>
+                            <button class="buy-now-btn">Buy Now</button>
+                        </div>
+                    </div>
                 </div>
+
             </div>
+
         </div>
+
     </section>
 
     <footer class="main-footer">

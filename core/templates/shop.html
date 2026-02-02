@@ -114,6 +114,21 @@
         .add-btn:hover { 
             background: #2d2d2d; 
         }
+
+        /* Nav Dropdown Styles (Copied from Index) */
+        .nav-user-container { position: relative; display: flex; align-items: center; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid #8B5E3C; transition: transform 0.2s; }
+        .user-avatar:hover { transform: scale(1.1); }
+        
+        .profile-dropdown {
+            display: none; position: absolute; top: 55px; right: 0; background-color: #ffffff;
+            min-width: 180px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); border-radius: 8px; z-index: 1000; overflow: hidden; border: 1px solid #e0e0e0;
+        }
+        .profile-dropdown.show { display: block; animation: fadeIn 0.3s ease; }
+        .profile-dropdown a { color: #2d2d2d; padding: 12px 16px; text-decoration: none; display: block; font-size: 0.9rem; border-bottom: 1px solid #f4f4f4; transition: 0.2s; }
+        .profile-dropdown a:hover { background-color: #f4f1ea; }
+        .profile-dropdown a.logout-btn { color: #d32f2f; border-bottom: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -130,13 +145,44 @@
 
         <ul class="nav-links" id="navLinks">
             <li><a href="{% url 'home' %}">Home</a></li>
-            <li class="user-link"><a href="{% url 'shop' %}" style="color: #8B5E3C; font-weight: bold;">Shop</a></li>
-            <li class="user-link"><a href="{% url 'gallery' %}">Gallery</a></li>
-            <li class="admin-link" style="display: none;"><a href="#">Manage Products</a></li>
+            <li><a href="{% url 'shop' %}" style="color: #8B5E3C; font-weight: bold;">Shop</a></li>
+            <li><a href="{% url 'offers' %}">Offers</a></li>
+            <li><a href="{% url 'gallery' %}">Gallery</a></li>
             <li><a href="{% url 'about' %}">About</a></li>
-            <li><a href="{% url 'Contact' %}">Contact Us</a></li> 
-            <li id="cartNavItem"><a href="#" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a></li>
-            <li><a href="{% url 'login' %}" class="login-btn" id="authBtn">Log In</a></li>
+            <li><a href="{% url 'Contact' %}">Contact</a></li>
+
+            {% if user.is_staff %}
+            <li>
+                <a href="{% url 'admin_dashboard' %}" style="color: #d32f2f; font-weight: bold;">Admin Panel</a>
+            </li>
+            {% endif %}
+
+            {% if user.is_authenticated %}
+                <li>
+                    <div class="nav-user-container">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" class="user-avatar" id="userAvatarBtn">
+                        
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div style="padding: 10px 16px; font-weight: bold; background: #f9f9f9; font-size: 0.8rem; border-bottom: 1px solid #eee;">
+                                Hi, {{ user.first_name|default:user.username }}
+                            </div>
+                            <a href="#">My Orders</a>
+                            <a href="#" onclick="logoutUser()" class="logout-btn">Logout</a>
+                        </div>
+                    </div>
+                </li>
+            {% else %}
+                <li><a href="{% url 'login' %}">Log In</a></li>
+                <li>
+                    <a href="{% url 'signup' %}" style="background: #8B5E3C; color: white; padding: 10px 25px; border-radius: 50px; font-weight: bold; transition: 0.3s;">
+                        Join
+                    </a>
+                </li>
+            {% endif %}
+            
+            <li id="cartNavItem">
+                <a href="#" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a>
+            </li>
         </ul>
     </nav>
 
@@ -190,9 +236,9 @@
                 </button>
             </div>
             {% empty %}
-                <p>No products found. Please add them in the Admin Panel.</p>
+                <p style="text-align:center; grid-column:1/-1;">No products found. Please add them in the Admin Panel.</p>
             {% endfor %}
-            </div>
+        </div>
     </section>
 
     <footer class="main-footer">
@@ -217,15 +263,43 @@
     <script src="{% static 'script.js' %}"></script>
     
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            // NOTE: The products are now rendered by Django (Backend), 
-            // so we don't need the JS array or the render loop anymore.
+        // --- 1. DROPDOWN TOGGLE (Local script for shop page specific elements) ---
+        const userAvatarBtn = document.getElementById('userAvatarBtn');
+        const profileDropdown = document.getElementById('profileDropdown');
 
-            // 1. Add Button Listeners to the Django-rendered buttons
+        if (userAvatarBtn) {
+            userAvatarBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('show');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!userAvatarBtn.contains(e.target)) {
+                    profileDropdown.classList.remove('show');
+                }
+            });
+        }
+
+        // --- 2. BACKEND LOGOUT LOGIC ---
+        function logoutUser() {
+            fetch('/api/logout/')
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    localStorage.removeItem('isAdmin');
+                    window.location.href = "{% url 'home' %}";
+                }
+            });
+        }
+
+        // --- 3. SHOP SPECIFIC LOGIC ---
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            // Add To Cart Listeners
             document.querySelectorAll('.add-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const product = {
-                        id: e.target.dataset.id, // Added ID for better tracking
+                        id: e.target.dataset.id,
                         name: e.target.dataset.name,
                         price: parseFloat(e.target.dataset.price),
                         img: e.target.dataset.img,
@@ -237,11 +311,7 @@
                 });
             });
 
-            // 2. TRIGGER ANIMATION (Exactly as before)
-            // Since Django rendered the HTML with the class "product-card", 
-            // GSAP will find them and animate them.
-
-            // Animate Header
+            // GSAP Animations
             gsap.to(".shop-header", {
                 opacity: 1,
                 y: 0,
@@ -249,7 +319,6 @@
                 ease: "power2.out"
             });
 
-            // Animate Grid Items (Staggered)
             gsap.to(".product-card", {
                 opacity: 1,
                 y: 0,
