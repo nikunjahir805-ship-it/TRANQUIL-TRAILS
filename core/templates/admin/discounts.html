@@ -6,71 +6,105 @@
 
 {% block content %}
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500;600&display=swap');
+
     .split-layout {
         display: grid;
         grid-template-columns: 1fr 1.5fr;
-        gap: 30px;
+        gap: 35px;
+        align-items: start;
     }
 
-    /* Form Styles */
+    /* --- FORM CARD --- */
     .form-card {
         background: white;
-        padding: 30px;
-        border-radius: 12px;
-        border: 1px solid #e0e0e0;
-        height: fit-content;
+        padding: 35px;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+        border: 1px solid #f0f0f0;
+        position: sticky;
+        top: 20px;
+    }
+
+    .form-header {
+        font-family: 'Playfair Display';
+        font-size: 1.5rem;
+        color: #2c2c2c;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
     }
 
     .form-group { margin-bottom: 20px; }
-    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; color: #444; }
-    .form-control {
-        width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;
-        font-family: 'Poppins'; font-size: 0.9rem; transition: 0.3s;
-    }
-    .form-control:focus { border-color: #8b5e3c; outline: none; }
+    .form-label { display: block; font-family:'Poppins'; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; color: #555; }
     
+    .form-control {
+        width: 100%; padding: 12px 15px; border: 1px solid #e0e0e0; border-radius: 8px;
+        font-family: 'Poppins'; font-size: 0.95rem; transition: 0.3s; background: #fafafa;
+    }
+    .form-control:focus { border-color: #8b5e3c; background: white; outline: none; }
+    
+    /* Icon Selector */
+    .icon-selector { display: flex; gap: 10px; flex-wrap: wrap; }
+    .icon-option {
+        width: 40px; height: 40px; border-radius: 8px; border: 1px solid #eee;
+        display: flex; align-items: center; justify-content: center; cursor: pointer;
+        transition: 0.2s; color: #666; background: #fafafa;
+    }
+    .icon-option:hover { background: #f0f0f0; color: #333; }
+    .icon-option.active { background: #2c2c2c; color: white; border-color: #2c2c2c; }
+
+    /* Button */
     .btn-primary {
-        width: 100%; padding: 12px; background: #2c2c2c; color: white;
-        border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
-        transition: 0.3s;
+        width: 100%; padding: 14px; background: #2c2c2c; color: white;
+        border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
+        transition: 0.3s; font-family: 'Poppins'; margin-top: 10px;
+        text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem;
     }
-    .btn-primary:hover { background: #8b5e3c; }
+    .btn-primary:hover { background: #8b5e3c; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(139,94,60,0.3); }
 
-    /* Coupon List Styles */
+    /* --- COUPON LIST --- */
+    .coupon-grid { display: flex; flex-direction: column; gap: 15px; }
+
     .coupon-item {
-        background: white;
-        border: 1px solid #eee;
-        border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 15px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        transition: transform 0.2s;
-        border-left: 5px solid #8b5e3c; /* Default color */
+        background: white; border: 1px solid #f0f0f0; border-radius: 12px;
+        padding: 25px; display: flex; justify-content: space-between; align-items: center;
+        transition: 0.3s; border-left: 5px solid #ddd;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.02);
     }
-    .coupon-item:hover { transform: translateX(5px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+    .coupon-item:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
 
-    .coupon-info h4 { margin-bottom: 5px; color: #2c2c2c; }
-    .coupon-info p { font-size: 0.85rem; color: #666; margin-bottom: 5px; }
-    .coupon-code { 
-        background: #f4f1ea; padding: 4px 10px; border-radius: 4px; 
-        font-family: monospace; font-weight: bold; color: #8b5e3c; font-size: 0.9rem;
+    .coupon-icon-box {
+        width: 50px; height: 50px; border-radius: 12px; margin-right: 20px;
+        display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
     }
+
+    .coupon-info h4 { margin: 0 0 5px; font-family: 'Poppins'; font-size: 1.1rem; color: #2c2c2c; font-weight: 600; }
+    .coupon-category { font-size: 0.7rem; background: #f4f4f4; padding: 2px 8px; border-radius: 4px; margin-left: 8px; text-transform: uppercase; letter-spacing: 0.5px; color: #666; font-weight: 500; }
+    .coupon-desc { font-size: 0.85rem; color: #888; margin: 0 0 10px; }
+    
+    .coupon-meta { display: flex; align-items: center; gap: 15px; }
+    .coupon-code { 
+        background: #f9f9f9; padding: 6px 12px; border-radius: 6px; 
+        font-family: 'Courier New', monospace; font-weight: 700; color: #333; 
+        border: 1px dashed #ccc; font-size: 0.95rem;
+    }
+    .discount-badge { font-weight: 700; font-size: 0.9rem; }
 
     .delete-btn {
-        background: none; border: none; color: #ff4d4d; cursor: pointer;
-        font-size: 1.1rem; opacity: 0.6; transition: 0.3s;
+        width: 35px; height: 35px; border-radius: 50%; border: 1px solid #eee;
+        background: white; color: #ff4d4d; cursor: pointer; display: flex;
+        align-items: center; justify-content: center; transition: 0.2s;
     }
-    .delete-btn:hover { opacity: 1; transform: scale(1.1); }
+    .delete-btn:hover { background: #fff0f0; border-color: #ff4d4d; transform: scale(1.1); }
 
     @media (max-width: 900px) { .split-layout { grid-template-columns: 1fr; } }
 </style>
 
 {% if messages %}
     {% for message in messages %}
-    <div style="padding: 15px; background: #d4edda; color: #155724; border-radius: 8px; margin-bottom: 20px;">
-        {{ message }}
+    <div style="padding: 15px 20px; background: #d4edda; color: #155724; border-radius: 8px; margin-bottom: 30px; border-left: 5px solid #28a745;">
+        <i class="fas fa-check-circle" style="margin-right:8px;"></i> {{ message }}
     </div>
     {% endfor %}
 {% endif %}
@@ -78,84 +112,123 @@
 <div class="split-layout fade-in-up">
     
     <div class="form-card">
-        <h3 style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px;">Create New Offer</h3>
+        <div class="form-header">Create New Offer</div>
+        
         <form method="POST">
             {% csrf_token %}
             
             <div class="form-group">
-                <label>Offer Title</label>
-                <input type="text" name="title" class="form-control" placeholder="e.g. New Year Sale" required>
+                <label class="form-label">Offer Title</label>
+                <input type="text" name="title" class="form-control" placeholder="e.g. Spring Sale" required>
             </div>
 
-            <div class="form-group" style="display: flex; gap: 15px;">
-                <div style="flex:1;">
-                    <label>Discount Code</label>
-                    <input type="text" name="code" class="form-control" placeholder="e.g. SALE2026" required>
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                    <label class="form-label">Code</label>
+                    <input type="text" name="code" class="form-control" placeholder="SPRING25" required style="text-transform: uppercase;">
                 </div>
-                <div style="flex:1;">
-                    <label>Discount Value</label>
-                    <input type="text" name="discount_text" class="form-control" placeholder="e.g. 25% OFF" required>
+                <div>
+                    <label class="form-label">Value</label>
+                    <input type="text" name="discount_text" class="form-control" placeholder="25% OFF" required>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Category</label>
+                <label class="form-label">Category</label>
                 <select name="category" class="form-control">
+                    <option value="General">General</option>
+                    <option value="Seasonal">Seasonal</option>
                     <option value="Membership">Membership</option>
-                    <option value="Training">Workshops</option>
-                    <option value="Merchandise">Merchandise</option>
+                    <option value="Clearance">Clearance</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label>Short Description</label>
-                <textarea name="description" class="form-control" rows="3" placeholder="Brief details about the offer..."></textarea>
+                <label class="form-label">Short Description</label>
+                <textarea name="description" class="form-control" rows="3" placeholder="Brief details..."></textarea>
             </div>
 
-            <div class="form-group" style="display: flex; gap: 15px;">
-                <div style="flex:1;">
-                    <label>Color (Hex)</label>
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 15px;">
+                <div>
+                    <label class="form-label">Color</label>
                     <input type="color" name="color" class="form-control" style="height: 45px; padding: 5px;" value="#8B5E3C">
                 </div>
-                <div style="flex:1;">
-                    <label>Icon Class (FontAwesome)</label>
-                    <input type="text" name="icon" class="form-control" value="fa-gift">
+                
+                <div>
+                    <label class="form-label">Select Icon</label>
+                    <input type="hidden" name="icon_class" id="iconInput" value="fa-gift">
+                    
+                    <div class="icon-selector">
+                        <div class="icon-option active" onclick="selectIcon('fa-gift', this)"><i class="fas fa-gift"></i></div>
+                        <div class="icon-option" onclick="selectIcon('fa-tag', this)"><i class="fas fa-tag"></i></div>
+                        <div class="icon-option" onclick="selectIcon('fa-star', this)"><i class="fas fa-star"></i></div>
+                        <div class="icon-option" onclick="selectIcon('fa-fire', this)"><i class="fas fa-fire"></i></div>
+                        <div class="icon-option" onclick="selectIcon('fa-shopping-bag', this)"><i class="fas fa-shopping-bag"></i></div>
+                    </div>
                 </div>
             </div>
 
-            <button type="submit" class="btn-primary">Create Coupon</button>
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-plus-circle" style="margin-right:8px;"></i> Create Coupon
+            </button>
         </form>
     </div>
 
     <div>
-        <h3 style="margin-bottom: 20px;">Active Campaigns</h3>
+        <h3 style="font-family:'Playfair Display'; margin-bottom:25px; font-size:1.5rem;">Active Campaigns</h3>
         
-        {% for offer in offers %}
-        <div class="coupon-item" style="border-left-color: {{ offer.color }};">
-            <div style="display: flex; gap: 15px; align-items: center;">
-                <div style="width: 40px; height: 40px; background: {{ offer.color }}20; color: {{ offer.color }}; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                    <i class="fas {{ offer.icon_class }}"></i>
+        <div class="coupon-grid">
+            {% for offer in offers %}
+            <div class="coupon-item" style="border-left-color: {{ offer.color }};">
+                <div style="display: flex; align-items: center;">
+                    <div class="coupon-icon-box" style="background: {{ offer.color }}15; color: {{ offer.color }};">
+                        <i class="fas {{ offer.icon_class }}"></i>
+                    </div>
+                    
+                    <div>
+                        <h4>{{ offer.title }} <span class="coupon-category">{{ offer.category }}</span></h4>
+                        <p class="coupon-desc">{{ offer.description|default:"No description provided."|truncatechars:60 }}</p>
+                        
+                        <div class="coupon-meta">
+                            <span class="coupon-code">{{ offer.code }}</span>
+                            <span class="discount-badge" style="color: {{ offer.color }};">{{ offer.discount_text }}</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="coupon-info">
-                    <h4>{{ offer.title }} <span style="font-size: 0.7rem; background: #eee; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">{{ offer.category }}</span></h4>
-                    <p>{{ offer.description|truncatechars:60 }}</p>
-                    <span class="coupon-code">{{ offer.code }}</span>
-                    <span style="font-size: 0.8rem; font-weight: bold; color: {{ offer.color }}; margin-left: 10px;">{{ offer.discount_text }}</span>
-                </div>
+                
+                <form action="{% url 'admin_delete_discount' offer.id %}" method="POST" onsubmit="return confirm('Delete this coupon?');">
+                    {% csrf_token %}
+                    <button type="submit" class="delete-btn" title="Delete Offer"><i class="fas fa-trash-alt"></i></button>
+                </form>
             </div>
-            
-            <form action="{% url 'admin_delete_discount' offer.id %}" method="POST" onsubmit="return confirm('Delete this coupon?');">
-                {% csrf_token %}
-                <button type="submit" class="delete-btn"><i class="fas fa-trash"></i></button>
-            </form>
+            {% empty %}
+            <div style="text-align: center; padding: 60px; color: #999; background: #f9f9f9; border-radius: 12px; border: 1px dashed #ddd;">
+                <i class="fas fa-ticket-alt" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i>
+                <p>No active coupons found. Create one to get started!</p>
+            </div>
+            {% endfor %}
         </div>
-        {% empty %}
-        <div style="text-align: center; padding: 40px; color: #999;">
-            <i class="fas fa-ticket-alt" style="font-size: 2rem; margin-bottom: 10px;"></i>
-            <p>No active coupons found. Create one to get started!</p>
-        </div>
-        {% endfor %}
 
     </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script>
+    // Animation
+    document.addEventListener("DOMContentLoaded", () => {
+        gsap.to(".fade-in-up", { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" });
+        gsap.from(".coupon-item", { opacity: 0, x: 20, duration: 0.5, stagger: 0.1, delay: 0.2 });
+    });
+
+    // Icon Selection Logic
+    function selectIcon(iconClass, element) {
+        // Update Hidden Input
+        document.getElementById('iconInput').value = iconClass;
+        
+        // Update Visual State
+        document.querySelectorAll('.icon-option').forEach(el => el.classList.remove('active'));
+        element.classList.add('active');
+    }
+</script>
+
 {% endblock %}

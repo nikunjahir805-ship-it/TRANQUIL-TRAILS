@@ -4,31 +4,206 @@
 {% block page_desc %}Create a new listing for the marketplace.{% endblock %}
 
 {% block content %}
-<div class="fade-in-up" style="max-width: 800px; margin: 0 auto;">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500;600&display=swap');
+
+    /* --- Page Animation --- */
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out forwards;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    @keyframes fadeInUp {
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --- Form Card Styling --- */
+    .product-form-card {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08); /* Soft Shadow */
+        padding: 40px;
+        max-width: 850px;
+        margin: 0 auto;
+        border: 1px solid #f0f0f0;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .product-form-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 50px rgba(0,0,0,0.12); /* Lift Effect */
+    }
+
+    /* --- Typography --- */
+    .form-label {
+        display: block;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #444;
+        margin-bottom: 8px;
+    }
+
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        padding: 14px 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.95rem;
+        color: #333;
+        transition: all 0.3s ease;
+        background: #fafafa;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        border-color: #8b5e3c;
+        background: #fff;
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(139, 94, 60, 0.1); /* Focus Ring */
+    }
+
+    /* --- Grid Layout --- */
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 25px;
+    }
+
+    @media (max-width: 768px) {
+        .form-row { grid-template-columns: 1fr; gap: 20px; }
+        .product-form-card { padding: 25px; }
+    }
+
+    /* --- File Upload Area --- */
+    .file-upload-wrapper {
+        position: relative;
+        width: 100%;
+        height: 180px;
+        border: 2px dashed #dcdcdc;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #fafafa;
+        transition: 0.3s;
+        cursor: pointer;
+        overflow: hidden;
+    }
+
+    .file-upload-wrapper:hover {
+        border-color: #8b5e3c;
+        background: #fff8f0;
+    }
+
+    .file-upload-wrapper i {
+        font-size: 2.5rem;
+        color: #8b5e3c;
+        margin-bottom: 10px;
+        transition: 0.3s;
+    }
+
+    .file-upload-wrapper:hover i {
+        transform: scale(1.1);
+    }
+
+    .file-upload-input {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    /* --- Button --- */
+    .submit-btn {
+        background: #8b5e3c;
+        color: white;
+        padding: 16px 30px;
+        border: none;
+        border-radius: 8px;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 20px;
+        box-shadow: 0 4px 15px rgba(139, 94, 60, 0.3);
+        transition: 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .submit-btn:hover {
+        background: #2c2c2c;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+
+    /* --- Alerts --- */
+    .alert {
+        padding: 15px 20px;
+        margin-bottom: 25px;
+        border-radius: 8px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .alert-success { background: #d4edda; color: #155724; border-left: 5px solid #28a745; }
+    .alert-error { background: #f8d7da; color: #721c24; border-left: 5px solid #dc3545; }
+
+    /* --- Info Badge --- */
+    .storage-info {
+        background: #eef5f9;
+        color: #2c3e50;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        margin-bottom: 25px;
+        border-left: 4px solid #3498db;
+        font-family: 'Poppins';
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+</style>
+
+<div class="fade-in-up">
     
     {% if messages %}
         {% for message in messages %}
-            <div style="padding: 15px; margin-bottom: 20px; border-radius: 6px; 
-                 {% if message.tags == 'success' %}background: #d4edda; color: #155724;{% else %}background: #f8d7da; color: #721c24;{% endif %}">
+            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
+                {% if message.tags == 'success' %}<i class="fas fa-check-circle"></i>{% else %}<i class="fas fa-exclamation-circle"></i>{% endif %}
                 {{ message }}
             </div>
         {% endfor %}
     {% endif %}
 
-    <div class="card">
+    <div class="storage-info">
+        <i class="fas fa-info-circle"></i>
+        <span><strong>Note:</strong> Products added here will be displayed on the <strong>Shop Page</strong>.</span>
+    </div>
+
+    <div class="product-form-card">
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div class="form-row">
                 <div>
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px;">Product Name</label>
-                    <input type="text" name="name" required placeholder="e.g. Clay Pot" 
-                           style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;">
+                    <label class="form-label">Product Name</label>
+                    <input type="text" name="name" required placeholder="e.g. Vintage Clay Pot" class="form-input">
                 </div>
                 
                 <div>
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px;">Category</label>
-                    <select name="category" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; background: white;">
+                    <label class="form-label">Category</label>
+                    <select name="category" required class="form-select">
                         <option value="" disabled selected>Select Category...</option>
                         {% for cat in categories %}
                             <option value="{{ cat.id }}">{{ cat.name }}</option>
@@ -37,36 +212,47 @@
                 </div>
             </div>
 
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-weight: 600; margin-bottom: 8px;">Price ($)</label>
-                <input type="number" step="0.01" name="price" required placeholder="0.00" 
-                       style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;">
+            <div style="margin-bottom: 25px;">
+                <label class="form-label">Price ($)</label>
+                <input type="number" step="0.01" name="price" required placeholder="0.00" class="form-input">
             </div>
 
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-weight: 600; margin-bottom: 8px;">Description</label>
-                <textarea name="description" rows="5" required 
-                          style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;"></textarea>
+            <div style="margin-bottom: 25px;">
+                <label class="form-label">Description</label>
+                <textarea name="description" rows="5" required placeholder="Describe the craftsmanship..." class="form-textarea"></textarea>
             </div>
 
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-weight: 600; margin-bottom: 8px;">Product Image</label>
-                <div style="border: 2px dashed #ddd; padding: 30px; text-align: center; border-radius: 6px; position: relative; background: #fafafa;">
-                    <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #8b5e3c; margin-bottom: 10px;"></i>
-                    <p style="margin-bottom: 10px;">Click to select an image</p>
-                    
-                    <input type="file" name="image" accept="image/*" required
-                           style="display: block; margin: 0 auto; max-width: 100%;">
+            <div style="margin-bottom: 30px;">
+                <label class="form-label">Product Image</label>
+                <div class="file-upload-wrapper" id="dropZone">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p id="fileName" style="color: #666; font-size: 0.9rem; font-family: 'Poppins';">Drag & Drop or Click to Upload</p>
+                    <input type="file" name="image" accept="image/*" required class="file-upload-input" id="fileInput">
                 </div>
             </div>
 
-            <button type="submit" 
-                    style="background: #8b5e3c; color: white; padding: 15px 30px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s;" 
-                    onmouseover="this.style.background='#2c2c2c'" 
-                    onmouseout="this.style.background='#8b5e3c'">
-                Publish Product
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-plus-circle" style="margin-right: 8px;"></i> Publish Product
             </button>
         </form>
     </div>
 </div>
+
+<script>
+    // Simple JS to show filename when uploaded
+    const fileInput = document.getElementById('fileInput');
+    const fileNameDisplay = document.getElementById('fileName');
+    const dropZone = document.getElementById('dropZone');
+
+    fileInput.addEventListener('change', function() {
+        if(this.files && this.files.length > 0) {
+            fileNameDisplay.textContent = this.files[0].name;
+            fileNameDisplay.style.color = '#28a745';
+            fileNameDisplay.style.fontWeight = '600';
+            dropZone.style.borderColor = '#28a745';
+            dropZone.style.background = '#f0fff4';
+        }
+    });
+</script>
+
 {% endblock %}

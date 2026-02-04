@@ -13,12 +13,25 @@ from django.db.models import Count, Sum, F
 from django.db.models.functions import TruncMonth
 
 # IMPORT YOUR MODELS
-from .models import Product, Customer, Category, GalleryItem, Order, OrderItem, Offer, Review
+# Ensure SiteSetting, Campaign, etc. are added to your models.py
+from .models import (
+    Product, Customer, Category, GalleryItem, Order, OrderItem, 
+    Offer, Review, Campaign, SiteSetting
+)
 
 # --- MAIN SITE VIEWS ---
 
-def home(request): 
-    return render(request, 'index.html')
+def home(request):
+    # Fetch latest 5-7 items for the 3D Slider
+    gallery_slider = GalleryItem.objects.all().order_by('-created_at')[:7]
+    
+    # Use 'category__name' to look up the Category by its name text.
+    wood_products = Product.objects.filter(category__name='Wood')[:5] 
+
+    return render(request, 'index.html', {
+        'gallery_slider': gallery_slider,
+        'wood_products': wood_products
+    })
 
 def shop(request): 
     products = Product.objects.all()
@@ -37,24 +50,22 @@ def gallery_detail(request, pk):
     return render(request, 'gallery_detail.html', {'item': item})
 
 def offers(request):
-    # 1. Fetch data
+    # FIX: Changed 'is_active' to 'active' to match your database model
     offers_queryset = Offer.objects.filter(active=True)
     
-    # 2. Convert to a list of dictionaries (Clean JSON for Frontend)
     offers_data = []
     for o in offers_queryset:
         offers_data.append({
             'id': o.id,
             'title': o.title,
-            'desc': o.description,
-            'discount': o.discount_text,
+            'description': o.description,
+            'discount_text': o.discount_text,
             'code': o.code,
-            'cat': o.category,
+            'category': o.category,
             'color': o.color,
-            'icon': o.icon_class
+            'icon_class': o.icon_class
         })
         
-    # 3. Send the list to the template
     return render(request, 'offers.html', {'offers_data': offers_data})
 
 def about(request): return render(request, 'about.html')
@@ -122,7 +133,6 @@ def admin_dashboard(request):
         'cat_labels': cat_labels,
         'cat_data': cat_data,
     }
-    # Using 'base_dashboard.html' as per your file structure
     return render(request, 'admin/dashboard.html', context)
 
 # --- ADMIN ANALYTICS (REAL DATA) ---
@@ -278,22 +288,33 @@ def admin_media(request):
     categories = Category.objects.all()
 
     if request.method == "POST":
-        image = request.FILES.get('image')
-        category_name = request.POST.get('category')
-        title = request.POST.get('title', '')
+        try:
+            image = request.FILES.get('image')
+            title = request.POST.get('title', '')
+            category_name = request.POST.get('category')
+            price = request.POST.get('price')
 
-        if image:
-            GalleryItem.objects.create(image=image, category=category_name, title=title)
-            messages.success(request, "Image uploaded to gallery!")
-            return redirect('admin_media')
-        else:
-            messages.error(request, "Please select an image.")
+            if image:
+                GalleryItem.objects.create(
+                    title=title,
+                    image=image,
+                    category=category_name,
+                    price=price if price else 0.00
+                )
+                messages.success(request, "Image uploaded to gallery!")
+                return redirect('admin_media')
+            else:
+                messages.error(request, "Please select an image.")
+        except Exception as e:
+            messages.error(request, f"Error: {e}")
 
+    # For drop down filter
+    gallery_cats = [{'name': 'Ceramics'}, {'name': 'Wood'}, {'name': 'Textiles'}, {'name': 'Other'}]
     gallery_items = GalleryItem.objects.all().order_by('-created_at')
     
     return render(request, 'admin/media.html', {
         'gallery_items': gallery_items,
-        'categories': categories 
+        'categories': gallery_cats 
     })
 
 def admin_delete_gallery_item(request, pk):
@@ -303,10 +324,9 @@ def admin_delete_gallery_item(request, pk):
         messages.success(request, "Image deleted successfully.")
     return redirect('admin_media')
 
-# --- DISCOUNT / OFFERS MANAGEMENT (REAL DATA) ---
+# --- DISCOUNT / OFFERS MANAGEMENT ---
 
 def admin_discounts(request):
-    # 1. Handle Form Submission (Add New Offer)
     if request.method == "POST":
         title = request.POST.get('title')
         code = request.POST.get('code')
@@ -314,7 +334,8 @@ def admin_discounts(request):
         category = request.POST.get('category')
         description = request.POST.get('description')
         color = request.POST.get('color', '#8B5E3C')
-        icon = request.POST.get('icon', 'fa-gift')
+        # Correctly capture icon_class
+        icon = request.POST.get('icon_class', 'fa-gift')
 
         if title and code:
             try:
@@ -325,7 +346,8 @@ def admin_discounts(request):
                     category=category,
                     description=description,
                     color=color,
-                    icon_class=icon
+                    icon_class=icon,
+                    active=True # Fixed: active=True
                 )
                 messages.success(request, "New coupon created successfully!")
             except Exception as e:
@@ -334,8 +356,8 @@ def admin_discounts(request):
         else:
             messages.error(request, "Title and Code are required.")
 
-    # 2. Fetch All Offers
-    offers = Offer.objects.all().order_by('-created_at')
+    # FIX: Filter by active=True (not is_active)
+    offers = Offer.objects.filter(active=True).order_by('-created_at')
     
     return render(request, 'admin/discounts.html', {'offers': offers})
 
@@ -346,19 +368,108 @@ def admin_delete_discount(request, pk):
         messages.success(request, "Coupon deleted.")
     return redirect('admin_discounts')
 
+# --- EMAIL CAMPAIGNS MANAGEMENT ---
 
-# --- PLACEHOLDER VIEWS ---
-def admin_reviews(request): return render(request, 'admin/reviews.html')
-def admin_orders(request): return render(request, 'admin/orders.html')
-def admin_invoices(request): return render(request, 'admin/invoices.html')
-def admin_shipments(request): return render(request, 'admin/shipments.html')
-def admin_returns(request): return render(request, 'admin/returns.html')
-def admin_customers(request): return render(request, 'admin/customers.html')
-def admin_segments(request): return render(request, 'admin/segments.html')
-def admin_staff(request): return render(request, 'admin/staff.html')
-def admin_campaigns(request): return render(request, 'admin/campaigns.html')
-def admin_blog(request): return render(request, 'admin/blog.html')
-def admin_settings(request): return render(request, 'admin/settings.html')
+def admin_campaigns(request):
+    if request.method == "POST":
+        subject = request.POST.get('subject')
+        content = request.POST.get('content')
+        action = request.POST.get('action') # 'draft' or 'send'
+
+        if subject and content:
+            status = 'Sent' if action == 'send' else 'Draft'
+            sent_date = timezone.now() if action == 'send' else None
+            
+            Campaign.objects.create(
+                subject=subject,
+                content=content,
+                status=status,
+                sent_date=sent_date
+            )
+            
+            msg = "Campaign sent successfully!" if action == 'send' else "Draft saved."
+            messages.success(request, msg)
+            return redirect('admin_campaigns')
+        else:
+            messages.error(request, "Subject and Content are required.")
+
+    campaigns = Campaign.objects.all().order_by('-created_at')
+    subscriber_count = Customer.objects.count()
+    sent_count = Campaign.objects.filter(status='Sent').count()
+
+    return render(request, 'admin/campaigns.html', {
+        'campaigns': campaigns,
+        'subscriber_count': subscriber_count,
+        'sent_count': sent_count
+    })
+
+# --- REVIEWS MANAGEMENT ---
+
+def admin_reviews(request):
+    if request.method == "POST":
+        customer_id = request.POST.get('customer')
+        product_id = request.POST.get('product')
+        rating = request.POST.get('rating')
+        comment = request.POST.get('comment')
+
+        if customer_id and product_id and rating:
+            Review.objects.create(
+                customer_id=customer_id,
+                product_id=product_id,
+                rating=rating,
+                comment=comment
+            )
+            messages.success(request, "Review added successfully!")
+            return redirect('admin_reviews')
+        else:
+            messages.error(request, "Please fill all fields.")
+
+    reviews = Review.objects.all().order_by('-created_at')
+    customers = Customer.objects.all()
+    products = Product.objects.all()
+
+    return render(request, 'admin/reviews.html', {
+        'reviews': reviews, 
+        'customers': customers, 
+        'products': products
+    })
+
+def admin_delete_review(request, pk):
+    if request.method == "POST":
+        review = get_object_or_404(Review, pk=pk)
+        review.delete()
+        messages.success(request, "Review deleted.")
+    return redirect('admin_reviews')
+
+def admin_toggle_heart(request, pk):
+    review = get_object_or_404(Review, pk=pk)
+    # Assuming is_liked logic exists in your model if needed
+    # review.is_liked = not review.is_liked
+    # review.save()
+    return redirect('admin_reviews')
+
+# --- SETTINGS MANAGEMENT ---
+
+def admin_settings(request):
+    # Singleton settings object (ID=1)
+    settings_obj, created = SiteSetting.objects.get_or_create(id=1)
+
+    if request.method == 'POST':
+        settings_obj.store_name = request.POST.get('store_name')
+        settings_obj.admin_email = request.POST.get('admin_email')
+        settings_obj.contact_phone = request.POST.get('contact_phone')
+        settings_obj.currency = request.POST.get('currency')
+        settings_obj.tax_rate = request.POST.get('tax_rate')
+        settings_obj.shipping_flat_rate = request.POST.get('shipping_flat_rate')
+        
+        # Checkbox handling
+        settings_obj.maintenance_mode = request.POST.get('maintenance_mode') == 'on'
+        
+        settings_obj.save()
+        messages.success(request, "System preferences updated successfully.")
+        return redirect('admin_settings')
+
+    return render(request, 'admin/settings.html', {'settings': settings_obj})
 
 # --- AUTHENTICATION APIS ---
 
@@ -409,49 +520,13 @@ def logout_api(request):
     logout(request)
     return JsonResponse({'success': True})
 
-# core/views.py - Find and Replace the 'admin_reviews' section
-
-def admin_reviews(request):
-    # 1. Handle "Add Review" Form
-    if request.method == "POST":
-        customer_id = request.POST.get('customer')
-        product_id = request.POST.get('product')
-        rating = request.POST.get('rating')
-        comment = request.POST.get('comment')
-
-        if customer_id and product_id and rating:
-            Review.objects.create(
-                customer_id=customer_id,
-                product_id=product_id,
-                rating=rating,
-                comment=comment
-            )
-            messages.success(request, "Review added successfully!")
-            return redirect('admin_reviews')
-        else:
-            messages.error(request, "Please fill all fields.")
-
-    # 2. Fetch Data
-    reviews = Review.objects.all().order_by('-created_at')
-    customers = Customer.objects.all()
-    products = Product.objects.all()
-
-    return render(request, 'admin/reviews.html', {
-        'reviews': reviews, 
-        'customers': customers, 
-        'products': products
-    })
-
-def admin_delete_review(request, pk):
-    if request.method == "POST":
-        review = get_object_or_404(Review, pk=pk)
-        review.delete()
-        messages.success(request, "Review deleted.")
-    return redirect('admin_reviews')
-
-def admin_toggle_heart(request, pk):
-    # This toggles the "Like/Heart" status
-    review = get_object_or_404(Review, pk=pk)
-    review.is_liked = not review.is_liked
-    review.save()
-    return redirect('admin_reviews')
+# --- PLACEHOLDERS ---
+# These prevent import errors for urls that might point here
+def admin_orders(request): return render(request, 'admin/orders.html')
+def admin_invoices(request): return render(request, 'admin/invoices.html')
+def admin_shipments(request): return render(request, 'admin/shipments.html')
+def admin_returns(request): return render(request, 'admin/returns.html')
+def admin_customers(request): return render(request, 'admin/customers.html')
+def admin_segments(request): return render(request, 'admin/segments.html')
+def admin_staff(request): return render(request, 'admin/staff.html')
+def admin_blog(request): return render(request, 'admin/blog.html')

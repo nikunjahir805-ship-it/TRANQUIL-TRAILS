@@ -6,72 +6,197 @@
 
 {% block content %}
 <style>
-    .split-layout { display: grid; grid-template-columns: 350px 1fr; gap: 30px; }
-    
-    /* Form Card */
-    .form-card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #e0e0e0; height: fit-content; position: sticky; top: 20px; }
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; color: #444; }
-    .form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Poppins'; }
-    .btn-submit { width: 100%; padding: 12px; background: #2c2c2c; color: white; border: none; border-radius: 6px; cursor: pointer; transition: 0.3s; }
-    .btn-submit:hover { background: #8b5e3c; }
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Poppins:wght@300;400;500;600&display=swap');
 
-    /* Review Grid */
-    .reviews-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    /* --- LAYOUT GRID --- */
+    .split-layout { 
+        display: grid; 
+        grid-template-columns: 380px 1fr; 
+        gap: 40px; 
+        align-items: start;
+    }
+
+    /* --- FORM CARD (Sticky Control Panel) --- */
+    .form-card { 
+        background: white; 
+        padding: 30px; 
+        border-radius: 16px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+        position: sticky; 
+        top: 20px; 
+        border: 1px solid #f0f0f0;
+        z-index: 10;
+        opacity: 0; /* Hidden initially for animation */
+    }
+
+    .form-header {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        color: #2c2c2c;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f4f1ea;
+    }
+
+    .form-group { margin-bottom: 20px; }
+    .form-group label { 
+        display: block; 
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.85rem; 
+        font-weight: 600; 
+        margin-bottom: 8px; 
+        color: #555; 
+    }
+
+    .form-control { 
+        width: 100%; 
+        padding: 12px 15px; 
+        border: 1px solid #e0e0e0; 
+        border-radius: 8px; 
+        font-family: 'Poppins'; 
+        transition: 0.3s;
+        background: #fafafa;
+        font-size: 0.9rem;
+    }
+    .form-control:focus { 
+        border-color: #8b5e3c; 
+        background: white; 
+        outline: none; 
+        box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.1);
+    }
+
+    .btn-submit { 
+        width: 100%; 
+        padding: 14px; 
+        background: #2c2c2c; 
+        color: white; 
+        border: none; 
+        border-radius: 8px; 
+        cursor: pointer; 
+        transition: 0.3s; 
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        margin-top: 10px;
+    }
+    .btn-submit:hover { 
+        background: #8b5e3c; 
+        transform: translateY(-2px); 
+        box-shadow: 0 5px 15px rgba(139, 94, 60, 0.3); 
+    }
+
+    /* --- REVIEWS GRID --- */
+    .reviews-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+        gap: 25px; 
+    }
     
     .review-card {
-        background: white; border-radius: 12px; padding: 20px;
-        border: 1px solid #eee; position: relative;
+        background: white; 
+        border-radius: 16px; 
+        padding: 25px;
+        border: 1px solid #f0f0f0; 
+        position: relative;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
-        opacity: 0; transform: translateY(20px); /* For GSAP */
+        opacity: 0; transform: translateY(30px); /* For GSAP */
+        overflow: hidden;
     }
-    .review-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
 
+    .review-card:hover { 
+        transform: translateY(-8px) !important; 
+        box-shadow: 0 15px 35px rgba(0,0,0,0.08); 
+        border-color: #e0e0e0;
+    }
+
+    /* Decorative Quote Icon Background */
+    .review-card::before {
+        content: '"';
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        font-family: 'Playfair Display', serif;
+        font-size: 6rem;
+        color: #f9f6f0;
+        z-index: 0;
+        line-height: 1;
+    }
+
+    .review-content-wrapper { position: relative; z-index: 1; }
+
+    /* Header */
     .review-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+    
     .user-avatar { 
         width: 50px; height: 50px; border-radius: 50%; object-fit: cover; 
-        background: #eee; border: 2px solid #f4f1ea;
+        background: #fff; border: 2px solid #8b5e3c; padding: 2px;
     }
-    .user-info h4 { font-size: 0.95rem; color: #2c2c2c; margin-bottom: 2px; }
-    .user-info span { font-size: 0.75rem; color: #888; }
+    
+    .user-initial-avatar {
+        width: 50px; height: 50px; border-radius: 50%;
+        background: #f4f1ea; color: #8b5e3c; border: 2px solid #e0e0e0;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 1.2rem;
+    }
 
-    .stars { color: #ffb400; font-size: 0.9rem; margin-bottom: 10px; }
-    .review-text { color: #555; font-size: 0.9rem; line-height: 1.5; margin-bottom: 20px; min-height: 60px; }
+    .user-info h4 { font-family: 'Playfair Display'; font-size: 1.1rem; color: #2c2c2c; margin-bottom: 2px; }
+    .user-info span { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+    .user-info strong { color: #8b5e3c; }
 
+    /* Stars & Text */
+    .stars { color: #ffb400; font-size: 1rem; margin-bottom: 15px; letter-spacing: 2px; }
+    
+    .review-text { 
+        color: #555; font-size: 0.95rem; line-height: 1.6; margin-bottom: 25px; 
+        font-style: italic; min-height: 60px; font-family: 'Playfair Display';
+    }
+
+    /* Footer & Actions */
     .review-footer { 
         display: flex; justify-content: space-between; align-items: center; 
-        border-top: 1px solid #f9f9f9; padding-top: 15px; 
+        border-top: 1px solid #f0f0f0; padding-top: 15px; 
     }
 
-    /* Actions */
-    .action-btn { background: none; border: none; cursor: pointer; transition: 0.2s; font-size: 1.1rem; }
+    .action-btn { 
+        background: white; border: 1px solid #eee; cursor: pointer; transition: 0.2s; 
+        font-size: 1rem; width: 36px; height: 36px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+    }
+    
     .heart-btn { color: #ccc; }
-    .heart-btn.liked { color: #e91e63; animation: pop 0.3s ease; }
-    .delete-btn { color: #ff4d4d; opacity: 0.6; }
-    .delete-btn:hover { opacity: 1; }
+    .heart-btn:hover { border-color: #e91e63; color: #e91e63; }
+    .heart-btn.liked { background: #ffeef4; border-color: #e91e63; color: #e91e63; animation: pop 0.4s ease; }
+    
+    .delete-btn { color: #ff4d4d; }
+    .delete-btn:hover { background: #fff0f0; border-color: #ff4d4d; }
 
-    @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
-    @media (max-width: 900px) { .split-layout { grid-template-columns: 1fr; } .form-card { position: relative; top: 0; } }
+    @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+    
+    /* Responsive */
+    @media (max-width: 900px) { 
+        .split-layout { grid-template-columns: 1fr; } 
+        .form-card { position: relative; top: 0; margin-bottom: 40px; } 
+    }
 </style>
 
 {% if messages %}
     {% for message in messages %}
-    <div style="padding: 15px; background: #d4edda; color: #155724; border-radius: 8px; margin-bottom: 20px;">
-        {{ message }}
+    <div style="padding: 15px 20px; background: #d4edda; color: #155724; border-radius: 8px; margin-bottom: 30px; border-left: 5px solid #28a745; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+        <i class="fas fa-check-circle" style="margin-right: 8px;"></i> {{ message }}
     </div>
     {% endfor %}
 {% endif %}
 
 <div class="split-layout">
     
-    <div class="form-card fade-in-up">
-        <h3 style="margin-bottom: 20px;">Add Manual Review</h3>
+    <div class="form-card" id="reviewFormCard">
+        <div class="form-header">Add Manual Review</div>
+        
         <form method="POST">
             {% csrf_token %}
             <div class="form-group">
-                <label>Customer</label>
+                <label><i class="fas fa-user" style="margin-right:5px;"></i> Customer</label>
                 <select name="customer" class="form-control" required>
-                    <option value="">Select Customer</option>
+                    <option value="">Select Customer...</option>
                     {% for c in customers %}
                         <option value="{{ c.id }}">{{ c.full_name }} ({{ c.email }})</option>
                     {% endfor %}
@@ -79,9 +204,9 @@
             </div>
 
             <div class="form-group">
-                <label>Product</label>
+                <label><i class="fas fa-box" style="margin-right:5px;"></i> Product</label>
                 <select name="product" class="form-control" required>
-                    <option value="">Select Product</option>
+                    <option value="">Select Product...</option>
                     {% for p in products %}
                         <option value="{{ p.id }}">{{ p.name }}</option>
                     {% endfor %}
@@ -89,7 +214,7 @@
             </div>
 
             <div class="form-group">
-                <label>Rating</label>
+                <label><i class="fas fa-star" style="margin-right:5px;"></i> Rating</label>
                 <select name="rating" class="form-control">
                     <option value="5">★★★★★ (5 Stars)</option>
                     <option value="4">★★★★☆ (4 Stars)</option>
@@ -100,11 +225,13 @@
             </div>
 
             <div class="form-group">
-                <label>Comment</label>
-                <textarea name="comment" class="form-control" rows="4" placeholder="What did they say?" required></textarea>
+                <label><i class="fas fa-comment-dots" style="margin-right:5px;"></i> Comment</label>
+                <textarea name="comment" class="form-control" rows="4" placeholder="Share the customer's thoughts..." required></textarea>
             </div>
 
-            <button type="submit" class="btn-submit">Post Review</button>
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-paper-plane" style="margin-right: 8px;"></i> Post Review
+            </button>
         </form>
     </div>
 
@@ -112,57 +239,76 @@
         <div class="reviews-grid">
             {% for review in reviews %}
             <div class="review-card">
-                <div class="review-header">
-                    {% if review.customer.profile_pic %}
-                        <img src="{{ review.customer.profile_pic.url }}" class="user-avatar" alt="User">
-                    {% else %}
-                        <div class="user-avatar" style="display:flex; align-items:center; justify-content:center; color:#888; font-weight:bold;">
-                            {{ review.customer.full_name|slice:":1" }}
+                <div class="review-content-wrapper">
+                    <div class="review-header">
+                        {% if review.customer.profile_pic %}
+                            <img src="{{ review.customer.profile_pic.url }}" class="user-avatar" alt="User">
+                        {% else %}
+                            <div class="user-initial-avatar">
+                                {{ review.customer.full_name|slice:":1" }}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="user-info">
+                            <h4>{{ review.customer.full_name }}</h4>
+                            <span>{{ review.created_at|date:"M d, Y" }} on <strong>{{ review.product.name }}</strong></span>
                         </div>
-                    {% endif %}
-                    
-                    <div class="user-info">
-                        <h4>{{ review.customer.full_name }}</h4>
-                        <span>{{ review.created_at|date:"M d, Y" }} on <strong>{{ review.product.name }}</strong></span>
                     </div>
-                </div>
 
-                <div class="stars">
-                    {% if review.rating == 5 %}★★★★★
-                    {% elif review.rating == 4 %}★★★★☆
-                    {% elif review.rating == 3 %}★★★☆☆
-                    {% elif review.rating == 2 %}★★☆☆☆
-                    {% else %}★☆☆☆☆{% endif %}
-                </div>
+                    <div class="stars">
+                        {% if review.rating == 5 %}<i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        {% elif review.rating == 4 %}<i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star" style="color:#ddd;"></i>
+                        {% elif review.rating == 3 %}<i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star" style="color:#ddd;"></i><i class="far fa-star" style="color:#ddd;"></i>
+                        {% elif review.rating == 2 %}<i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star" style="color:#ddd;"></i><i class="far fa-star" style="color:#ddd;"></i><i class="far fa-star" style="color:#ddd;"></i>
+                        {% else %}<i class="fas fa-star"></i><i class="far fa-star" style="color:#ddd;"></i><i class="far fa-star" style="color:#ddd;"></i><i class="far fa-star" style="color:#ddd;"></i><i class="far fa-star" style="color:#ddd;"></i>{% endif %}
+                    </div>
 
-                <p class="review-text">"{{ review.comment }}"</p>
+                    <p class="review-text">{{ review.comment }}</p>
 
-                <div class="review-footer">
-                    <a href="{% url 'admin_toggle_heart' review.id %}" class="action-btn heart-btn {% if review.is_liked %}liked{% endif %}">
-                        <i class="fas fa-heart"></i>
-                    </a>
+                    <div class="review-footer">
+                        <a href="{% url 'admin_toggle_heart' review.id %}" class="action-btn heart-btn {% if review.is_liked %}liked{% endif %}" title="Feature this review">
+                            <i class="fas fa-heart"></i>
+                        </a>
 
-                    <form action="{% url 'admin_delete_review' review.id %}" method="POST" onsubmit="return confirm('Delete this review?');">
-                        {% csrf_token %}
-                        <button type="submit" class="action-btn delete-btn"><i class="fas fa-trash"></i></button>
-                    </form>
+                        <form action="{% url 'admin_delete_review' review.id %}" method="POST" onsubmit="return confirm('Delete this review? This cannot be undone.');">
+                            {% csrf_token %}
+                            <button type="submit" class="action-btn delete-btn" title="Delete Review">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
             {% empty %}
-            <p style="color:#888; margin-top:20px;">No reviews yet.</p>
+            <div style="text-align: center; padding: 60px; color: #999; grid-column: 1/-1;">
+                <i class="far fa-comment-dots" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
+                <p>No reviews yet. Use the form to add one manually!</p>
+            </div>
             {% endfor %}
         </div>
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        // Animate the layout (Form comes in first)
-        gsap.to(".fade-in-up", { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" });
+        // 1. Animate Form (Slide from left)
+        gsap.to("#reviewFormCard", { 
+            opacity: 1, 
+            x: 0, 
+            duration: 0.8, 
+            ease: "power2.out",
+            startAt: { x: -30 }
+        });
 
-        // Stagger the reviews
+        // 2. Animate Reviews (Staggered cascade from bottom)
         gsap.to(".review-card", {
-            opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: "power2.out", delay: 0.2
+            opacity: 1, 
+            y: 0, 
+            duration: 0.6, 
+            stagger: 0.1, 
+            ease: "back.out(1.2)", 
+            delay: 0.2
         });
     });
 </script>

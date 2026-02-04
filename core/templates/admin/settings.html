@@ -1,19 +1,207 @@
 {% extends 'admin/base_admin.html' %}
-{% block page_title %}Settings{% endblock %}
-{% block page_desc %}Configure your system preferences.{% endblock %}
+{% load static %}
+
+{% block page_title %}System Settings{% endblock %}
+{% block page_desc %}Configure store details, finance metrics, and system status.{% endblock %}
 
 {% block content %}
-<div class="card fade-in-up" style="max-width: 600px;">
-    <h3>General Settings</h3>
-    <br>
-    <div style="margin-bottom: 15px;">
-        <label style="display:block; font-weight:600; margin-bottom:5px;">Store Name</label>
-        <input type="text" value="Tranquil Trails" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500;600&display=swap');
+
+    /* --- LAYOUT --- */
+    .settings-container {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 30px;
+    }
+
+    /* --- SIDEBAR NAV --- */
+    .settings-nav {
+        background: white; border-radius: 12px; padding: 20px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.03); border: 1px solid #eee;
+        height: fit-content; position: sticky; top: 20px;
+    }
+    
+    .nav-item {
+        display: flex; align-items: center; gap: 12px;
+        padding: 12px 15px; border-radius: 8px; color: #555;
+        text-decoration: none; font-family: 'Poppins'; font-size: 0.9rem;
+        transition: 0.2s; margin-bottom: 5px; cursor: pointer;
+    }
+    .nav-item:hover, .nav-item.active { background: #f4f1ea; color: #8b5e3c; font-weight: 600; }
+    .nav-item i { width: 20px; text-align: center; }
+
+    /* --- FORM CARD --- */
+    .settings-card {
+        background: white; border-radius: 16px; padding: 35px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.05); border: 1px solid #eee;
+    }
+
+    .section-title {
+        font-family: 'Playfair Display'; font-size: 1.5rem; color: #2c2c2c;
+        margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #f0f0f0;
+    }
+
+    /* Form Elements */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 30px; }
+    
+    .form-group label {
+        display: block; font-family: 'Poppins'; font-weight: 600; 
+        font-size: 0.85rem; margin-bottom: 8px; color: #444;
+    }
+    
+    .form-input {
+        width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px;
+        font-family: 'Poppins'; font-size: 0.95rem; background: #fafafa; transition: 0.3s;
+    }
+    .form-input:focus { border-color: #8b5e3c; background: white; outline: none; }
+
+    /* Toggle Switch */
+    .switch-wrapper {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 15px; border: 1px solid #eee; border-radius: 8px; background: #fafafa;
+    }
+    .switch-label h4 { margin: 0 0 5px; font-family: 'Poppins'; font-size: 0.95rem; }
+    .switch-label p { margin: 0; font-size: 0.8rem; color: #888; }
+
+    .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+        position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+        background-color: #ccc; transition: .4s; border-radius: 34px;
+    }
+    .slider:before {
+        position: absolute; content: ""; height: 18px; width: 18px;
+        left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%;
+    }
+    input:checked + .slider { background-color: #8b5e3c; }
+    input:checked + .slider:before { transform: translateX(24px); }
+
+    /* Action Bar */
+    .action-bar {
+        margin-top: 40px; padding-top: 20px; border-top: 1px solid #f0f0f0;
+        display: flex; justify-content: flex-end; gap: 15px;
+    }
+    
+    .btn-save {
+        background: #2c2c2c; color: white; padding: 12px 35px; border-radius: 30px;
+        border: none; font-weight: 600; cursor: pointer; font-family: 'Poppins';
+        transition: 0.3s; display: flex; align-items: center; gap: 10px;
+    }
+    .btn-save:hover { background: #8b5e3c; transform: translateY(-2px); }
+
+    @media (max-width: 900px) { .settings-container { grid-template-columns: 1fr; } }
+</style>
+
+{% if messages %}
+    {% for message in messages %}
+    <div style="padding: 15px 20px; background: #d4edda; color: #155724; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #28a745;">
+        <i class="fas fa-check-circle" style="margin-right:8px;"></i> {{ message }}
     </div>
-    <div style="margin-bottom: 15px;">
-        <label style="display:block; font-weight:600; margin-bottom:5px;">Admin Email</label>
-        <input type="email" value="admin@tranquiltrails.com" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+    {% endfor %}
+{% endif %}
+
+<form method="POST" class="settings-container fade-in-up">
+    {% csrf_token %}
+
+    <div class="settings-nav">
+        <a class="nav-item active" onclick="scrollToSection('general')"><i class="fas fa-sliders-h"></i> General</a>
+        <a class="nav-item" onclick="scrollToSection('finance')"><i class="fas fa-coins"></i> Finance</a>
+        <a class="nav-item" onclick="scrollToSection('system')"><i class="fas fa-server"></i> System</a>
     </div>
-    <button style="background: #4caf50; color: white; padding: 10px 20px; border:none; border-radius:6px; cursor:pointer;">Save Changes</button>
-</div>
+
+    <div class="settings-card">
+        
+        <div id="general" style="margin-bottom: 40px;">
+            <h3 class="section-title">General Information</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Store Name</label>
+                    <input type="text" name="store_name" value="{{ settings.store_name }}" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Admin Email</label>
+                    <input type="email" name="admin_email" value="{{ settings.admin_email }}" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Contact Phone</label>
+                    <input type="text" name="contact_phone" value="{{ settings.contact_phone }}" class="form-input">
+                </div>
+            </div>
+        </div>
+
+        <div id="finance" style="margin-bottom: 40px;">
+            <h3 class="section-title">Finance & Tax</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Currency Symbol</label>
+                    <select name="currency" class="form-input">
+                        <option value="USD" {% if settings.currency == 'USD' %}selected{% endif %}>USD ($)</option>
+                        <option value="EUR" {% if settings.currency == 'EUR' %}selected{% endif %}>EUR (€)</option>
+                        <option value="INR" {% if settings.currency == 'INR' %}selected{% endif %}>INR (₹)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tax Rate (%)</label>
+                    <input type="number" step="0.01" name="tax_rate" value="{{ settings.tax_rate }}" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Flat Shipping Rate</label>
+                    <input type="number" step="0.01" name="shipping_flat_rate" value="{{ settings.shipping_flat_rate }}" class="form-input">
+                </div>
+            </div>
+        </div>
+
+        <div id="system">
+            <h3 class="section-title">System Status</h3>
+            
+            <div class="switch-wrapper">
+                <div class="switch-label">
+                    <h4>Maintenance Mode</h4>
+                    <p>Activate to hide the store front from visitors while you make updates.</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" name="maintenance_mode" {% if settings.maintenance_mode %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="action-bar">
+            <button type="submit" class="btn-save">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
+        </div>
+
+    </div>
+</form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Animation
+        gsap.to(".fade-in-up", { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" });
+        
+        // Navigation Logic
+        const navItems = document.querySelectorAll('.nav-item');
+        
+        navItems.forEach(item => {
+            item.addEventListener('click', function() {
+                navItems.forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    });
+
+    function scrollToSection(id) {
+        const element = document.getElementById(id);
+        if (element) {
+            window.scrollTo({
+                top: element.offsetTop - 100,
+                behavior: 'smooth'
+            });
+        }
+    }
+</script>
+
 {% endblock %}

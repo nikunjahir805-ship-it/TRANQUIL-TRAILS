@@ -71,6 +71,13 @@ urlpatterns = [
     path('admin-dashboard/reviews/', views.admin_reviews, name='admin_reviews'),
     path('admin-dashboard/reviews/delete/<int:pk>/', views.admin_delete_review, name='admin_delete_review'),
     path('admin-dashboard/reviews/toggle-heart/<int:pk>/', views.admin_toggle_heart, name='admin_toggle_heart'),
+
+    # ... existing paths ...
+    path('admin-dashboard/inventory/', views.admin_inventory, name='admin_inventory'),
+    
+    # --- ADD THIS LINE ---
+    path('admin-dashboard/inventory/update/<int:pk>/', views.admin_update_stock, name='admin_update_stock'),
+    # -----------
 ]
 
 # Enable Image Loading

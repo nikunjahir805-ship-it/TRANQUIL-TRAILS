@@ -34,13 +34,27 @@
 
     /* Update Stock Input */
     .stock-input {
-        width: 60px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; text-align: center;
+        width: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 6px; text-align: center; font-weight: bold;
         transition: 0.2s;
     }
-    .stock-input:focus { border-color: #8b5e3c; outline: none; }
+    .stock-input:focus { border-color: #8b5e3c; outline: none; background: #fffbf7; }
+
+    /* Update Button */
+    .btn-update {
+        background: none; border: 1px solid #ddd; padding: 8px 16px; border-radius: 6px; cursor: pointer; color: #555; transition: 0.2s;
+    }
+    .btn-update:hover { background: #2c2c2c; color: white; border-color: #2c2c2c; }
 </style>
 
 <div class="fade-in-up">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="padding: 15px; margin-bottom: 20px; border-radius: 6px; background: #d4edda; color: #155724; border-left: 4px solid #28a745;">
+                <i class="fas fa-check-circle"></i> {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 20px;">
         
@@ -65,7 +79,7 @@
                 <th>Category</th>
                 <th>Stock Level</th>
                 <th>Status</th>
-                <th style="text-align: right;">Update</th>
+                <th style="text-align: right;">Action</th>
             </tr>
         </thead>
         <tbody id="inventoryBody">
@@ -73,7 +87,9 @@
             <tr class="table-row" 
                 data-stock="{{ p.stock|default:0 }}" 
                 data-name="{{ p.name|lower }}"
-                data-sku="SKU-{{ p.id }}"> <td style="display: flex; align-items: center;">
+                data-sku="SKU-{{ p.id }}"> 
+                
+                <td style="display: flex; align-items: center;">
                     {% if p.image %}
                         <img src="{{ p.image.url }}" class="prod-thumb">
                     {% else %}
@@ -88,31 +104,28 @@
                     {% if p.category %}{{ p.category.name }}{% else %}Uncategorized{% endif %}
                 </td>
 
-                <td>
-                    <input type="number" value="{{ p.stock|default:0 }}" class="stock-input">
-                </td>
+                <form method="POST" action="{% url 'admin_update_stock' p.id %}">
+                    {% csrf_token %}
+                    <td>
+                        <input type="number" name="stock" value="{{ p.stock|default:0 }}" class="stock-input" min="0">
+                    </td>
 
-                <td>
-                    {% if p.stock > 10 %}
-                        <span class="status-badge status-in">In Stock</span>
-                    {% elif p.stock > 0 %}
-                        <span class="status-badge status-low">Low Stock</span>
-                    {% else %}
-                        {% if p.stock == 0 %}
-                             <span class="status-badge status-out">Out of Stock</span>
+                    <td>
+                        {% if p.stock > 10 %}
+                            <span class="status-badge status-in">In Stock</span>
+                        {% elif p.stock > 0 %}
+                            <span class="status-badge status-low">Low Stock</span>
                         {% else %}
-                             <span class="status-badge status-out">Out of Stock</span>
+                            <span class="status-badge status-out">Out of Stock</span>
                         {% endif %}
-                    {% endif %}
-                </td>
+                    </td>
 
-                <td style="text-align: right;">
-                    <button style="background: none; border: 1px solid #ddd; padding: 6px 12px; border-radius: 6px; cursor: pointer; color: #555; transition: 0.2s;"
-                            onmouseover="this.style.background='#2c2c2c'; this.style.color='white'"
-                            onmouseout="this.style.background='none'; this.style.color='#555'">
-                        Save
-                    </button>
-                </td>
+                    <td style="text-align: right;">
+                        <button type="submit" class="btn-update">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                    </td>
+                </form>
             </tr>
             {% empty %}
             <tr>
@@ -144,8 +157,16 @@
         let rows = document.querySelectorAll('#inventoryBody tr');
 
         rows.forEach(row => {
-            let text = row.innerText.toLowerCase();
-            row.style.display = text.indexOf(val) > -1 ? "" : "none";
+            // We search inside the first cell (Name) and second cell (SKU)
+            // But since the row structure is complex with form, we check dataset attributes we added
+            let name = row.getAttribute('data-name');
+            let sku = row.getAttribute('data-sku').toLowerCase();
+            
+            if (name.includes(val) || sku.includes(val)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
         });
     });
 
@@ -158,19 +179,20 @@
         let rows = document.querySelectorAll('#inventoryBody tr');
 
         rows.forEach(row => {
-            // Get stock number from data attribute or input value
-            // Since backend stock might be None, we rely on the rendered badge class for filtering
-            let badge = row.querySelector('.status-badge');
+            // Get stock number directly from the input value currently in the row
+            // (Use fallback to dataset stock if input parsing fails)
+            let input = row.querySelector('input[name="stock"]');
+            let stock = input ? parseInt(input.value) : 0;
             
             if (type === 'all') {
                 row.style.display = "";
             } 
             else if (type === 'low') {
-                if (badge && badge.classList.contains('status-low')) row.style.display = "";
+                if (stock > 0 && stock <= 10) row.style.display = "";
                 else row.style.display = "none";
             } 
             else if (type === 'out') {
-                if (badge && badge.classList.contains('status-out')) row.style.display = "";
+                if (stock === 0) row.style.display = "";
                 else row.style.display = "none";
             }
         });

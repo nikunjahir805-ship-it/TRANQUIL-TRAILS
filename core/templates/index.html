@@ -91,24 +91,33 @@
     </header>
 
     <section class="carousel-section">
-        <h2 style="font-family: 'Playfair Display'; font-size: 2.5rem;">The Curated Gallery</h2>
-        <div class="slider-outer-wrapper">
-            <div class="slider-container">
-                <div class="slider-wrapper" id="sliderWrapper">
-                    <div class="slide" data-name="Earthen Vase" data-price="85" data-img="{% static '1.jpeg' %}"><img src="{% static '1.jpeg' %}" alt="Earthen Vase"><button class="add-to-cart-btn">Add to Cart</button></div>
-                    <div class="slide" data-name="Woven Basket" data-price="45" data-img="{% static '3.jpeg' %}"><img src="{% static '3.jpeg' %}" alt="Woven Basket"><button class="add-to-cart-btn">Add to Cart</button></div>
-                    <div class="slide" data-name="Stone Art" data-price="120" data-img="{% static '4.jpeg' %}"><img src="{% static '4.jpeg' %}" alt="Stone Art"><button class="add-to-cart-btn">Add to Cart</button></div>
-                    <div class="slide" data-name="Ceramic Bowl" data-price="35" data-img="{% static '5.jpeg' %}"><img src="{% static '5.jpeg' %}" alt="Ceramic Bowl"><button class="add-to-cart-btn">Add to Cart</button></div>
-                    <div class="slide" data-name="Oak Tray" data-price="40" data-img="{% static '6.jpg' %}"><img src="{% static '6.jpg' %}" alt="Oak Tray"><button class="add-to-cart-btn">Add to Cart</button></div>
+    <h2 style="font-family: 'Playfair Display'; font-size: 2.5rem;">The Curated Gallery</h2>
+    <div class="slider-outer-wrapper">
+        <div class="slider-container">
+            <div class="slider-wrapper" id="sliderWrapper">
+                
+                {% for item in gallery_slider %}
+                <div class="slide" 
+                     data-name="{{ item.title }}" 
+                     data-price="{{ item.price }}" 
+                     data-img="{{ item.image.url }}">
+                    
+                    <img src="{{ item.image.url }}" alt="{{ item.title }}">
+                    <button class="add-to-cart-btn">Add to Cart - ${{ item.price }}</button>
                 </div>
-            </div>
-            <div class="slider-nav">
-                <button class="nav-arrow" id="prevBtn" aria-label="Previous">&#10229;</button>
-                <button class="nav-arrow" id="nextBtn" aria-label="Next">&#10230;</button>
-            </div>
+                {% empty %}
+                <div class="slide active"><img src="{% static 'placeholder.jpg' %}" alt="Empty"><button class="add-to-cart-btn">No Items</button></div>
+                {% endfor %}
+                </div>
         </div>
-    </section>
-      
+        <div class="slider-nav">
+            <button class="nav-arrow" id="prevBtn" aria-label="Previous">&#10229;</button>
+            <button class="nav-arrow" id="nextBtn" aria-label="Next">&#10230;</button>
+        </div>
+    </div>
+</section>
+
+
     <section class="wood-section">
         <div class="section-container">
             <div class="wood-header">
