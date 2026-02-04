@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Admin | Tranquil Trails{% endblock %}</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -13,110 +15,117 @@
 
     <style>
         :root {
-            --primary-dark: #2c2c2c;
-            --primary-accent: #8b5e3c;
-            --primary-accent-hover: #a67c52;
-            --secondary-bg: #f4f1ea;
-            --white: #ffffff;
-            --text-dark: #1a1a1a;
-            --text-light: #b0b0b0;
-            --border-color: #e0e0e0;
+            --sidebar-bg: #1e1e2d;
+            --sidebar-text: #a2a3b7;
+            --sidebar-hover: #2b2b40;
+            --active-color: #8b5e3c;
             
-            /* Badge Colors */
-            --badge-live: #ff9800;
-            --badge-danger: #f44336;
+            --main-bg: #f3f6f9;
+            --white: #ffffff;
+            --text-dark: #3f4254;
+            --border-color: #e4e6ef;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; text-decoration: none; list-style: none; }
-        body { font-family: 'Poppins', sans-serif; background-color: var(--secondary-bg); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; }
+        * { margin: 0; padding: 0; box-sizing: border-box; text-decoration: none; list-style: none; outline: none; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--main-bg); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; }
 
-        /* --- Sidebar Styling --- */
-        .sidebar { width: 280px; background-color: var(--primary-dark); color: var(--white); height: 100vh; display: flex; flex-direction: column; transition: transform 0.3s ease-in-out; flex-shrink: 0; z-index: 1000; }
-        
-        .logo-container { padding: 25px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; }
-        .logo-text { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; letter-spacing: 1px; color: var(--white); }
-        
-        .sidebar-scroll-area { flex: 1; overflow-y: auto; padding: 15px 10px; }
-        .sidebar-scroll-area::-webkit-scrollbar { width: 4px; }
-        .sidebar-scroll-area::-webkit-scrollbar-thumb { background: #444; }
-
-        .nav-category { font-size: 0.7rem; text-transform: uppercase; color: #666; padding: 20px 15px 8px; font-weight: 700; letter-spacing: 0.5px; }
-        
-        .nav-link { 
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 12px 15px; color: var(--text-light); 
-            border-radius: 6px; transition: 0.3s; font-size: 0.9rem; 
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 265px;
+            background-color: var(--sidebar-bg);
+            display: flex; flex-direction: column;
+            height: 100vh;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
         }
+
+        .logo-area {
+            height: 80px; display: flex; align-items: center; padding: 0 25px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .logo-text { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: #fff; letter-spacing: 1px; }
+        .logo-sub { font-size: 0.7rem; color: #6c7293; margin-top: 2px; }
+
+        .nav-scroller { flex: 1; overflow-y: auto; padding: 20px 0; }
+        .nav-scroller::-webkit-scrollbar { width: 4px; }
+        .nav-scroller::-webkit-scrollbar-thumb { background: #3b3b52; border-radius: 2px; }
+
+        .nav-category { font-size: 0.75rem; text-transform: uppercase; color: #555770; padding: 20px 25px 8px; font-weight: 600; letter-spacing: 0.5px; }
         
-        .nav-content { display: flex; align-items: center; }
-        .nav-link i { width: 25px; margin-right: 10px; font-size: 1rem; text-align: center; }
-
-        /* Active & Hover States */
-        .nav-link:hover { background-color: rgba(255, 255, 255, 0.05); color: var(--white); }
-        .nav-link.active { background-color: var(--primary-accent); color: var(--white); }
-
-        /* Badges */
-        .badge { padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; color: #000; }
-        .badge-live { background-color: var(--badge-live); color: black; }
-        .badge-low { background-color: var(--badge-danger); color: white; }
-        .badge-count { background-color: var(--badge-live); color: black; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
-
-        /* --- Main Content --- */
-        .main-content { flex: 1; height: 100vh; overflow-y: auto; padding: 30px; position: relative; width: 100%; }
+        .nav-item { padding: 0 15px; margin-bottom: 4px; }
+        .nav-link {
+            display: flex; align-items: center; padding: 12px 15px;
+            color: var(--sidebar-text); border-radius: 8px; font-size: 0.9rem; font-weight: 500;
+            transition: 0.2s;
+        }
+        .nav-link i { width: 25px; font-size: 1.1rem; color: #606275; transition: 0.2s; }
         
-        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; animation: slideDown 0.6s ease-out; }
-        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .nav-link:hover { background-color: var(--sidebar-hover); color: #fff; }
+        .nav-link:hover i { color: #fff; }
+        
+        .nav-link.active { background-color: #2b2b40; color: #fff; }
+        .nav-link.active i { color: var(--active-color); }
 
-        .fade-in-up { animation: fadeInUp 0.6s ease-out forwards; opacity: 0; transform: translateY(20px); }
+        .badge { padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; margin-left: auto; }
+        .bg-accent { background: var(--active-color); color: white; }
+        .bg-danger { background: #f64e60; color: white; }
+
+        /* --- MAIN CONTENT --- */
+        .content-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+
+        /* Glassmorphism Header */
+        .top-header {
+            height: 80px; display: flex; align-items: center; justify-content: space-between; padding: 0 30px;
+            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color); z-index: 100;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .mobile-toggle { font-size: 1.4rem; cursor: pointer; display: none; color: var(--text-dark); }
+        
+        .page-title h2 { font-family: 'Playfair Display'; font-size: 1.4rem; color: #181c32; }
+        .page-title p { font-size: 0.85rem; color: #b5b5c3; margin-top: -2px; }
+
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        
+        .search-box { position: relative; display: none; /* Hidden on small screens */ }
+        .search-box input {
+            padding: 10px 15px 10px 40px; border-radius: 20px; border: 1px solid transparent; background: #eaecf0; width: 220px; transition: 0.3s;
+        }
+        .search-box input:focus { background: white; border-color: var(--border-color); box-shadow: 0 0 0 4px rgba(139, 94, 60, 0.1); width: 280px; }
+        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #999; }
+
+        .notif-btn { position: relative; cursor: pointer; font-size: 1.2rem; color: #7e8299; transition: 0.2s; }
+        .notif-btn:hover { color: var(--active-color); }
+        .notif-dot { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: #f64e60; border-radius: 50%; border: 2px solid white; animation: pulse 2s infinite; }
+
+        .user-profile { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 8px; background: #e1f0ff; color: #009ef7; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; }
+        .user-info { text-align: right; }
+        .user-info .name { font-size: 0.9rem; font-weight: 600; color: #181c32; }
+        .user-info .role { font-size: 0.75rem; color: #b5b5c3; display: block; }
+
+        /* Content Body */
+        .content-body { flex: 1; overflow-y: auto; padding: 30px; }
+        .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; opacity: 0; transform: translateY(15px); }
+
+        /* Animations */
         @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(246, 78, 96, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(246, 78, 96, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(246, 78, 96, 0); } }
 
-        /* Cards */
-        .card { background: var(--white); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; }
+        /* --- RESPONSIVE --- */
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 999; backdrop-filter: blur(2px); }
 
-        /* --- Responsive Styles Added Here --- */
-        .menu-toggle { display: none; font-size: 1.5rem; color: var(--primary-dark); cursor: pointer; margin-right: 15px; }
-        .sidebar-close { display: none; color: var(--white); font-size: 1.2rem; cursor: pointer; }
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; opacity: 0; transition: opacity 0.3s ease; }
-        .overlay.active { display: block; opacity: 1; }
+        @media (min-width: 992px) { .search-box { display: block; } }
 
         @media (max-width: 992px) {
-            .sidebar {
-                position: fixed;
-                left: 0;
-                top: 0;
-                transform: translateX(-100%); /* Hide sidebar by default */
-                box-shadow: 2px 0 10px rgba(0,0,0,0.2);
-            }
-            
-            .sidebar.active {
-                transform: translateX(0); /* Show sidebar */
-            }
-
-            .menu-toggle { display: block; }
-            .sidebar-close { display: block; }
-            
-            .main-content { padding: 20px; }
-        }
-
-        @media (max-width: 576px) {
-            .admin-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 20px;
-            }
-            
-            .header-left {
-                display: flex;
-                align-items: center;
-                width: 100%;
-            }
-
-            .header-right {
-                width: 100%;
-                justify-content: flex-end;
-            }
-            
-            .admin-header h1 { font-size: 1.5rem !important; }
+            .sidebar { position: fixed; left: -280px; height: 100%; box-shadow: 5px 0 20px rgba(0,0,0,0.1); }
+            .sidebar.active { left: 0; }
+            .mobile-toggle { display: block; }
+            .overlay.active { display: block; }
+            .content-body { padding: 20px; }
+            .user-info { display: none; }
         }
     </style>
 </head>
@@ -125,205 +134,161 @@
     <div class="overlay" id="sidebarOverlay"></div>
 
     <aside class="sidebar" id="sidebar">
-        <div class="logo-container">
+        <div class="logo-area">
             <div>
                 <div class="logo-text">TRANQUIL TRAILS</div>
-                <small style="opacity: 0.6; font-size: 0.75rem;">Admin Dashboard</small>
-            </div>
-            <div class="sidebar-close" id="closeSidebar">
-                <i class="fas fa-times"></i>
+                <div class="logo-sub">Administration Panel</div>
             </div>
         </div>
 
-        <div class="sidebar-scroll-area">
-            <ul class="nav-menu">
-                <li class="nav-category">Overview</li>
-                <li>
-                    <a href="{% url 'admin_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
-                        <div class="nav-content"><i class="fas fa-th-large"></i> Dashboard</div>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'admin_analytics' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_analytics' %}active{% endif %}">
-                        <div class="nav-content"><i class="fas fa-chart-line"></i> Analytics</div>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="nav-link">
-                        <div class="nav-content"><i class="fas fa-globe"></i> Live View</div>
-                        <span class="badge badge-live">LIVE</span>
-                    </a>
-                </li>
-                
-                <li class="nav-category">Catalog Management</li>
-                <li>
-                    <a href="{% url 'admin_products' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_products' %}active{% endif %}">
-                        <div class="nav-content"><i class="fas fa-box"></i> All Products</div>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'admin_add_product' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_add_product' %}active{% endif %}">
-                        <div class="nav-content"><i class="fas fa-plus-circle"></i> Add Product</div>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'admin_categories' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_categories' %}active{% endif %}">
-                        <div class="nav-content"><i class="fas fa-tags"></i> Categories</div>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'admin_inventory' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_inventory' %}active{% endif %}">
-                        <div class="nav-content"><i class="fas fa-warehouse"></i> Inventory</div>
-                        <span class="badge badge-low">LOW</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'admin_reviews' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_reviews' %}active{% endif %}">
-                        <div class="nav-content"><i class="fas fa-star"></i> Reviews</div>
-                    </a>
-                </li>
+        <div class="nav-scroller">
+            <div class="nav-category">Dashboard</div>
+            <div class="nav-item">
+                <a href="{% url 'admin_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+                    <i class="fas fa-th-large"></i> <span>Overview</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="{% url 'admin_analytics' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_analytics' %}active{% endif %}">
+                    <i class="fas fa-chart-pie"></i> <span>Analytics</span>
+                </a>
+            </div>
 
-                <li class="nav-category">Sales & Orders</li>
-                <li>
-                    <a href="{% url 'admin_orders' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_orders' %}active{% endif %}">
-                        <div class="nav-content"><i class="fas fa-shopping-cart"></i> Orders</div>
-                        <span class="badge badge-count">12</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'admin_invoices' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_invoices' %}active{% endif %}">
-                        <div class="nav-content"><i class="fas fa-file-invoice-dollar"></i> Invoices</div>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'admin_shipments' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_shipments' %}active{% endif %}">
-                        <div class="nav-content"><i class="fas fa-shipping-fast"></i> Shipments</div>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'admin_returns' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_returns' %}active{% endif %}">
-                        <div class="nav-content"><i class="fas fa-undo"></i> Returns & Refunds</div>
-                    </a>
-                </li>
+            <div class="nav-category">Catalog</div>
+            <div class="nav-item">
+                <a href="{% url 'admin_products' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_products' %}active{% endif %}">
+                    <i class="fas fa-box-open"></i> <span>Products</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="{% url 'admin_add_product' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_add_product' %}active{% endif %}">
+                    <i class="fas fa-plus-square"></i> <span>Add Product</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="{% url 'admin_categories' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_categories' %}active{% endif %}">
+                    <i class="fas fa-tags"></i> <span>Categories</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="{% url 'admin_inventory' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_inventory' %}active{% endif %}">
+                    <i class="fas fa-warehouse"></i> <span>Inventory</span>
+                    <span class="badge bg-danger">Low</span>
+                </a>
+            </div>
 
-                <li class="nav-category">People</li>
-                <li>
-                    <a href="{% url 'admin_customers' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_customers' %}active{% endif %}">
-                        <div class="nav-content"><i class="fas fa-users"></i> Customers</div>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'admin_segments' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_segments' %}active{% endif %}">
-                        <div class="nav-content"><i class="fas fa-user-tag"></i> Segments</div>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'admin_staff' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_staff' %}active{% endif %}">
-                        <div class="nav-content"><i class="fas fa-id-badge"></i> Staff Management</div>
-                    </a>
-                </li>
+            <div class="nav-category">Sales</div>
+            <div class="nav-item">
+                <a href="{% url 'admin_orders' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_orders' %}active{% endif %}">
+                    <i class="fas fa-shopping-cart"></i> <span>Orders</span>
+                    <span class="badge bg-accent">12</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="{% url 'admin_reviews' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_reviews' %}active{% endif %}">
+                    <i class="fas fa-star"></i> <span>Reviews</span>
+                </a>
+            </div>
 
-                <li class="nav-category">Marketing</li>
-                <li>
-                    <a href="{% url 'admin_discounts' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_discounts' %}active{% endif %}">
-                        <div class="nav-content"><i class="fas fa-percent"></i> Discounts & Coupons</div>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'admin_campaigns' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_campaigns' %}active{% endif %}">
-                        <div class="nav-content"><i class="fas fa-envelope-open-text"></i> Email Campaigns</div>
-                    </a>
-                </li>
+            <div class="nav-category">Marketing</div>
+            <div class="nav-item">
+                <a href="{% url 'admin_discounts' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_discounts' %}active{% endif %}">
+                    <i class="fas fa-ticket-alt"></i> <span>Coupons</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="{% url 'admin_campaigns' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_campaigns' %}active{% endif %}">
+                    <i class="fas fa-envelope-open-text"></i> <span>Campaigns</span>
+                </a>
+            </div>
 
-                <li class="nav-category">Content</li>
-                <!-- <li>
-                    <a href="{% url 'admin_blog' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_blog' %}active{% endif %}">
-                        <div class="nav-content"><i class="fas fa-pen-nib"></i> Artisan Stories (Blog)</div>
-                    </a>
-                </li> -->
-                <li>
-                    <a href="{% url 'admin_media' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_media' %}active{% endif %}">
-                        <div class="nav-content"><i class="fas fa-images"></i> Media Gallery</div>
-                    </a>
-                </li>
+            <div class="nav-category">Media</div>
+            <div class="nav-item">
+                <a href="{% url 'admin_media' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_media' %}active{% endif %}">
+                    <i class="fas fa-images"></i> <span>Library</span>
+                </a>
+            </div>
 
-                <li class="nav-category">System</li>
-                <li>
-                    <a href="{% url 'admin_settings' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_settings' %}active{% endif %}">
-                        <div class="nav-content"><i class="fas fa-cog"></i> General Settings</div>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'home' %}" class="nav-link">
-                        <div class="nav-content"><i class="fas fa-sign-out-alt"></i> Back to Storefront</div>
-                    </a>
-                </li>
-            </ul>
+            <div class="nav-category">Settings</div>
+            <div class="nav-item">
+                <a href="{% url 'admin_settings' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_settings' %}active{% endif %}">
+                    <i class="fas fa-cog"></i> <span>General</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="{% url 'home' %}" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i> <span>View Store</span>
+                </a>
+            </div>
         </div>
     </aside>
 
-    <main class="main-content">
-        <header class="admin-header">
+    <div class="content-wrapper">
+        
+        <header class="top-header">
             <div class="header-left">
-                <i class="fas fa-bars menu-toggle" id="menuToggle"></i>
-                
-                <div>
-                    <h1 style="font-family: 'Playfair Display'; font-size: 2rem;">{% block page_title %}Dashboard{% endblock %}</h1>
-                    <p style="color: #666;">{% block page_desc %}Overview of your store{% endblock %}</p>
+                <i class="fas fa-bars mobile-toggle" id="menuToggle"></i>
+                <div class="page-title">
+                    <h2>{% block page_title %}Dashboard{% endblock %}</h2>
+                    <p>{% block page_desc %}Welcome back, Admin{% endblock %}</p>
                 </div>
             </div>
-            
-            <div class="header-right" style="display: flex; gap: 15px;">
-                <button style="width: 40px; height: 40px; border-radius: 50%; border: 1px solid #ddd; background: white; cursor: pointer;"><i class="far fa-bell"></i></button>
-                <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">NL</div>
+
+            <div class="header-right">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search...">
+                </div>
+
+                <div class="notif-btn">
+                    <i class="far fa-bell"></i>
+                    <div class="notif-dot"></div>
+                </div>
+
+                <div class="user-profile">
+                    <div class="user-info">
+                        <span class="name">{{ user.first_name|default:user.username }}</span>
+                        <span class="role">Administrator</span>
+                    </div>
+                    <div class="user-avatar">
+                        {{ user.username|slice:":1"|upper }}
+                    </div>
+                </div>
             </div>
         </header>
 
-        {% block content %}{% endblock %}
-    </main>
+        <div class="content-body">
+            {% block content %}{% endblock %}
+        </div>
+
+    </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            gsap.to(".fade-in-up", { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power2.out" });
+        // 1. Sidebar Toggle
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const toggle = document.getElementById('menuToggle');
 
-            // --- Sidebar Toggle Logic ---
-            const menuToggle = document.getElementById('menuToggle');
-            const sidebar = document.getElementById('sidebar');
-            const closeSidebar = document.getElementById('closeSidebar');
-            const overlay = document.getElementById('sidebarOverlay');
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
 
-            function openSidebar() {
-                sidebar.classList.add('active');
-                overlay.classList.add('active');
-            }
+        if(toggle) toggle.addEventListener('click', toggleSidebar);
+        if(overlay) overlay.addEventListener('click', toggleSidebar);
 
-            function closeSidebarFunc() {
-                sidebar.classList.remove('active');
-                overlay.classList.remove('active');
-            }
+        // 2. Scroll Memory (Keep sidebar position on reload)
+        const scroller = document.querySelector('.nav-scroller');
+        const savedPos = localStorage.getItem('sidebarPos');
+        if (savedPos) scroller.scrollTop = savedPos;
 
-            if (menuToggle) menuToggle.addEventListener('click', openSidebar);
-            if (closeSidebar) closeSidebar.addEventListener('click', closeSidebarFunc);
-            if (overlay) overlay.addEventListener('click', closeSidebarFunc);
-
-            // --- Sidebar Scroll Memory ---
-            const sidebarScrollArea = document.querySelector('.sidebar-scroll-area');
-            const savedPosition = localStorage.getItem('sidebarScrollPos');
-            if (savedPosition && sidebarScrollArea) sidebarScrollArea.scrollTop = savedPosition;
-
-            const navLinks = document.querySelectorAll('.nav-link');
-            navLinks.forEach(link => {
-                link.addEventListener('click', () => {
-                    if (sidebarScrollArea) {
-                        localStorage.setItem('sidebarScrollPos', sidebarScrollArea.scrollTop);
-                    }
-                    // Auto close sidebar on mobile when a link is clicked
-                    if (window.innerWidth <= 992) {
-                        closeSidebarFunc();
-                    }
-                });
-            });
+        scroller.addEventListener('scroll', () => {
+            localStorage.setItem('sidebarPos', scroller.scrollTop);
         });
+
+        // 3. GSAP Entry Animation
+        gsap.from(".top-header", { y: -20, opacity: 0, duration: 0.6, ease: "power2.out" });
     </script>
+
 </body>
 </html>

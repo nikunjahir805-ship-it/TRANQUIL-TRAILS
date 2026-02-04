@@ -1,122 +1,128 @@
-{% load static %} 
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shop | TRANQUIL TRAILS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    
     <link rel="stylesheet" href="{% static 'styles.css' %}">
 
     <style>
-        /* --- KEEPING YOUR EXACT STYLES --- */
-        .shop-container { 
-            padding: 120px 5% 60px; 
-            background: #F4EFE6; 
-            min-height: 100vh; 
+        :root {
+            --primary: #8B5E3C;
+            --dark: #2c2c2c;
+            --bg: #F4EFE6;
+            --white: #ffffff;
         }
 
-        .shop-header { 
-            text-align: center; 
-            margin-bottom: 50px; 
-            opacity: 0;
-            transform: translateY(-20px);
-        }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--dark); margin: 0; padding: 0; }
+
+        /* --- SHOP HEADER & FILTERS --- */
+        .shop-container { padding: 120px 5% 60px; min-height: 100vh; }
         
-        .shop-header h1 { 
-            font-family: 'Playfair Display'; 
-            font-size: 3.5rem; 
-            color: #2d2d2d;
-        }
+        .shop-header { text-align: center; margin-bottom: 40px; opacity: 0; transform: translateY(-20px); }
+        .shop-header h1 { font-family: 'Playfair Display'; font-size: 3.5rem; color: #2d2d2d; margin-bottom: 10px; }
+        .shop-header p { color: #666; font-size: 1.1rem; }
 
+        .category-filters { text-align: center; margin-bottom: 50px; opacity: 0; transform: translateY(10px); }
+        .filter-btn {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 25px;
+            margin: 0 5px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: 'Poppins';
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .filter-btn:hover, .filter-btn.active { background: var(--primary); color: white; }
+
+        /* --- PRODUCT GRID --- */
         .product-grid { 
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 30px;
             max-width: 1200px; 
             margin: 0 auto; 
-            width: 100%;
         }
 
         .product-card {
-            background: white; 
-            padding: 15px; 
-            border-radius: 12px; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            opacity: 0; 
-            transform: translateY(30px);
+            background: white; padding: 15px; border-radius: 12px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05); transition: all 0.3s ease;
+            display: flex; flex-direction: column; justify-content: space-between;
+            opacity: 0; transform: translateY(30px); position: relative;
         }
-
-        .product-card:hover {
-            transform: translateY(-10px) !important;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-        }
+        .product-card:hover { transform: translateY(-10px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
 
         .product-img-box { 
-            width: 100%; 
-            height: 300px; 
-            border-radius: 8px; 
-            overflow: hidden; 
-            margin-bottom: 15px; 
-            background: #f9f9f9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 100%; height: 320px; border-radius: 8px; overflow: hidden; 
+            margin-bottom: 15px; background: #f9f9f9; position: relative;
         }
-
         .product-img-box img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            transition: transform 0.6s ease; 
+            width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; 
+        }
+        .product-card:hover .product-img-box img { transform: scale(1.05); }
+
+        /* Quick View Icon */
+        .quick-view-btn {
+            position: absolute; bottom: -50px; left: 50%; transform: translateX(-50%);
+            background: white; color: var(--dark); width: 45px; height: 45px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 2;
+        }
+        .product-card:hover .quick-view-btn { bottom: 20px; }
+        .quick-view-btn:hover { background: var(--primary); color: white; }
+
+        /* Sold Out Badge */
+        .sold-out-badge {
+            position: absolute; top: 15px; left: 15px; 
+            background: #d32f2f; color: white; padding: 5px 12px; 
+            font-size: 0.75rem; font-weight: 700; border-radius: 4px; z-index: 2;
         }
 
-        .product-card:hover .product-img-box img {
-            transform: scale(1.05);
-        }
-
+        /* Typography */
         .product-card h3 { 
-            font-family: 'Playfair Display'; 
-            font-size: 1.3rem; 
-            margin-bottom: 5px; 
+            font-family: 'Playfair Display'; font-size: 1.25rem; margin-bottom: 5px; color: #333;
         }
-
         .product-card .price { 
-            font-weight: 600; 
-            color: #8B5E3C; 
-            margin-bottom: 15px; 
+            font-weight: 600; color: var(--primary); margin-bottom: 15px; font-size: 1.1rem;
         }
 
+        /* Buttons */
         .add-btn {
-            width: 100%; 
-            padding: 12px; 
-            background: #8B5E3C; 
-            color: white;
-            border: none; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            transition: 0.3s;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.85rem;
+            width: 100%; padding: 12px; background: var(--primary); color: white;
+            border: none; border-radius: 6px; cursor: pointer; transition: 0.3s;
+            font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;
         }
+        .add-btn:hover { background: var(--dark); }
         
-        .add-btn:hover { 
-            background: #2d2d2d; 
-        }
+        .add-btn.disabled { background: #ccc; cursor: not-allowed; }
+        .add-btn.disabled:hover { background: #ccc; }
 
-        /* Nav Dropdown Styles */
+        /* --- FOOTER --- */
+        .main-footer { background: #222; color: #fff; padding: 70px 0 20px; margin-top: auto; }
+        .footer-container { display: flex; flex-wrap: wrap; justify-content: space-between; max-width: 1200px; margin: 0 auto; padding: 0 30px; }
+        .footer-section { flex: 1; min-width: 250px; margin-bottom: 30px; }
+        .footer-logo { font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 20px; color: #f4f1ea; letter-spacing: 1px; }
+        .footer-section p { opacity: 0.7; line-height: 1.6; font-size: 0.9rem; max-width: 300px; }
+        .footer-section h4 { font-size: 1.1rem; margin-bottom: 20px; color: var(--primary); }
+        .footer-section ul li { margin-bottom: 12px; }
+        .footer-section a { color: #aaa; transition: 0.3s; font-size: 0.95rem; }
+        .footer-section a:hover { color: var(--primary); padding-left: 5px; }
+        .footer-bottom { text-align: center; border-top: 1px solid #333; padding-top: 25px; margin-top: 40px; color: #666; font-size: 0.85rem; }
+
+        /* Dropdown & Nav adjustments */
         .nav-user-container { position: relative; display: flex; align-items: center; }
-        .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid #8B5E3C; transition: transform 0.2s; }
-        .user-avatar:hover { transform: scale(1.1); }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid var(--primary); transition: transform 0.2s; }
         .profile-dropdown {
             display: none; position: absolute; top: 55px; right: 0; background-color: #ffffff;
             min-width: 180px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); border-radius: 8px; z-index: 1000; overflow: hidden; border: 1px solid #e0e0e0;
@@ -124,7 +130,6 @@
         .profile-dropdown.show { display: block; animation: fadeIn 0.3s ease; }
         .profile-dropdown a { color: #2d2d2d; padding: 12px 16px; text-decoration: none; display: block; font-size: 0.9rem; border-bottom: 1px solid #f4f4f4; transition: 0.2s; }
         .profile-dropdown a:hover { background-color: #f4f1ea; }
-        .profile-dropdown a.logout-btn { color: #d32f2f; border-bottom: none; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -136,9 +141,7 @@
             <span class="logo-text">TRANQUIL TRAILS</span>
         </a>
         
-        <button class="hamburger" id="hamburger" aria-label="Toggle menu">
-            <span></span><span></span><span></span>
-        </button>
+        <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
 
         <ul class="nav-links" id="navLinks">
             <li><a href="{% url 'home' %}">Home</a></li>
@@ -149,31 +152,25 @@
             <li><a href="{% url 'Contact' %}">Contact</a></li>
 
             {% if user.is_staff %}
-            <li>
-                <a href="{% url 'admin_dashboard' %}" style="color: #d32f2f; font-weight: bold;">Admin Panel</a>
-            </li>
+            <li><a href="{% url 'admin_dashboard' %}" style="color: #d32f2f; font-weight: bold;">Admin Panel</a></li>
             {% endif %}
 
             {% if user.is_authenticated %}
                 <li>
                     <div class="nav-user-container">
-                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" class="user-avatar" id="userAvatarBtn">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="user-avatar" id="userAvatarBtn">
                         <div class="profile-dropdown" id="profileDropdown">
                             <div style="padding: 10px 16px; font-weight: bold; background: #f9f9f9; font-size: 0.8rem; border-bottom: 1px solid #eee;">
                                 Hi, {{ user.first_name|default:user.username }}
                             </div>
                             <a href="#">My Orders</a>
-                            <a href="#" onclick="logoutUser()" class="logout-btn">Logout</a>
+                            <a href="#" onclick="logoutUser()" style="color:#d32f2f;">Logout</a>
                         </div>
                     </div>
                 </li>
             {% else %}
                 <li><a href="{% url 'login' %}">Log In</a></li>
-                <li>
-                    <a href="{% url 'signup' %}" style="background: #8B5E3C; color: white; padding: 10px 25px; border-radius: 50px; font-weight: bold; transition: 0.3s;">
-                        Join
-                    </a>
-                </li>
+                <li><a href="{% url 'signup' %}" style="background: #8B5E3C; color: white; padding: 10px 25px; border-radius: 50px; font-weight: bold;">Join</a></li>
             {% endif %}
             
             <li id="cartNavItem">
@@ -190,7 +187,9 @@
         <div class="cart-body"><ul id="cart-items-list"></ul></div>
         <div class="cart-footer">
             <div class="cart-total-row"><span>Total</span><span>$<span id="total-price">0</span></span></div>
-            <button class="checkout-btn" style="width: 100%;">Checkout Now</button>
+            
+            <button class="checkout-btn" style="width: 100%;" onclick="alert('Checkout feature coming soon!')">Checkout Now</button>
+            
             <button class="clear-cart-link" onclick="clearCart()">Clear All Items</button>
         </div>
     </div>
@@ -198,114 +197,155 @@
     <section class="shop-container">
         <div class="shop-header">
             <h1>The Artisan Archive</h1>
-            <p>Curated Handcrafted Pieces</p>
+            <p>Curated Handcrafted Pieces for Your Home</p>
+        </div>
+
+        <div class="category-filters">
+            <button class="filter-btn active" onclick="filterProducts('all')">All</button>
+            <button class="filter-btn" onclick="filterProducts('Ceramics')">Ceramics</button>
+            <button class="filter-btn" onclick="filterProducts('Wood')">Wood</button>
+            <button class="filter-btn" onclick="filterProducts('Textiles')">Textiles</button>
+            <button class="filter-btn" onclick="filterProducts('Other')">Other</button>
         </div>
 
         <div class="product-grid" id="shopGrid">
             {% for product in products %}
-            <div class="product-card">
+            <div class="product-card" data-category="{{ product.category.name|default:'Other' }}">
                 <div class="product-img-box">
                     {% if product.image %}
                         <img src="{{ product.image.url }}" alt="{{ product.name }}">
                     {% else %}
                         <img src="{% static 'placeholder.jpg' %}" alt="No Image">
                     {% endif %}
+                    
+                    {% if product.stock <= 0 %}
+                        <div class="sold-out-badge">SOLD OUT</div>
+                    {% endif %}
+
+                    <a href="{% url 'product_detail' product.id %}" class="quick-view-btn" title="View Details">
+                        <i class="fas fa-eye"></i>
+                    </a>
                 </div>
                 
-                <a href="{% url 'product_detail' product.id %}" style="text-decoration: none; color: inherit;">
+                <a href="{% url 'product_detail' product.id %}" style="text-decoration: none;">
                     <h3>{{ product.name }}</h3>
                 </a>
 
                 <p class="price">${{ product.price }}</p>
                 
+                {% if product.stock > 0 %}
                 <button class="add-btn" 
-                        data-id="{{ product.id }}"
-                        data-name="{{ product.name }}" 
-                        data-price="{{ product.price }}" 
-                        {% if product.image %}data-img="{{ product.image.url }}"{% endif %}>
+                        onclick="addToCart('{{ product.id }}', '{{ product.name }}', '{{ product.price }}', '{{ product.image.url|default:'' }}')">
                     Add to Cart
                 </button>
+                {% else %}
+                <button class="add-btn disabled" disabled>Out of Stock</button>
+                {% endif %}
             </div>
             {% empty %}
-                <p style="text-align:center; grid-column:1/-1;">No products found. Please add them in the Admin Panel.</p>
+                <p style="text-align:center; grid-column:1/-1; color:#777;">No products available at the moment.</p>
             {% endfor %}
         </div>
     </section>
 
     <footer class="main-footer">
         <div class="footer-container">
-            <div class="footer-section about">
+            <div class="footer-section">
                 <h3 class="footer-logo">TRANQUIL TRAILS</h3>
-                <p>Preserving Indian heritage from Ahmedabad to your home.</p>
+                <p>Preserving Indian heritage from Ahmedabad to your home. Empowering artisans through digital commerce.</p>
             </div>
-            <div class="footer-section links">
+            <div class="footer-section">
                 <h4>Support</h4>
                 <ul>
                     <li><a href="{% url 'Contact' %}">Contact Us</a></li>
                     <li><a href="{% url 'about' %}">Our Story</a></li>
+                    <li><a href="#">Shipping & Returns</a></li>
+                    <li><a href="#">FAQs</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Connect</h4>
+                <ul>
+                    <li><a href="#"><i class="fab fa-instagram"></i> Instagram</a></li>
+                    <li><a href="#"><i class="fab fa-facebook"></i> Facebook</a></li>
+                    <li><a href="#"><i class="fab fa-pinterest"></i> Pinterest</a></li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 TRANQUIL TRAILS. All Rights Reserved.</p>
+            <p>&copy; 2026 TRANQUIL TRAILS. Handcrafted with Love.</p>
         </div>
     </footer>
 
     <script>
         window.djangoUser = "{{ user.username|default:'guest' }}";
-    </script>
 
-    <script src="{% static 'script.js' %}"></script>
-    
-    <script>
-        // --- 1. DROPDOWN TOGGLE ---
+        // 1. DROPDOWN LOGIC
         const userAvatarBtn = document.getElementById('userAvatarBtn');
         const profileDropdown = document.getElementById('profileDropdown');
-
         if (userAvatarBtn) {
             userAvatarBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 profileDropdown.classList.toggle('show');
             });
-
             document.addEventListener('click', (e) => {
-                if (!userAvatarBtn.contains(e.target)) {
-                    profileDropdown.classList.remove('show');
-                }
+                if (!userAvatarBtn.contains(e.target)) profileDropdown.classList.remove('show');
             });
         }
 
-        // --- 2. BACKEND LOGOUT LOGIC ---
+        // 2. LOGOUT LOGIC
         function logoutUser() {
-            fetch('/api/logout/')
-            .then(res => res.json())
-            .then(data => {
+            fetch('/api/logout/').then(res => res.json()).then(data => {
                 if(data.success) {
                     localStorage.removeItem('isAdmin');
-                    // We DO NOT wipe the cart here because script.js uses 'cart_username'
                     window.location.href = "{% url 'home' %}";
                 }
             });
         }
 
-        // --- 3. PAGE ANIMATIONS ONLY ---
+        // 3. ANIMATIONS
         document.addEventListener("DOMContentLoaded", () => {
-            gsap.to(".shop-header", {
-                opacity: 1,
-                y: 0,
-                duration: 0.8,
-                ease: "power2.out"
+            gsap.to(".shop-header", { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" });
+            gsap.to(".category-filters", { opacity: 1, y: 0, duration: 0.8, delay: 0.2, ease: "power2.out" });
+            
+            // Stagger Product Cards
+            animateGrid();
+        });
+
+        // NEW CODE (Fixes the issue)
+function animateGrid() {
+    gsap.fromTo(".product-card:not(.hidden)", 
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power2.out" } 
+        // Removed clearProps: "all" so the opacity: 1 stays applied
+    );
+}
+
+        // 4. FILTER LOGIC
+        function filterProducts(category) {
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const cards = document.querySelectorAll('.product-card');
+
+            cards.forEach(card => {
+                const productCat = card.getAttribute('data-category');
+                
+                if (category === 'all' || productCat === category) {
+                    card.style.display = 'flex';
+                    card.classList.remove('hidden');
+                } else {
+                    card.style.display = 'none';
+                    card.classList.add('hidden');
+                }
             });
 
-            gsap.to(".product-card", {
-                opacity: 1,
-                y: 0,
-                duration: 0.6,
-                stagger: 0.1, 
-                ease: "power2.out",
-                delay: 0.2
-            });
-        });
+            // Re-trigger animation for visible items
+            animateGrid();
+        }
     </script>
+    
+    <script src="{% static 'script.js' %}"></script>
 </body>
 </html>

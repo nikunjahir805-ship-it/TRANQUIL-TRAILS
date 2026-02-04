@@ -7,6 +7,8 @@
     <title>Artisan Studio | Handcrafted Project</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles.css' %}">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
       
@@ -115,8 +117,43 @@
             <button class="nav-arrow" id="nextBtn" aria-label="Next">&#10230;</button>
         </div>
     </div>
-</section>
+    </section>
 
+    <section style="padding: 80px 5%; background: white;">
+        <div style="text-align: center; margin-bottom: 50px;">
+            <h2 style="font-family: 'Playfair Display'; font-size: 2.5rem; color: #2c2c2c;">Curated Collections</h2>
+            <p style="color: #666; font-family: 'Poppins';">Explore our handcrafted heritage</p>
+        </div>
+
+        <div class="category-grid">
+            {% for cat in categories %}
+            <a href="{% url 'shop' %}" class="cat-card">
+                {% if cat.image %}
+                    <img src="{{ cat.image.url }}" alt="{{ cat.name }}">
+                {% else %}
+                    <img src="https://source.unsplash.com/600x400/?{{ cat.name|lower }},craft" alt="{{ cat.name }}">
+                {% endif %}
+                
+                <div class="cat-overlay">
+                    <h3>{{ cat.name }}</h3>
+                    <span class="btn-text">View Collection <i class="fas fa-arrow-right"></i></span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+
+    <style>
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
+        .cat-card { position: relative; height: 350px; border-radius: 12px; overflow: hidden; display: block; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .cat-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+        .cat-overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 30px; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; transform: translateY(10px); transition: 0.4s; }
+        .cat-overlay h3 { font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 5px; }
+        .btn-text { font-family: 'Poppins'; font-size: 0.9rem; opacity: 0; transform: translateY(20px); transition: 0.4s; display: inline-block; color: #ddd; }
+        .cat-card:hover img { transform: scale(1.1); }
+        .cat-card:hover .cat-overlay { transform: translateY(0); }
+        .cat-card:hover .btn-text { opacity: 1; transform: translateY(0); }
+    </style>
 
     <section class="wood-section">
         <div class="section-container">
@@ -199,6 +236,27 @@
                     <div class="pro-image-wrapper"><img src="{% static 'Pashmina Shawl.jpg' %}" alt="Pashmina Shawl"></div>
                     <div class="pro-info"><h4>Pashmina Shawl</h4><p class="price">$250</p><div class="pro-btn-group"><button class="add-to-cart-btn">Add to Cart</button><button class="buy-now-btn">Buy Now</button></div></div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <section style="background: #2c2c2c; color: white; padding: 80px 5%; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 50px;">
+        <div style="flex: 1; min-width: 300px; max-width: 600px;">
+            <h2 style="font-family: 'Playfair Display'; font-size: 2.5rem; margin-bottom: 20px;">Preserving the Art of the Hand</h2>
+            <p style="font-family: 'Poppins'; line-height: 1.8; color: #ccc; margin-bottom: 30px;">
+                Every piece at Tranquil Trails tells a story of generations. By supporting us, you are directly supporting artisan communities in Ahmedabad and keeping ancient crafts alive in a modern world.
+            </p>
+            <div style="background: rgba(255,255,255,0.1); padding: 5px; border-radius: 50px; display: flex; max-width: 400px;">
+                <input type="email" placeholder="Your email address" style="flex: 1; background: none; border: none; padding: 15px 20px; color: white; outline: none;">
+                <button style="background: #8B5E3C; color: white; border: none; padding: 12px 30px; border-radius: 50px; cursor: pointer; font-weight: bold;">Subscribe</button>
+            </div>
+        </div>
+        <div style="flex: 1; min-width: 300px; max-width: 500px;">
+            <div style="position: relative;">
+                <div style="position: absolute; top: -20px; left: -20px; width: 100%; height: 100%; border: 2px solid #8B5E3C; border-radius: 12px; z-index: 0;"></div>
+                <img src="https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?auto=format&fit=crop&q=80&w=800" 
+                     style="width: 100%; border-radius: 12px; position: relative; z-index: 1; box-shadow: 0 20px 50px rgba(0,0,0,0.3);" 
+                     alt="Artisan working">
             </div>
         </div>
     </section>

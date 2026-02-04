@@ -1,0 +1,348 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Checkout | Tranquil Trails</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #8B5E3C;
+            --primary-dark: #2c2c2c;
+            --bg-color: #F4EFE6;
+            --white: #ffffff;
+            --gray-light: #f9f9f9;
+            --border: #e0e0e0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--primary-dark);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        /* --- MAIN CONTAINER --- */
+        .checkout-container {
+            display: grid; 
+            grid-template-columns: 1.3fr 0.9fr; 
+            gap: 40px;
+            max-width: 1100px; 
+            width: 100%; 
+            background: var(--white);
+            padding: 50px; 
+            border-radius: 24px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.06);
+            
+            /* Initial state for animation */
+            opacity: 0; 
+            transform: translateY(30px);
+        }
+
+        /* --- LEFT SIDE: FORM --- */
+        .shipping-section h2 { 
+            font-family: 'Playfair Display', serif; 
+            font-size: 1.8rem; 
+            margin-bottom: 30px; 
+            color: var(--primary-dark);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .input-group { margin-bottom: 20px; }
+        .input-group.full-width { grid-column: span 2; }
+
+        .input-group label { 
+            display: block; 
+            font-size: 0.85rem; 
+            margin-bottom: 8px; 
+            font-weight: 600; 
+            color: #666; 
+            letter-spacing: 0.5px;
+        }
+
+        .input-field { 
+            width: 100%; 
+            padding: 14px 16px; 
+            border: 1px solid var(--border); 
+            border-radius: 10px; 
+            font-family: 'Poppins'; 
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: var(--gray-light);
+        }
+
+        .input-field:focus { 
+            background: var(--white);
+            border-color: var(--primary); 
+            outline: none; 
+            box-shadow: 0 0 0 4px rgba(139,94,60,0.1); 
+        }
+
+        /* --- RIGHT SIDE: SUMMARY --- */
+        .order-summary {
+            background: #faf8f5; 
+            padding: 35px; 
+            border-radius: 20px; 
+            border: 1px solid #eee;
+            display: flex; 
+            flex-direction: column;
+            position: relative;
+        }
+
+        .summary-header { 
+            font-family: 'Playfair Display', serif; 
+            font-size: 1.5rem; 
+            margin-bottom: 25px; 
+            border-bottom: 1px dashed #ccc; 
+            padding-bottom: 20px; 
+        }
+        
+        .items-scroll {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 250px;
+            margin-bottom: 20px;
+            padding-right: 10px;
+        }
+        
+        .items-scroll::-webkit-scrollbar { width: 4px; }
+        .items-scroll::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+
+        .item-row { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 15px; 
+            font-size: 0.95rem; 
+        }
+        .item-name { color: #555; font-weight: 500; }
+        .item-price { font-weight: 600; color: var(--primary-dark); }
+        
+        .total-row { 
+            margin-top: auto; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            font-size: 1.5rem; 
+            font-weight: 700; 
+            border-top: 2px solid #eee; 
+            padding-top: 25px; 
+            color: var(--primary);
+        }
+
+        /* --- PAY BUTTON --- */
+        #rzp-button1 {
+            background: var(--primary-dark); 
+            color: white; 
+            border: none; 
+            width: 100%;
+            padding: 18px; 
+            border-radius: 50px; 
+            font-size: 1rem; 
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            cursor: pointer; 
+            margin-top: 30px; 
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(44, 44, 44, 0.15);
+        }
+
+        #rzp-button1:hover { 
+            background: var(--primary); 
+            transform: translateY(-3px); 
+            box-shadow: 0 15px 30px rgba(139, 94, 60, 0.3); 
+        }
+
+        /* Security Badges */
+        .secure-badges { 
+            display: flex; 
+            justify-content: center; 
+            gap: 15px; 
+            margin-top: 25px; 
+            opacity: 0.5; 
+            filter: grayscale(100%);
+        }
+        .pm-icon { height: 24px; }
+
+        /* Responsive */
+        @media (max-width: 900px) { 
+            .checkout-container { grid-template-columns: 1fr; padding: 30px; } 
+            .order-summary { margin-top: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="checkout-container" id="mainCard">
+        
+        <div class="shipping-section">
+            <h2>Shipping Details</h2>
+            
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>First Name</label>
+                    <input type="text" class="input-field" value="{{ user.first_name }}" placeholder="John">
+                </div>
+                <div class="input-group">
+                    <label>Last Name</label>
+                    <input type="text" class="input-field" value="{{ user.last_name }}" placeholder="Doe">
+                </div>
+                
+                <div class="input-group full-width">
+                    <label>Email Address</label>
+                    <input type="email" class="input-field" value="{{ user.email }}" placeholder="john@example.com">
+                </div>
+
+                <div class="input-group full-width">
+                    <label>Phone Number</label>
+                    <input type="tel" class="input-field" placeholder="+91 98765 43210">
+                </div>
+
+                <div class="input-group full-width">
+                    <label>Street Address</label>
+                    <input type="text" class="input-field" placeholder="123 Artisan Avenue">
+                </div>
+
+                <div class="input-group">
+                    <label>City</label>
+                    <input type="text" class="input-field" placeholder="Mumbai">
+                </div>
+                <div class="input-group">
+                    <label>Pincode</label>
+                    <input type="text" class="input-field" placeholder="400001">
+                </div>
+            </div>
+        </div>
+
+        <div class="order-summary">
+            <div class="summary-header">Your Order</div>
+            
+            <div class="items-scroll">
+                {% for item in items %}
+                <div class="item-row">
+                    <span class="item-name">{{ item.product.name }} <span style="font-size:0.8rem; color:#888;">(x{{ item.quantity }})</span></span>
+                    <span class="item-price">₹{{ item.get_total|floatformat:2 }}</span>
+                </div>
+                {% empty %}
+                <p style="color:#888; text-align:center;">Your cart is empty.</p>
+                {% endfor %}
+            </div>
+
+            <div class="total-row">
+                <span>Total Amount</span>
+                <span>₹{{ total|floatformat:2 }}</span>
+            </div>
+
+            <button id="rzp-button1">
+                Pay Now <i class="fas fa-lock" style="margin-left:8px; font-size:0.8rem;"></i>
+            </button>
+
+            <div class="secure-badges">
+                <img src="https://cdn-icons-png.flaticon.com/512/349/349221.png" class="pm-icon" alt="Visa">
+                <img src="https://cdn-icons-png.flaticon.com/512/349/349228.png" class="pm-icon" alt="Mastercard">
+                <img src="https://cdn-icons-png.flaticon.com/512/825/825454.png" class="pm-icon" alt="UPI">
+                <img src="https://cdn-icons-png.flaticon.com/512/349/349230.png" class="pm-icon" alt="Verified">
+            </div>
+            <p style="text-align:center; font-size:0.75rem; color:#999; margin-top:10px;">
+                Secured by Razorpay
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        // 1. GSAP Entry Animation
+        document.addEventListener("DOMContentLoaded", () => {
+            gsap.to("#mainCard", { 
+                opacity: 1, 
+                y: 0, 
+                duration: 0.8, 
+                ease: "power2.out" 
+            });
+        });
+
+        // 2. Razorpay Configuration
+        // Note: The template variables {{ ... }} are populated by Django
+        var options = {
+            "key": "{{ razorpay_merchant_key }}", // Enter the Key ID generated from the Dashboard
+            "amount": "{{ razorpay_amount }}", // Amount is in currency subunits. Default currency is INR.
+            "currency": "INR",
+            "name": "Tranquil Trails",
+            "description": "Artisan Handcrafted Order",
+            "image": "https://your-logo-url.com/logo.png", // Optional Logo
+            "order_id": "{{ razorpay_order_id }}", // This is the order_id created in the backend
+            
+            "handler": function (response){
+                // This function runs when payment is successful
+                verifyPayment(response);
+            },
+            
+            "prefill": {
+                "name": "{{ user_name }}",
+                "email": "{{ user_email }}",
+                "contact": "{{ user_phone }}"
+            },
+            "theme": {
+                "color": "#8B5E3C" // Matches your primary color
+            },
+            "modal": {
+                "ondismiss": function(){
+                    console.log('Checkout form closed');
+                }
+            }
+        };
+
+        var rzp1 = new Razorpay(options);
+        
+        // 3. Button Click Handler
+        document.getElementById('rzp-button1').onclick = function(e){
+            rzp1.open();
+            e.preventDefault();
+        }
+
+        // 4. Verification Logic (Sends data back to Django)
+        function verifyPayment(response) {
+            var formData = new FormData();
+            formData.append('razorpay_payment_id', response.razorpay_payment_id);
+            formData.append('razorpay_order_id', response.razorpay_order_id);
+            formData.append('razorpay_signature', response.razorpay_signature);
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}'); // Necessary for Django security
+
+            // Call the verify-payment URL
+            fetch("{% url 'verify_payment' %}", {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    window.location.href = "{% url 'payment_success' %}";
+                } else {
+                    alert("Payment verification failed. Please contact support.");
+                }
+            })
+            .catch(err => {
+                console.error("Error verifying payment:", err);
+                alert("Something went wrong. Please check your connection.");
+            });
+        }
+    </script>
+
+</body>
+</html>

@@ -530,3 +530,23 @@ def admin_customers(request): return render(request, 'admin/customers.html')
 def admin_segments(request): return render(request, 'admin/segments.html')
 def admin_staff(request): return render(request, 'admin/staff.html')
 def admin_blog(request): return render(request, 'admin/blog.html')
+
+
+# In core/views.py
+
+def home(request):
+    # 1. Slider Data
+    gallery_slider = GalleryItem.objects.all().order_by('-created_at')[:7]
+    
+    # 2. Featured Products (Wood)
+    wood_products = Product.objects.filter(category__name='Wood')[:5] 
+
+    # --- NEW ADDITION ---
+    # 3. Fetch all categories for the "Shop by Category" section
+    categories = Category.objects.all()[:4] # Limit to 4 for a nice grid
+
+    return render(request, 'index.html', {
+        'gallery_slider': gallery_slider,
+        'wood_products': wood_products,
+        'categories': categories # Pass this to the template
+    })
