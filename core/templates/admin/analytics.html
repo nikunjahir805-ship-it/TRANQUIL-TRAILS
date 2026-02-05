@@ -6,11 +6,11 @@
 
 {% block content %}
 <style>
-    /* --- Layout & Card Styles --- */
+    /* --- Premium Layout & Card Styles --- */
     .dashboard-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 20px;
+        gap: 25px;
         margin-bottom: 30px;
     }
 
@@ -21,12 +21,16 @@
         border: 1px solid #f0f0f0;
         position: relative;
         overflow: hidden;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        opacity: 0; /* Hidden for animation */
+        transform: translateY(20px);
     }
 
     .metric-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(139, 94, 60, 0.1);
+        border-color: rgba(139, 94, 60, 0.2);
     }
 
     .metric-header {
@@ -37,233 +41,211 @@
     }
 
     .metric-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.1rem;
+        width: 45px; height: 45px;
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
     }
+    
+    .metric-card:hover .metric-icon { transform: scale(1.1) rotate(5deg); }
 
     .metric-val {
-        font-size: 2.2rem;
+        font-size: 2.4rem;
         font-weight: 700;
         color: #2c2c2c;
         font-family: 'Playfair Display', serif;
         margin-bottom: 5px;
+        letter-spacing: -0.5px;
     }
 
     .metric-label {
         font-size: 0.85rem;
         color: #888;
         font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
     .trend-indicator {
-        font-size: 0.8rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 5px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        display: flex; align-items: center; gap: 5px;
+        padding: 5px 10px; border-radius: 20px;
     }
-    .trend-up { color: #4caf50; background: rgba(76, 175, 80, 0.1); padding: 4px 8px; border-radius: 20px; }
-    .trend-down { color: #f44336; background: rgba(244, 67, 54, 0.1); padding: 4px 8px; border-radius: 20px; }
+    .trend-up { color: #2e7d32; background: rgba(76, 175, 80, 0.15); }
+    .trend-down { color: #c62828; background: rgba(244, 67, 54, 0.15); }
 
     /* --- Chart Section --- */
     .chart-section {
         display: grid;
         grid-template-columns: 2fr 1fr;
-        gap: 20px;
+        gap: 25px;
         margin-bottom: 30px;
     }
 
     .chart-card {
         background: white;
-        padding: 25px;
-        border-radius: 16px;
+        padding: 30px;
+        border-radius: 20px;
         border: 1px solid #f0f0f0;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.02);
         height: 100%;
-        min-height: 400px;
-        position: relative;
+        min-height: 420px;
+        opacity: 0; /* For animation */
+        transform: translateY(20px);
+        display: flex; flex-direction: column;
     }
 
     .chart-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 25px;
     }
+    .chart-header h3 { font-family: 'Playfair Display'; font-size: 1.3rem; margin: 0; }
 
-    /* --- Top Products List --- */
-    .product-list-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 12px 0;
-        border-bottom: 1px solid #f9f9f9;
+    /* --- Top Products List (Scrollable) --- */
+    .product-list-container {
+        flex: 1;
+        overflow-y: auto; /* Handles 80+ products */
+        padding-right: 5px;
     }
+    /* Custom Scrollbar */
+    .product-list-container::-webkit-scrollbar { width: 4px; }
+    .product-list-container::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 4px; }
+
+    .product-list-item {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 15px 0; border-bottom: 1px dashed #f0f0f0;
+        transition: background 0.2s;
+    }
+    .product-list-item:hover { background: #fcfcfc; padding-left: 10px; border-radius: 8px; }
     .product-list-item:last-child { border-bottom: none; }
     
     .prod-info { display: flex; align-items: center; gap: 15px; }
-    .prod-img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; background: #eee; }
+    .prod-img { width: 45px; height: 45px; border-radius: 10px; object-fit: cover; background: #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     
-    .progress-bar-bg { width: 100px; height: 6px; background: #f0f0f0; border-radius: 10px; overflow: hidden; }
-    .progress-bar-fill { height: 100%; background: var(--primary-accent); border-radius: 10px; }
+    .progress-bar-bg { width: 80px; height: 6px; background: #f0f0f0; border-radius: 10px; overflow: hidden; margin-top: 5px; }
+    .progress-bar-fill { height: 100%; background: #8b5e3c; border-radius: 10px; transition: width 1s ease-out; }
 
     /* Responsive */
     @media (max-width: 992px) {
         .chart-section { grid-template-columns: 1fr; }
+        .metric-val { font-size: 2rem; }
     }
 </style>
 
-<div class="fade-in-up" style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
-    <div style="background: white; padding: 8px 15px; border-radius: 8px; border: 1px solid #e0e0e0; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: #666; cursor: pointer;">
-        <i class="far fa-calendar-alt"></i> Last 30 Days <i class="fas fa-chevron-down" style="font-size: 0.7rem;"></i>
+<div class="fade-in-up" style="display: flex; justify-content: flex-end; margin-bottom: 25px;">
+    <div style="background: white; padding: 10px 20px; border-radius: 50px; border: 1px solid #e0e0e0; display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #555; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: 0.3s;">
+        <i class="far fa-calendar-alt" style="color: #8b5e3c;"></i> Last 30 Days <i class="fas fa-chevron-down" style="font-size: 0.7rem; margin-left: 5px;"></i>
     </div>
 </div>
 
-<div class="dashboard-grid fade-in-up">
+<div class="dashboard-grid">
     <div class="metric-card">
         <div class="metric-header">
             <div class="metric-icon" style="background: rgba(139, 94, 60, 0.1); color: #8b5e3c;">
-                <i class="fas fa-dollar-sign"></i>
+                <i class="fas fa-coins"></i>
             </div>
-            <div class="trend-indicator trend-up">
-                <i class="fas fa-arrow-up"></i> 12%
-            </div>
+            <div class="trend-indicator trend-up"><i class="fas fa-arrow-up"></i> 12%</div>
         </div>
-        <div class="metric-val counter" data-target="{{ total_revenue|default:55690 }}">0</div>
+        <div class="metric-val counter" data-target="{{ total_revenue|default:0 }}">0</div>
         <div class="metric-label">Total Revenue</div>
     </div>
 
     <div class="metric-card">
         <div class="metric-header">
             <div class="metric-icon" style="background: rgba(33, 150, 243, 0.1); color: #2196f3;">
-                <i class="fas fa-eye"></i>
+                <i class="fas fa-users"></i>
             </div>
-            <div class="trend-indicator trend-up">
-                <i class="fas fa-arrow-up"></i> 8.5%
-            </div>
+            <div class="trend-indicator trend-up"><i class="fas fa-arrow-up"></i> 8.5%</div>
         </div>
-        <div class="metric-val counter" data-target="{{ total_visits|default:15240 }}">0</div>
-        <div class="metric-label">Total Visits</div>
+        <div class="metric-val counter" data-target="{{ total_visits|default:0 }}">0</div>
+        <div class="metric-label">Site Visits</div>
     </div>
 
     <div class="metric-card">
         <div class="metric-header">
             <div class="metric-icon" style="background: rgba(76, 175, 80, 0.1); color: #4caf50;">
-                <i class="fas fa-magic"></i>
+                <i class="fas fa-chart-pie"></i>
             </div>
-            <div class="trend-indicator trend-down">
-                <i class="fas fa-arrow-down"></i> 1.2%
-            </div>
+            <div class="trend-indicator trend-down"><i class="fas fa-arrow-down"></i> 1.2%</div>
         </div>
-        <div class="metric-val"><span class="counter" data-target="{{ conversion_rate|default:3.2 }}">0</span>%</div>
+        <div class="metric-val"><span class="counter" data-target="{{ conversion_rate|default:0 }}">0</span>%</div>
         <div class="metric-label">Conversion Rate</div>
     </div>
 
     <div class="metric-card">
         <div class="metric-header">
             <div class="metric-icon" style="background: rgba(255, 152, 0, 0.1); color: #ff9800;">
-                <i class="fas fa-shopping-bag"></i>
+                <i class="fas fa-receipt"></i>
             </div>
-            <div class="trend-indicator trend-up">
-                <i class="fas fa-arrow-up"></i> 5%
-            </div>
+            <div class="trend-indicator trend-up"><i class="fas fa-arrow-up"></i> 5%</div>
         </div>
-        <div class="metric-val">$<span class="counter" data-target="{{ avg_order_value|default:84 }}">0</span></div>
+        <div class="metric-val">$<span class="counter" data-target="{{ avg_order_value|default:0 }}">0</span></div>
         <div class="metric-label">Avg. Order Value</div>
     </div>
 </div>
 
-<div class="chart-section fade-in-up">
+<div class="chart-section">
     <div class="chart-card">
         <div class="chart-header">
-            <h3>Revenue Analytics</h3>
+            <h3>Revenue Overview</h3>
             <i class="fas fa-ellipsis-h" style="color: #bbb; cursor: pointer;"></i>
         </div>
-        <div style="height: 320px; width: 100%;">
+        <div style="flex: 1; width: 100%; min-height: 300px;">
             <canvas id="trafficChart"></canvas>
         </div>
     </div>
 
     <div class="chart-card">
         <div class="chart-header">
-            <h3>Top Performing Items</h3>
+            <h3>Top Products</h3>
+            <span style="font-size: 0.8rem; color: #888;">By Revenue</span>
         </div>
-        <div style="overflow-y: auto; max-height: 320px;">
+        
+        <div class="product-list-container">
             {% for product in top_products %}
             <div class="product-list-item">
                 <div class="prod-info">
-                    <img src="{% if product.image %}{{ product.image.url }}{% else %}https://via.placeholder.com/40{% endif %}" class="prod-img" alt="Prod">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" class="prod-img" alt="{{ product.name }}">
+                    {% else %}
+                        <div class="prod-img" style="background: #e0e0e0; display:flex; align-items:center; justify-content:center; color:#999; font-size:0.7rem;">IMG</div>
+                    {% endif %}
+                    
                     <div>
-                        <div style="font-weight: 600; font-size: 0.9rem;">{{ product.name }}</div>
-                        <div style="font-size: 0.75rem; color: #888;">{{ product.sales_count }} Sales</div>
+                        <div style="font-weight: 600; font-size: 0.95rem; color: #333;">{{ product.product__name }}</div>
+                        <div style="font-size: 0.75rem; color: #999;">{{ product.sales_count }} Units Sold</div>
                     </div>
                 </div>
                 <div style="text-align: right;">
-                    <div style="font-weight: bold;">${{ product.total_revenue }}</div>
+                    <div style="font-weight: 700; color: #2c2c2c;">${{ product.total_revenue }}</div>
                     <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" > </div>
+                        <div class="progress-bar-fill" style="width: {{ product.percentage }};"></div>
                     </div>
                 </div>
             </div>
             {% empty %}
-            <div class="product-list-item">
-                <div class="prod-info">
-                    <div class="prod-img" style="background: #ccc;"></div>
-                    <div>
-                        <div style="font-weight: 600; font-size: 0.9rem;">Ceramic Vase</div>
-                        <div style="font-size: 0.75rem; color: #888;">142 Sales</div>
-                    </div>
-                </div>
-                <div style="text-align: right;">
-                    <div style="font-weight: bold;">$4,200</div>
-                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 80%;"></div></div>
-                </div>
-            </div>
-            <div class="product-list-item">
-                <div class="prod-info">
-                    <div class="prod-img" style="background: #ccc;"></div>
-                    <div>
-                        <div style="font-weight: 600; font-size: 0.9rem;">Woven Basket</div>
-                        <div style="font-size: 0.75rem; color: #888;">98 Sales</div>
-                    </div>
-                </div>
-                <div style="text-align: right;">
-                    <div style="font-weight: bold;">$2,100</div>
-                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 50%;"></div></div>
-                </div>
-            </div>
-            <div class="product-list-item">
-                <div class="prod-info">
-                    <div class="prod-img" style="background: #ccc;"></div>
-                    <div>
-                        <div style="font-weight: 600; font-size: 0.9rem;">Oak Table Lamp</div>
-                        <div style="font-size: 0.75rem; color: #888;">76 Sales</div>
-                    </div>
-                </div>
-                <div style="text-align: right;">
-                    <div style="font-weight: bold;">$1,800</div>
-                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 35%;"></div></div>
-                </div>
-            </div>
+            <p style="text-align: center; color: #999; margin-top: 50px;">No sales data available yet.</p>
             {% endfor %}
         </div>
     </div>
 </div>
 
-<div class="dashboard-grid fade-in-up" style="grid-template-columns: 1fr 1fr;">
-    <div class="chart-card" style="min-height: 300px;">
-        <h3 style="margin-bottom: 20px;">Device Breakdown</h3>
-        <div style="height: 200px; display: flex; justify-content: center;">
+<div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+    <div class="chart-card" style="min-height: 350px;">
+        <div class="chart-header">
+            <h3>Device Breakdown</h3>
+        </div>
+        <div style="height: 250px; display: flex; justify-content: center; position: relative;">
             <canvas id="deviceChart"></canvas>
         </div>
     </div>
-    <div class="chart-card" style="min-height: 300px;">
-        <h3 style="margin-bottom: 20px;">User Retention</h3>
-        <div style="height: 200px;">
+    <div class="chart-card" style="min-height: 350px;">
+        <div class="chart-header">
+            <h3>User Retention</h3>
+        </div>
+        <div style="height: 250px; width: 100%;">
             <canvas id="retentionChart"></canvas>
         </div>
     </div>
@@ -274,41 +256,50 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        // 1. GSAP Counter Animation
+        // 1. GSAP Staggered Entrance
+        gsap.to(".metric-card", {
+            opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power2.out"
+        });
+        gsap.to(".chart-card", {
+            opacity: 1, y: 0, duration: 0.8, stagger: 0.2, delay: 0.3, ease: "power2.out"
+        });
+
+        // 2. Animated Numbers
         const counters = document.querySelectorAll('.counter');
         counters.forEach(counter => {
             const target = +counter.getAttribute('data-target');
-            // If it's a decimal (conversion rate), animate differently
-            const isFloat = counter.innerText.includes('.') || target % 1 !== 0;
+            const isFloat = target % 1 !== 0; // Check if decimal needed
             
             gsap.to(counter, {
                 innerText: target,
-                duration: 2,
+                duration: 2.5,
                 snap: { innerText: isFloat ? 0.1 : 1 },
-                ease: "power2.out",
+                ease: "power3.out",
                 onUpdate: function() {
-                    this.targets()[0].innerText = isFloat 
-                        ? parseFloat(this.targets()[0].innerText).toFixed(1) 
-                        : Math.ceil(this.targets()[0].innerText).toLocaleString();
+                    let val = parseFloat(this.targets()[0].innerText);
+                    // Format numbers (e.g. 1,200)
+                    this.targets()[0].innerText = val.toLocaleString(undefined, { minimumFractionDigits: isFloat ? 1 : 0, maximumFractionDigits: isFloat ? 1 : 0 });
                 }
             });
         });
 
-        // 2. Chart.js Setup
-        
-        // Retrieve data from Django context (if available), else use mock
+        // 3. Chart Configuration
+        const brandColor = '#8b5e3c';
+        const brandLight = '#d4a373';
+        const brandDark = '#2c2c2c';
+
+        // Retrieve Real Data
         const salesDataEl = document.getElementById('sales-data');
         const salesLabelsEl = document.getElementById('sales-labels');
         
-        const salesData = salesDataEl ? JSON.parse(salesDataEl.textContent) : [1200, 1900, 3000, 5000, 2000, 3000, 4500, 3200, 4100, 2900, 5200, 6100];
+        // Use real data or premium mock data fallback
+        const salesData = salesDataEl ? JSON.parse(salesDataEl.textContent) : [1500, 2300, 3200, 4500, 4100, 5200, 6800, 5900, 7100, 8500, 9200, 10500];
         const salesLabels = salesLabelsEl ? JSON.parse(salesLabelsEl.textContent) : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-        // TRAFFIC / REVENUE CHART (Line with Gradient)
+        // --- TRAFFIC CHART (Line) ---
         const ctx1 = document.getElementById('trafficChart').getContext('2d');
-        
-        // Create Gradient
         const gradient1 = ctx1.createLinearGradient(0, 0, 0, 400);
-        gradient1.addColorStop(0, 'rgba(139, 94, 60, 0.4)'); // Primary Accent Color
+        gradient1.addColorStop(0, 'rgba(139, 94, 60, 0.2)');
         gradient1.addColorStop(1, 'rgba(139, 94, 60, 0.0)');
 
         new Chart(ctx1, {
@@ -318,16 +309,15 @@
                 datasets: [{
                     label: 'Revenue ($)',
                     data: salesData,
-                    borderColor: '#8b5e3c',
+                    borderColor: brandColor,
+                    backgroundColor: gradient1,
                     pointBackgroundColor: '#fff',
-                    pointBorderColor: '#8b5e3c',
-                    pointHoverBackgroundColor: '#8b5e3c',
+                    pointBorderColor: brandColor,
                     pointBorderWidth: 2,
                     pointRadius: 4,
-                    pointHoverRadius: 6,
+                    pointHoverRadius: 7,
                     tension: 0.4,
-                    fill: true,
-                    backgroundColor: gradient1
+                    fill: true
                 }]
             },
             options: {
@@ -336,57 +326,55 @@
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                        backgroundColor: '#2c2c2c',
+                        backgroundColor: brandDark,
+                        padding: 10,
                         titleFont: { family: 'Poppins' },
-                        bodyFont: { family: 'Poppins' }
+                        bodyFont: { family: 'Poppins' },
+                        displayColors: false,
                     }
                 },
                 scales: {
-                    x: { grid: { display: false } },
-                    y: { 
-                        grid: { borderDash: [5, 5], color: '#f0f0f0' },
-                        beginAtZero: true 
-                    }
+                    x: { grid: { display: false }, ticks: { font: { family: 'Poppins' } } },
+                    y: { grid: { borderDash: [5, 5], color: '#f0f0f0' }, beginAtZero: true, ticks: { font: { family: 'Poppins' } } }
                 }
             }
         });
 
-        // DEVICE BREAKDOWN (Doughnut)
+        // --- DEVICE CHART (Doughnut) ---
         const ctx2 = document.getElementById('deviceChart').getContext('2d');
         new Chart(ctx2, {
             type: 'doughnut',
             data: {
                 labels: ['Mobile', 'Desktop', 'Tablet'],
                 datasets: [{
-                    data: [55, 30, 15],
-                    backgroundColor: ['#2c2c2c', '#8b5e3c', '#e0e0e0'],
+                    data: [65, 25, 10],
+                    backgroundColor: [brandColor, brandDark, '#e0e0e0'],
                     borderWidth: 0,
-                    hoverOffset: 10
+                    hoverOffset: 15
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                cutout: '70%',
                 plugins: {
-                    legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } }
+                    legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true, font: { family: 'Poppins' } } }
                 }
             }
         });
 
-        // RETENTION CHART (Bar)
+        // --- RETENTION CHART (Bar) ---
         const ctx3 = document.getElementById('retentionChart').getContext('2d');
         new Chart(ctx3, {
             type: 'bar',
             data: {
-                labels: ['New', 'Returning'],
+                labels: ['New Users', 'Returning'],
                 datasets: [{
                     label: 'Users',
-                    data: [3500, 1200],
-                    backgroundColor: ['#d4a373', '#2c2c2c'],
-                    borderRadius: 10,
-                    barThickness: 40
+                    data: [850, 420],
+                    backgroundColor: [brandLight, brandColor],
+                    borderRadius: 8,
+                    barThickness: 50
                 }]
             },
             options: {
@@ -394,7 +382,7 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, grid: { display: false } },
+                    y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
                     x: { grid: { display: false } }
                 }
             }

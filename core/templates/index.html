@@ -9,6 +9,48 @@
     <link rel="stylesheet" href="{% static 'styles.css' %}">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- NEW STYLES FOR STORY SLIDER --- */
+        .story-slider-container {
+            flex: 1;
+            min-width: 300px;
+            max-width: 500px;
+            height: 350px;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            border: 2px solid #8B5E3C; /* Border to match theme */
+        }
+
+        .story-slider-track {
+            display: flex;
+            width: 300%; /* 3 images * 100% width */
+            height: 100%;
+            animation: storyAutoSlide 12s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95);
+        }
+
+        .story-slide {
+            width: 33.333%;
+            height: 100%;
+            position: relative;
+        }
+
+        .story-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Animation Keyframes: Moves track Left to show next image */
+        @keyframes storyAutoSlide {
+            0%, 30% { transform: translateX(0); }       /* Show Image 1 */
+            33%, 63% { transform: translateX(-33.33%); } /* Show Image 2 */
+            66%, 96% { transform: translateX(-66.66%); } /* Show Image 3 */
+            100% { transform: translateX(0); }          /* Back to Image 1 */
+        }
+    </style>
 </head>
 <body>
       
@@ -91,6 +133,45 @@
             <div class="layer layer-3"><img src="{% static 'small.jpg' %}" alt="Handcrafted item"></div>
         </div>
     </header>
+
+    <section class="features-bar">
+        <div class="feature-item">
+            <i class="fas fa-truck-moving"></i>
+            <div>
+                <h4>Free Shipping</h4>
+                <p>On all orders over $150</p>
+            </div>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-leaf"></i>
+            <div>
+                <h4>100% Sustainable</h4>
+                <p>Eco-friendly materials</p>
+            </div>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-shield-alt"></i>
+            <div>
+                <h4>Secure Payment</h4>
+                <p>100% protected transactions</p>
+            </div>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-undo"></i>
+            <div>
+                <h4>Easy Returns</h4>
+                <p>30-day money back guarantee</p>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        .features-bar { background: #fff; padding: 40px 5%; display: flex; flex-wrap: wrap; justify-content: space-around; gap: 30px; border-bottom: 1px solid #eee; }
+        .feature-item { display: flex; align-items: center; gap: 15px; min-width: 200px; }
+        .feature-item i { font-size: 2rem; color: #8B5E3C; }
+        .feature-item h4 { font-family: 'Playfair Display'; font-size: 1.1rem; margin-bottom: 5px; color: #2c2c2c; }
+        .feature-item p { font-size: 0.85rem; color: #888; font-family: 'Poppins'; }
+    </style>
 
     <section class="carousel-section">
     <h2 style="font-family: 'Playfair Display'; font-size: 2.5rem;">The Curated Gallery</h2>
@@ -175,72 +256,18 @@
                 </div>
                 {% empty %}
                 <div class="wood-scroll-wrapper" id="woodWrapper">
-    
-    <div class="wood-card" data-name="Mahogany Table" data-price="450" data-img="{% static 'Sculpted Grace_ Wooden.jpg' %}">
-        <img src="{% static 'Sculpted Grace_ Wooden.jpg' %}" alt="Mahogany Table">
-        <div class="wood-overlay">
-            <h3>Mahogany Table</h3>
-            <p class="wood-price">$450</p>
-            <button class="add-to-cart-btn">Add to Bag</button>
-        </div>
-    </div>
-
-    <div class="wood-card" data-name="Teak Chair" data-price="220" data-img="{% static 'Sculpted Wooden Vase.jpg' %}">
-        <img src="{% static 'Sculpted Wooden Vase.jpg' %}" alt="Teak Chair">
-        <div class="wood-overlay">
-            <h3>Teak Chair</h3>
-            <p class="wood-price">$220</p>
-            <button class="add-to-cart-btn">Add to Bag</button>
-        </div>
-    </div>
-
-    <div class="wood-card" data-name="Oak Shelf" data-price="120" data-img="{% static 'Flowers Wood Carving.jpg' %}">
-        <img src="{% static 'Flowers Wood Carving.jpg' %}" alt="Oak Shelf">
-        <div class="wood-overlay">
-            <h3>Oak Shelf</h3>
-            <p class="wood-price">$120</p>
-            <button class="add-to-cart-btn">Add to Bag</button>
-        </div>
-    </div>
-
-</div>
+                    <div class="wood-card" data-name="Mahogany Table" data-price="450" data-img="{% static 'Sculpted Grace_ Wooden.jpg' %}">
+                        <img src="{% static 'Sculpted Grace_ Wooden.jpg' %}" alt="Mahogany Table">
+                        <div class="wood-overlay"><h3>Mahogany Table</h3><p class="wood-price">$450</p><button class="add-to-cart-btn">Add to Bag</button></div>
+                    </div>
+                </div>
                 {% endfor %}
             </div>
         </div>
     </section>
 
-    <section class="artisan-favorites">
-        <div class="section-container">
-            <div class="gallery-header">
-                <div class="header-title">
-                    <span class="subtitle">Handpicked For You</span>
-                    <h2 class="playfair">Artisan Favorites</h2>
-                </div>
-            </div>
-
-            <div class="filter-container">
-                <div class="filter-track">
-                    <button class="filter-btn active" data-filter="all">All Masterpieces</button>
-                    <button class="filter-btn" data-filter="textiles">Textiles</button>
-                    <button class="filter-btn" data-filter="ceramics">Ceramics</button>
-                    <button class="filter-btn" data-filter="decor">Home Decor</button>
-                </div>
-            </div>
-
-            <div class="pro-slider-horizontal" id="proSlider">
-                <div class="pro-card" data-category="ceramics" data-name="Decorative Pot" data-price="120" data-img="{% static '10.jpg' %}">
-                    <div class="pro-image-wrapper"><img src="{% static '10.jpg' %}" alt="Decorative Pot"></div>
-                    <div class="pro-info"><h4>Decorative Pot</h4><p class="price">$120</p><div class="pro-btn-group"><button class="add-to-cart-btn">Add to Cart</button><button class="buy-now-btn">Buy Now</button></div></div>
-                </div>
-                <div class="pro-card" data-category="textiles" data-name="Pashmina Shawl" data-price="250" data-img="{% static 'Pashmina Shawl.jpg' %}">
-                    <div class="pro-image-wrapper"><img src="{% static 'Pashmina Shawl.jpg' %}" alt="Pashmina Shawl"></div>
-                    <div class="pro-info"><h4>Pashmina Shawl</h4><p class="price">$250</p><div class="pro-btn-group"><button class="add-to-cart-btn">Add to Cart</button><button class="buy-now-btn">Buy Now</button></div></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <section style="background: #2c2c2c; color: white; padding: 80px 5%; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 50px;">
+        
         <div style="flex: 1; min-width: 300px; max-width: 600px;">
             <h2 style="font-family: 'Playfair Display'; font-size: 2.5rem; margin-bottom: 20px;">Preserving the Art of the Hand</h2>
             <p style="font-family: 'Poppins'; line-height: 1.8; color: #ccc; margin-bottom: 30px;">
@@ -251,15 +278,69 @@
                 <button style="background: #8B5E3C; color: white; border: none; padding: 12px 30px; border-radius: 50px; cursor: pointer; font-weight: bold;">Subscribe</button>
             </div>
         </div>
-        <div style="flex: 1; min-width: 300px; max-width: 500px;">
-            <div style="position: relative;">
-                <div style="position: absolute; top: -20px; left: -20px; width: 100%; height: 100%; border: 2px solid #8B5E3C; border-radius: 12px; z-index: 0;"></div>
-                <img src="https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?auto=format&fit=crop&q=80&w=800" 
-                     style="width: 100%; border-radius: 12px; position: relative; z-index: 1; box-shadow: 0 20px 50px rgba(0,0,0,0.3);" 
-                     alt="Artisan working">
+
+        <div class="story-slider-container">
+            <div class="story-slider-track">
+                <div class="story-slide">
+                    <img src="https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?auto=format&fit=crop&q=80&w=800" alt="Artisan 1">
+                </div>
+                <div class="story-slide">
+                    <img src="https://images.unsplash.com/photo-1590736969955-71cc94801759?auto=format&fit=crop&q=80&w=800" alt="Pottery Making">
+                </div>
+                <div class="story-slide">
+                    <img src="https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&q=80&w=800" alt="Detailed Carving">
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <section class="reviews-section">
+        <div style="text-align: center; margin-bottom: 50px;">
+            <span style="font-family: 'Poppins'; color: #8B5E3C; letter-spacing: 2px; text-transform: uppercase; font-size: 0.9rem; font-weight: 600;">Testimonials</span>
+            <h2 style="font-family: 'Playfair Display'; font-size: 2.5rem; color: #2c2c2c; margin-top: 10px;">Voices from the Community</h2>
+        </div>
+
+        <div class="reviews-grid">
+            <div class="review-card">
+                <div class="stars">★★★★★</div>
+                <p>"The teak chair I ordered is absolutely stunning. You can feel the soul in the craftsmanship."</p>
+                <div class="reviewer">
+                    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
+                    <div><h4>Elena R.</h4><span>New York, USA</span></div>
+                </div>
+            </div>
+            <div class="review-card">
+                <div class="stars">★★★★★</div>
+                <p>"Incredible quality and fast shipping. I love knowing my purchase helps artisans in Ahmedabad."</p>
+                <div class="reviewer">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+                    <div><h4>David K.</h4><span>London, UK</span></div>
+                </div>
+            </div>
+            <div class="review-card">
+                <div class="stars">★★★★★</div>
+                <p>"Tranquil Trails is a gem. The handwoven shawl is softer than I imagined."</p>
+                <div class="reviewer">
+                    <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="User">
+                    <div><h4>Sarah M.</h4><span>Toronto, Canada</span></div>
+                </div>
             </div>
         </div>
     </section>
+
+    <style>
+        .reviews-section { padding: 100px 5%; background: #F9F9F9; }
+        .reviews-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; }
+        .review-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); transition: 0.3s; }
+        .review-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .stars { color: #f4c150; font-size: 1.2rem; margin-bottom: 20px; letter-spacing: 3px; }
+        .review-card p { font-family: 'Poppins'; color: #555; line-height: 1.6; font-size: 1rem; margin-bottom: 30px; font-style: italic; }
+        .reviewer { display: flex; align-items: center; gap: 15px; }
+        .reviewer img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+        .reviewer h4 { font-family: 'Playfair Display'; font-size: 1.1rem; color: #2c2c2c; margin: 0; }
+        .reviewer span { font-size: 0.8rem; color: #888; }
+    </style>
 
     <footer class="main-footer">
         <div class="footer-container">
@@ -279,8 +360,25 @@
                 <form class="subscribe-form"><input type="email" placeholder="Email"><button type="submit">Join</button></form>
             </div>
         </div>
-        <div class="footer-bottom"><p>&copy; 2026 TRANQUIL TRAILS. All Rights Reserved.</p></div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2026 TRANQUIL TRAILS. All Rights Reserved.</p>
+            <div class="payment-icons">
+                <i class="fab fa-cc-visa"></i>
+                <i class="fab fa-cc-mastercard"></i>
+                <i class="fab fa-cc-amex"></i>
+                <i class="fab fa-google-pay"></i>
+                <i class="fas fa-rupee-sign"></i>
+            </div>
+        </div>
     </footer>
+
+    <style>
+        .footer-bottom { border-top: 1px solid #333; padding-top: 25px; margin-top: 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+        .payment-icons { display: flex; gap: 15px; font-size: 1.5rem; color: #888; }
+        .payment-icons i:hover { color: white; transition: 0.3s; }
+        @media (max-width: 600px) { .footer-bottom { justify-content: center; text-align: center; } }
+    </style>
 
     <script src="{% static 'script.js' %}"></script>
     
@@ -302,16 +400,14 @@
             });
         }
 
-        // --- 2. BACKEND LOGOUT LOGIC (WITH CART FIX) ---
+        // --- 2. BACKEND LOGOUT LOGIC ---
         function logoutUser() {
             fetch('/api/logout/')
             .then(res => res.json())
             .then(data => {
                 if(data.success) {
-                    // CLEAR LOCAL DATA TO PREVENT ADMIN CART LEAKING TO USER
                     localStorage.removeItem('isAdmin');
-                    localStorage.removeItem('cart'); // <--- CRITICAL FIX
-                    
+                    localStorage.removeItem('cart'); 
                     window.location.href = "{% url 'home' %}";
                 }
             });
