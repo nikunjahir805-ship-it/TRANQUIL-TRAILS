@@ -3,6 +3,24 @@
  * Handles Navigation, Cart, Slider, and Checkout Logic
  */
 
+// Ensure this is at the top level of script.js
+function addToCart(id, name, price, img) {
+    console.log("Adding to cart:", name); // Debug line
+    
+    const numericPrice = parseFloat(price) || 0;
+    const existingIndex = cart.findIndex(item => item.name === name);
+    
+    if (existingIndex > -1) {
+        cart[existingIndex].quantity += 1;
+    } else {
+        cart.push({ id, name, price: numericPrice, img, quantity: 1 });
+    }
+    
+    saveAndUpdate();
+    openCartSidebar();
+}
+
+// ... rest of your code ...
 // --- 1. User & Cart Setup ---
 // Get the current user from the HTML (or default to 'guest')
 const currentUser = window.djangoUser || 'guest';
@@ -300,3 +318,51 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+
+function renderCartUI() {
+    const list = document.getElementById('cart-items-list');
+    const totalEl = document.getElementById('total-price');
+    const countEl = document.getElementById('cart-count');
+    
+    if (!list) return;
+
+    list.innerHTML = '';
+    let subtotal = 0;
+    let totalItems = 0;
+
+    cart.forEach(item => {
+        // --- THE FIX START ---
+        // 1. Ensure item.price is a valid number. Fallback to 0 if undefined.
+        const itemPrice = parseFloat(item.price) || 0;
+        
+        // 2. Calculate totals using the safe price
+        subtotal += itemPrice * item.quantity;
+        totalItems += item.quantity;
+        // --- THE FIX END ---
+
+        let displayImg = item.img;
+        if (displayImg && !displayImg.startsWith('/static/') && !displayImg.startsWith('http')) {
+            displayImg = staticBasePath + displayImg;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'cart-item';
+        li.innerHTML = `
+            <img src="${displayImg}" alt="${item.name}" onerror="this.src='/static/placeholder.jpg'">
+            <div class="cart-item-info">
+                <h4>${item.name}</h4>
+                <p class="item-price">$${itemPrice.toFixed(2)}</p> 
+                <div class="qty-controls">
+                    <button class="qty-btn" onclick="updateQuantity('${item.name}', -1)">-</button>
+                    <span class="qty-val">${item.quantity}</span>
+                    <button class="qty-btn" onclick="updateQuantity('${item.name}', 1)">+</button>
+                </div>
+            </div>
+            <button class="remove-item" onclick="removeFromCart('${item.name}')">&times;</button>
+        `;
+        list.appendChild(li);
+    });
+
+    if(totalEl) totalEl.innerText = subtotal.toFixed(2);
+    if(countEl) countEl.innerText = totalItems;
+}

@@ -7,11 +7,37 @@
 {% block content %}
 <style>
     /* --- MODERN TABLE STYLES --- */
-    .modern-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
-    .modern-table thead th { color: #888; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; padding: 0 20px 10px 20px; text-align: left; }
+    .modern-table { 
+        width: 100%; 
+        border-collapse: separate; 
+        border-spacing: 0 10px; 
+    }
+    .modern-table thead th { 
+        color: #888; 
+        font-size: 0.85rem; 
+        text-transform: uppercase; 
+        letter-spacing: 1px; 
+        padding: 0 20px 10px 20px; 
+        text-align: left; 
+    }
     
-    .table-row { background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.02); border-radius: 8px; transition: 0.2s; }
-    .table-row:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+    .table-row { 
+        background: white; 
+        box-shadow: 0 2px 5px rgba(0,0,0,0.02); 
+        border-radius: 8px; 
+        transition: transform 0.3s ease, box-shadow 0.3s ease; 
+        /* Fixes for blurriness and disappearing content */
+        backface-visibility: hidden;
+        -webkit-font-smoothing: antialiased;
+        will-change: transform, box-shadow;
+    }
+
+    .table-row:hover { 
+        transform: translateY(-3px); 
+        box-shadow: 0 8px 15px rgba(0,0,0,0.08); 
+        position: relative;
+        z-index: 10;
+    }
     
     .table-row td { padding: 15px 20px; vertical-align: middle; }
     .table-row td:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
@@ -126,14 +152,15 @@
 </div>
 
 <script>
-    // --- 1. ANIMATION ON LOAD ---
+    // --- 1. ANIMATION ON LOAD (UPDATED TO PREVENT BLUR) ---
     document.addEventListener("DOMContentLoaded", () => {
         gsap.from(".table-row", {
             opacity: 0,
             y: 20,
             duration: 0.5,
             stagger: 0.05,
-            ease: "power2.out"
+            ease: "power2.out",
+            clearProps: "all" // Removes GSAP styles after animation so hover works perfectly
         });
     });
 
@@ -143,7 +170,6 @@
         let rows = document.querySelectorAll('#productTableBody tr');
 
         rows.forEach(row => {
-            // Combine all text in the row to search against
             let text = row.innerText.toLowerCase();
             if (text.indexOf(filter) > -1) {
                 row.style.display = "";

@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         /* --- KEEPING YOUR THEME --- */
@@ -18,7 +19,6 @@
             background: #F4EFE6; 
         }
         
-        /* Navbar Tweaks to match your Shop Page */
         nav { 
             background: #fff; 
             padding: 20px 5%; 
@@ -28,7 +28,6 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
         }
 
-        /* Product Detail Specific Layout */
         .detail-container {
             padding: 120px 10% 80px;
             display: flex;
@@ -107,7 +106,16 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.15);
         }
 
-        /* Responsive Design */
+        /* Avatar styles to match navigation */
+        .user-avatar { 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            cursor: pointer; 
+            border: 2px solid #8B5E3C; 
+        }
+
         @media (max-width: 900px) {
             .detail-container { 
                 flex-direction: column; 
@@ -133,13 +141,36 @@
 
         <ul class="nav-links" id="navLinks">
             <li><a href="{% url 'home' %}">Home</a></li>
-            <li class="user-link"><a href="{% url 'shop' %}">Shop</a></li>
-            <li class="user-link"><a href="{% url 'gallery' %}">Gallery</a></li>
-            <li class="admin-link" style="display: none;"><a href="#">Manage Products</a></li>
+            <li><a href="{% url 'shop' %}">Shop</a></li>
+            <li><a href="{% url 'gallery' %}">Gallery</a></li>
             <li><a href="{% url 'about' %}">About</a></li>
             <li><a href="{% url 'Contact' %}">Contact Us</a></li> 
-            <li id="cartNavItem"><a href="#" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a></li>
-            <li><a href="{% url 'login' %}" class="login-btn" id="authBtn">Log In</a></li>
+            
+            <li id="cartNavItem">
+                <a href="#" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a>
+            </li>
+
+            {% if user.is_authenticated %}
+                <li>
+                    <div class="nav-user-container" style="position: relative;">
+                        {% if user.is_staff %}
+                            <img src="https://cdn-icons-png.flaticon.com/512/6024/6024190.png" alt="Admin" class="user-avatar" id="userAvatarBtn">
+                        {% else %}
+                            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" class="user-avatar" id="userAvatarBtn">
+                        {% endif %}
+                        
+                        <div class="profile-dropdown" id="profileDropdown" style="display: none; position: absolute; right: 0; background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-radius: 8px; width: 150px; z-index: 100;">
+                            <div style="padding: 10px 16px; border-bottom: 1px solid #eee; font-size: 0.8rem;">Hi, {{ user.username }}</div>
+                            {% if user.is_staff %}
+                                <a href="{% url 'admin_dashboard' %}" style="display: block; padding: 10px 16px; color: #d32f2f; font-weight: bold;">Admin Panel</a>
+                            {% endif %}
+                            <a href="#" onclick="logoutUser()" style="display: block; padding: 10px 16px; color: #333;">Logout</a>
+                        </div>
+                    </div>
+                </li>
+            {% else %}
+                <li><a href="{% url 'login' %}" class="login-btn">Log In</a></li>
+            {% endif %}
         </ul>
     </nav>
 
@@ -154,7 +185,7 @@
         <div class="cart-footer">
             <div class="cart-total-row">
                 <span>Total</span>
-                <span>$<span id="total-price">0</span></span>
+                <span>₹<span id="total-price">0</span></span>
             </div>
             <button class="checkout-btn" style="width: 100%;">Checkout Now</button>
             <button class="clear-cart-link" onclick="clearCart()">Clear All Items</button>
@@ -172,7 +203,7 @@
 
         <div class="detail-info">
             <h1>{{ product.name }}</h1>
-            <span class="detail-price">${{ product.price }}</span>
+            <span class="detail-price">₹{{ product.price }}</span>
             
             <p class="detail-desc">
                 {{ product.description }}
@@ -213,10 +244,21 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const buyBtn = document.getElementById('buyBtn');
+            const avatarBtn = document.getElementById('userAvatarBtn');
+            const dropdown = document.getElementById('profileDropdown');
+
+            // Dropdown Toggle Logic
+            if(avatarBtn && dropdown) {
+                avatarBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isVisible = dropdown.style.display === 'block';
+                    dropdown.style.display = isVisible ? 'none' : 'block';
+                });
+                document.addEventListener('click', () => dropdown.style.display = 'none');
+            }
 
             if(buyBtn) {
                 buyBtn.addEventListener('click', function() {
-                    // Create the product object securely
                     const productData = {
                         id: this.dataset.id,
                         name: this.dataset.name,
@@ -225,15 +267,21 @@
                         quantity: 1
                     };
                     
-                    // Call the function from your main script.js
-                    if(typeof handleAddToCart === "function") {
-                        handleAddToCart(productData);
-                    } else {
-                        console.error("handleAddToCart function is missing from script.js");
+                    if(typeof addToCart === "function") {
+                        addToCart(productData.id, productData.name, productData.price, productData.img);
+                        // Open sidebar after adding
+                        const sidebar = document.getElementById('cartSidebar');
+                        if(sidebar) sidebar.classList.add('active');
                     }
                 });
             }
         });
+
+        function logoutUser() {
+            fetch('/api/logout/').then(res => res.json()).then(data => {
+                if(data.success) window.location.href = "{% url 'home' %}";
+            });
+        }
     </script>
 </body>
 </html>

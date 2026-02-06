@@ -5,49 +5,80 @@
 
 {% block content %}
 <style>
+    /* --- FIX FOR SCROLL BLUR & VISIBILITY --- */
+    .fade-in-up {
+        /* Ensure content is always crisp and visible */
+        opacity: 1 !important;
+        transform: none !important;
+        -webkit-font-smoothing: antialiased;
+        backface-visibility: hidden;
+    }
+
+    /* Remove any potential backdrop filters that cause blur on scroll */
+    .table-row {
+        background: #ffffff !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        /* Force GPU rendering to prevent flickering */
+        transform: translateZ(0);
+        margin-bottom: 10px;
+        display: table-row; /* Ensure it behaves like a standard row */
+    }
+
     /* --- SHARED MODERN TABLE STYLES --- */
     .modern-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
-    .modern-table thead th { color: #888; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; padding: 0 20px 10px 20px; text-align: left; }
+    
+    /* Make Header Sticky so it doesn't get lost, but remove blur */
+    .modern-table thead th { 
+        color: #888; 
+        font-size: 0.85rem; 
+        text-transform: uppercase; 
+        letter-spacing: 1px; 
+        padding: 10px 20px; 
+        text-align: left;
+        position: sticky;
+        top: 0;
+        background: #f4f7f6; /* Match your admin background color */
+        z-index: 10;
+    }
     
     .table-row { background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.02); border-radius: 8px; transition: 0.2s; }
     .table-row:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
     
-    .table-row td { padding: 15px 20px; vertical-align: middle; }
+    .table-row td { padding: 15px 20px; vertical-align: middle; border: none; }
     .table-row td:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
     .table-row td:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
 
     /* Product Mini Image */
-    .prod-thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; background: #f4f4f4; margin-right: 15px; }
+    .prod-thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; background: #f4f4f4; margin-right: 15px; border: 1px solid #eee; }
     
     /* Stock Status Badges */
     .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-    .status-in { background: #e8f5e9; color: #2e7d32; }   /* Green */
-    .status-low { background: #fff3e0; color: #ef6c00; }  /* Orange */
-    .status-out { background: #ffebee; color: #c62828; }  /* Red */
+    .status-in { background: #e8f5e9; color: #2e7d32; }
+    .status-low { background: #fff3e0; color: #ef6c00; }
+    .status-out { background: #ffebee; color: #c62828; }
 
-    /* Quick Filter Buttons */
     .filter-chip {
         background: white; border: 1px solid #eee; padding: 8px 16px; border-radius: 20px; 
         font-size: 0.85rem; color: #555; cursor: pointer; transition: 0.2s;
     }
     .filter-chip:hover, .filter-chip.active { background: #2c2c2c; color: white; border-color: #2c2c2c; }
 
-    /* Update Stock Input */
     .stock-input {
         width: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 6px; text-align: center; font-weight: bold;
-        transition: 0.2s;
     }
     .stock-input:focus { border-color: #8b5e3c; outline: none; background: #fffbf7; }
 
-    /* Update Button */
     .btn-update {
         background: none; border: 1px solid #ddd; padding: 8px 16px; border-radius: 6px; cursor: pointer; color: #555; transition: 0.2s;
     }
     .btn-update:hover { background: #2c2c2c; color: white; border-color: #2c2c2c; }
+
+    /* Fix for form elements in tables */
+    .modern-table form { display: contents; }
 </style>
 
 <div class="fade-in-up">
-
     {% if messages %}
         {% for message in messages %}
             <div style="padding: 15px; margin-bottom: 20px; border-radius: 6px; background: #d4edda; color: #155724; border-left: 4px solid #28a745;">
@@ -57,7 +88,6 @@
     {% endif %}
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 20px;">
-        
         <div style="position: relative;">
             <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #aaa;"></i>
             <input type="text" id="invSearch" placeholder="Search SKU or Name..." 
@@ -89,13 +119,15 @@
                 data-name="{{ p.name|lower }}"
                 data-sku="SKU-{{ p.id }}"> 
                 
-                <td style="display: flex; align-items: center;">
-                    {% if p.image %}
-                        <img src="{{ p.image.url }}" class="prod-thumb">
-                    {% else %}
-                        <div class="prod-thumb" style="display:flex; align-items:center; justify-content:center;"><i class="fas fa-box" style="color:#ccc;"></i></div>
-                    {% endif %}
-                    <span style="font-weight: 600; color: #333;">{{ p.name }}</span>
+                <td>
+                    <div style="display: flex; align-items: center;">
+                        {% if p.image %}
+                            <img src="{{ p.image.url }}" class="prod-thumb">
+                        {% else %}
+                            <div class="prod-thumb" style="display:flex; align-items:center; justify-content:center;"><i class="fas fa-box" style="color:#ccc;"></i></div>
+                        {% endif %}
+                        <span style="font-weight: 600; color: #333;">{{ p.name }}</span>
+                    </div>
                 </td>
 
                 <td style="color: #666; font-family: monospace;">SKU-{{ p.id }}00X</td>
@@ -136,34 +168,32 @@
             {% endfor %}
         </tbody>
     </table>
-
 </div>
 
 <script>
-    // --- 1. ANIMATION ENTRY ---
+    // --- 1. ANIMATION ENTRY (MODIFIED TO PREVENT STICKY BLUR) ---
     document.addEventListener("DOMContentLoaded", () => {
         gsap.from(".table-row", {
             opacity: 0,
-            y: 20,
-            duration: 0.5,
-            stagger: 0.05,
-            ease: "power2.out"
+            y: 10,
+            duration: 0.4,
+            stagger: 0.03,
+            ease: "power1.out",
+            clearProps: "all" // CRITICAL: This removes the GSAP styles after animation so they don't interfere with scroll
         });
     });
 
     // --- 2. SEARCH LOGIC ---
     document.getElementById('invSearch').addEventListener('keyup', function() {
         let val = this.value.toLowerCase();
-        let rows = document.querySelectorAll('#inventoryBody tr');
+        let rows = document.querySelectorAll('#inventoryBody tr.table-row');
 
         rows.forEach(row => {
-            // We search inside the first cell (Name) and second cell (SKU)
-            // But since the row structure is complex with form, we check dataset attributes we added
             let name = row.getAttribute('data-name');
             let sku = row.getAttribute('data-sku').toLowerCase();
             
             if (name.includes(val) || sku.includes(val)) {
-                row.style.display = "";
+                row.style.display = "table-row";
             } else {
                 row.style.display = "none";
             }
@@ -172,27 +202,24 @@
 
     // --- 3. FILTER LOGIC (All / Low / Out) ---
     function filterTable(type, btn) {
-        // Update active button
         document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
-        let rows = document.querySelectorAll('#inventoryBody tr');
+        let rows = document.querySelectorAll('#inventoryBody tr.table-row');
 
         rows.forEach(row => {
-            // Get stock number directly from the input value currently in the row
-            // (Use fallback to dataset stock if input parsing fails)
             let input = row.querySelector('input[name="stock"]');
             let stock = input ? parseInt(input.value) : 0;
             
             if (type === 'all') {
-                row.style.display = "";
+                row.style.display = "table-row";
             } 
             else if (type === 'low') {
-                if (stock > 0 && stock <= 10) row.style.display = "";
+                if (stock > 0 && stock <= 10) row.style.display = "table-row";
                 else row.style.display = "none";
             } 
             else if (type === 'out') {
-                if (stock === 0) row.style.display = "";
+                if (stock === 0) row.style.display = "table-row";
                 else row.style.display = "none";
             }
         });
