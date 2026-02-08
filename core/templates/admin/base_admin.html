@@ -202,7 +202,13 @@
                 </a>
             </div>
 
-            <div class="nav-category">Media</div>
+           <div class="nav-category">Media</div>
+            <div class="nav-item">
+                <a href="{% url 'museum_manager' %}" class="nav-link {% if request.resolver_match.url_name == 'museum_manager' %}active{% endif %}">
+                    <i class="fas fa-university"></i> <span>Museum Manager</span>
+                </a>
+            </div>
+            
             <div class="nav-item">
                 <a href="{% url 'admin_media' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_media' %}active{% endif %}">
                     <i class="fas fa-images"></i> <span>Library</span>

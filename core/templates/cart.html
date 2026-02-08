@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart | TRANQUIL TRAILS</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    
+    <style>
+        .cart-page-container {
+            padding: 120px 5% 80px;
+            min-height: 80vh;
+            background: #F4EFE6;
+        }
+        .cart-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .cart-header h1 {
+            font-family: 'Playfair Display';
+            font-size: 3rem;
+            color: #2c2c2c;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Copy your nav from other templates -->
+    <nav>
+        <a href="{% url 'home' %}" class="logo-container">
+            <img src="{% static 'Adobe Express - file.png' %}" alt="Logo" class="logo-img">
+            <span class="logo-text">TRANQUIL TRAILS</span>
+        </a>
+        
+        <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+
+        <ul class="nav-links" id="navLinks">
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="{% url 'shop' %}">Shop</a></li>
+            <li><a href="{% url 'offers' %}">Offers</a></li>
+            <li><a href="{% url 'gallery' %}">Gallery</a></li>
+            <li><a href="{% url 'about' %}">About</a></li>
+            <li><a href="{% url 'Contact' %}">Contact</a></li>
+            
+            <li id="cartNavItem">
+                <a href="#" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a>
+            </li>
+        </ul>
+    </nav>
+
+    <section class="cart-page-container">
+        <div class="cart-header">
+            <h1>Your Shopping Cart</h1>
+        </div>
+        
+        <!-- Cart items will be injected here by JavaScript -->
+        <div id="cart-page-container"></div>
+    </section>
+
+    <!-- Copy your footer from other templates -->
+    <footer class="main-footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3 class="footer-logo">TRANQUIL TRAILS</h3>
+                <p>Preserving Indian heritage from Ahmedabad to your home.</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 TRANQUIL TRAILS. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{% static 'script.js' %}"></script>
+    <script src="{% static 'js/cart.js' %}"></script>
+</body>
+</html>

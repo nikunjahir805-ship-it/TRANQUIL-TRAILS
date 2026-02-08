@@ -101,3 +101,23 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# settings.py
+
+# ... existing settings ...
+# In settings.py
+
+# ... bottom of file ...
+
+# Razorpay Settings
+RAZORPAY_KEY_ID = 'rzp_test_YOUR_KEY_HERE'     # Replace with your Test Key ID
+RAZORPAY_KEY_SECRET = 'YOUR_SECRET_HERE'       # Replace with your Test Key Secret
+
+# settings.py
+
+# Redirect to the 'login' path name when @login_required blocks a user
+LOGIN_URL = 'login'
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'admin_dashboard'
+LOGOUT_REDIRECT_URL = 'login'

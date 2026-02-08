@@ -115,7 +115,9 @@
         <div class="cart-body"><ul id="cart-items-list"></ul></div>
         <div class="cart-footer">
             <div class="cart-total-row"><span>SubTotal</span><span class="total-amount">₹<span id="total-price">0</span></span></div>
-            <button class="checkout-btn">Checkout Now</button>
+                    <a href="{% url 'checkout' %}" class="checkout-btn" style="text-decoration:none; display:block; text-align:center;">
+                Proceed to Secure Checkout
+            </a>
             <button class="clear-cart-link" onclick="clearCart()">Clear All Items</button>
         </div>
     </div>
@@ -186,7 +188,11 @@
                      data-img="{{ item.image.url }}">
                     
                     <img src="{{ item.image.url }}" alt="{{ item.title }}">
-                    <button class="add-to-cart-btn">Add to Cart - ₹{{ item.price }}</button>
+                    <button class="add-to-cart-btn"
+                            data-id="{{ item.id }}"
+                            data-name="{{ item.title }}"
+                            data-price="{{ item.price }}"
+                            data-image="{{ item.image.url }}">Add to Cart - ₹{{ item.price }}</button>
                 </div>
                 {% empty %}
                 <div class="slide active"><img src="{% static 'placeholder.jpg' %}" alt="Empty"><button class="add-to-cart-btn">No Items</button></div>
@@ -251,7 +257,11 @@
                     <div class="wood-overlay">
                         <h3>{{ product.name }}</h3>
                         <p class="wood-price">₹{{ product.price }}</p>
-                        <button class="add-to-cart-btn">Add to Bag</button>
+                        <button class="add-to-cart-btn"
+                                data-id="{{ product.id }}"
+                                data-name="{{ product.name }}"
+                                data-price="{{ product.price }}"
+                                data-image="{{ product.image.url }}">Add to Bag</button>
                     </div>
                 </div>
                 {% empty %}
@@ -381,6 +391,7 @@
     </style>
 
     <script src="{% static 'script.js' %}"></script>
+    <script src="{% static 'js/cart.js' %}"></script>
     
     <script>
         // --- 1. DROPDOWN TOGGLE ---

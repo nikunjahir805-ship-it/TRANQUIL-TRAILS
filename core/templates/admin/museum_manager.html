@@ -1,0 +1,241 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block page_title %}Museum Manager{% endblock %}
+{% block page_desc %}Curate the main homepage exhibitions and collections.{% endblock %}
+
+{% block content %}
+<style>
+    /* Section Tabs */
+    .museum-tabs {
+        display: flex; gap: 10px; margin-bottom: 30px; background: #f4f1ea;
+        padding: 8px; border-radius: 50px; width: fit-content;
+    }
+    .m-tab {
+        padding: 10px 25px; border-radius: 50px; border: none; background: transparent;
+        cursor: pointer; font-family: 'Poppins'; font-weight: 600; color: #8B5E3C; transition: 0.3s;
+    }
+    .m-tab.active { background: #8B5E3C; color: white; box-shadow: 0 4px 15px rgba(139, 94, 60, 0.3); }
+
+    /* Museum Grid */
+    .museum-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+
+    .museum-card {
+        background: white; border-radius: 15px; overflow: hidden; border: 1px solid #eee;
+        transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; transform: translateY(30px);
+        display: flex; flex-direction: column;
+    }
+    .museum-card:hover { transform: scale(1.03); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+
+    .m-img-wrapper { height: 200px; width: 100%; position: relative; overflow: hidden; }
+    .m-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+    
+    .m-badge {
+        position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,0.9);
+        padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: bold;
+    }
+
+    .m-content { padding: 20px; flex-grow: 1; }
+    .m-content h4 { font-family: 'Playfair Display'; font-size: 1.2rem; margin-bottom: 5px; }
+    .m-content p { font-size: 0.85rem; color: #777; }
+
+    .m-actions { display: flex; border-top: 1px solid #f5f5f5; }
+    .m-action-btn { flex: 1; padding: 12px; border: none; background: none; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
+    .m-action-btn:hover { background: #faf9f7; color: #8B5E3C; }
+    .btn-del { color: #d32f2f; }
+
+    /* Modal Styles */
+    .modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center;
+        z-index: 2000; backdrop-filter: blur(5px);
+    }
+    .modal-content {
+        background: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 500px;
+        position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .close-modal { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; cursor: pointer; color: #999; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
+    .form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Poppins'; }
+    .btn-save { background: #8B5E3C; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: 600; margin-top: 10px; }
+</style>
+
+<div class="museum-tabs">
+    <button class="m-tab active" data-tab="gallery" onclick="filterMuseum('gallery')">The Gallery</button>
+    <button class="m-tab" data-tab="collections" onclick="filterMuseum('collections')">Collections</button>
+    <button class="m-tab" data-tab="woodwork" onclick="filterMuseum('woodwork')">Woodwork</button>
+</div>
+
+<button class="add-btn-main" onclick="openMuseumModal('add')" style="margin-bottom: 30px; background: #2c2c2c; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+    <i class="fas fa-plus"></i> Add New <span id="addBtnText">Gallery Item</span>
+</button>
+
+<div class="museum-grid" id="museumGrid">
+    
+    {% for item in gallery_items %}
+    <div class="museum-card" data-type="gallery">
+        <div class="m-img-wrapper">
+            <span class="m-badge">INDEX SLIDER</span>
+            <img src="{{ item.image.url }}" id="img-{{ item.id }}">
+        </div>
+        <div class="m-content">
+            <h4 id="name-{{ item.id }}">{{ item.name }}</h4>
+            <p>₹<span id="price-{{ item.id }}">{{ item.price }}</span></p>
+        </div>
+        <div class="m-actions">
+            <button class="m-action-btn" onclick="openMuseumModal('edit', '{{ item.id }}', 'gallery')"><i class="fas fa-edit"></i> Edit</button>
+            <form method="POST" style="flex:1;" onsubmit="return confirm('Delete this item from home page?')">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="item_id" value="{{ item.id }}">
+                <input type="hidden" name="item_type" value="gallery">
+                <button type="submit" class="m-action-btn btn-del"><i class="fas fa-trash"></i> Delete</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% for cat in categories %}
+    <div class="museum-card" data-type="collections">
+        <div class="m-img-wrapper">
+            <span class="m-badge">COLLECTION</span>
+            <img src="{{ cat.image.url }}" id="img-cat-{{ cat.id }}">
+        </div>
+        <div class="m-content">
+            <h4 id="name-cat-{{ cat.id }}">{{ cat.name }}</h4>
+            <p>Main Homepage Grid</p>
+        </div>
+        <div class="m-actions">
+            <button class="m-action-btn" onclick="openMuseumModal('edit', '{{ cat.id }}', 'collections')"><i class="fas fa-edit"></i> Edit</button>
+            <form method="POST" style="flex:1;" onsubmit="return confirm('Delete this collection?')">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="item_id" value="{{ cat.id }}">
+                <input type="hidden" name="item_type" value="collections">
+                <button type="submit" class="m-action-btn btn-del"><i class="fas fa-trash"></i> Delete</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% for product in wood_products %}
+    <div class="museum-card" data-type="woodwork">
+        <div class="m-img-wrapper">
+            <span class="m-badge">WOODWORK</span>
+            <img src="{{ product.image.url }}" id="img-{{ product.id }}">
+        </div>
+        <div class="m-content">
+            <h4 id="name-{{ product.id }}">{{ product.name }}</h4>
+            <p>₹<span id="price-{{ product.id }}">{{ product.price }}</span></p>
+        </div>
+        <div class="m-actions">
+            <button class="m-action-btn" onclick="openMuseumModal('edit', '{{ product.id }}', 'woodwork')"><i class="fas fa-edit"></i> Edit</button>
+            <form method="POST" style="flex:1;" onsubmit="return confirm('Delete this woodwork item?')">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="item_id" value="{{ product.id }}">
+                <input type="hidden" name="item_type" value="woodwork">
+                <button type="submit" class="m-action-btn btn-del"><i class="fas fa-trash"></i> Delete</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="modal-overlay" id="museumModal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeMuseumModal()">&times;</span>
+        <h3 id="modalTitle" style="margin-bottom: 20px; font-family: 'Playfair Display'; color: #8B5E3C;">Add New Item</h3>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="save">
+            <input type="hidden" name="item_id" id="form_item_id">
+            <input type="hidden" name="item_type" id="form_item_type" value="gallery">
+
+            <div class="form-group">
+                <label>Name / Title</label>
+                <input type="text" name="name" id="form_name" class="form-control" required>
+            </div>
+
+            <div class="form-group" id="priceGroup">
+                <label>Price (₹)</label>
+                <input type="number" name="price" id="form_price" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label>Update Image</label>
+                <input type="file" name="image" class="form-control" id="form_image">
+            </div>
+
+            <button type="submit" class="btn-save">Save to Museum</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    let activeType = 'gallery';
+
+    function filterMuseum(type) {
+        activeType = type;
+        // Update Tabs
+        document.querySelectorAll('.m-tab').forEach(t => t.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        
+        // Update Add Button Text
+        const typeLabel = type === 'gallery' ? 'Gallery Item' : (type === 'collections' ? 'Collection' : 'Woodwork Item');
+        document.getElementById('addBtnText').innerText = typeLabel;
+
+        // Filter Grid
+        const cards = document.querySelectorAll('.museum-card');
+        gsap.to(cards, {
+            opacity: 0, scale: 0.9, duration: 0.2, 
+            onComplete: () => {
+                cards.forEach(card => {
+                    card.style.display = card.dataset.type === type ? "flex" : "none";
+                });
+                gsap.to(`.museum-card[data-type="${type}"]`, {
+                    opacity: 1, scale: 1, duration: 0.4, stagger: 0.05
+                });
+            }
+        });
+    }
+
+    function openMuseumModal(mode, id = null, type = activeType) {
+        const modal = document.getElementById('museumModal');
+        document.getElementById('form_item_id').value = id || "";
+        document.getElementById('form_item_type').value = type;
+
+        // Hide price field for collections
+        document.getElementById('priceGroup').style.display = type === 'collections' ? 'none' : 'block';
+
+        if (mode === 'edit') {
+            document.getElementById('modalTitle').innerText = "Edit Item";
+            const idPrefix = type === 'collections' ? 'cat-' : '';
+            document.getElementById('form_name').value = document.getElementById(`name-${idPrefix}${id}`).innerText;
+            if (type !== 'collections') {
+                document.getElementById('form_price').value = document.getElementById(`price-${id}`).innerText;
+            }
+        } else {
+            document.getElementById('modalTitle').innerText = "Add New Item";
+            document.getElementById('form_name').value = "";
+            document.getElementById('form_price').value = "";
+        }
+
+        modal.style.display = "flex";
+        gsap.from(".modal-content", { y: -30, opacity: 0, duration: 0.4, ease: "power2.out" });
+    }
+
+    function closeMuseumModal() {
+        document.getElementById('museumModal').style.display = "none";
+    }
+
+    // Initial load
+    window.onload = () => {
+        gsap.to('.museum-card[data-type="gallery"]', { opacity: 1, y: 0, stagger: 0.1, duration: 0.8 });
+        document.querySelectorAll('.museum-card').forEach(c => {
+            if(c.dataset.type !== 'gallery') c.style.display = 'none';
+        });
+    }
+</script>
+{% endblock %}

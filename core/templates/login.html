@@ -21,201 +21,56 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
 
-        .login-container {
-            display: flex;
-            height: 100vh;
-            width: 100%;
-        }
+        .login-container { display: flex; height: 100vh; width: 100%; }
 
         /* --- LEFT SIDE VISUAL --- */
         .login-visual {
             flex: 1.2;
-            /* Make sure 'no.jpg' exists in your static folder, or use a placeholder */
             background: url('{% static "no.jpg" %}'); 
-            background-position: center;
-            background-size: cover;
-            background-repeat: no-repeat;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between; 
-            padding: 60px;
-            color: white;
-            position: relative;
+            background-position: center; background-size: cover; background-repeat: no-repeat;
+            display: flex; flex-direction: column; justify-content: space-between; 
+            padding: 60px; color: white; position: relative;
         }
 
-        .visual-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 100%);
-            z-index: 1;
-        }
+        .visual-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 100%); z-index: 1; }
 
         .product-badge {
-            position: relative;
-            z-index: 2;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 25px;
-            width: fit-content;
-            border-radius: 4px;
-            animation: float 6s ease-in-out infinite;
+            position: relative; z-index: 2; background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2); padding: 25px; width: fit-content;
+            border-radius: 4px; animation: float 6s ease-in-out infinite;
         }
 
-        .collection-tag {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--accent);
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
+        .collection-tag { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); display: block; margin-bottom: 8px; font-weight: 600; }
+        .product-badge h4 { font-family: 'Playfair Display'; font-size: 1.3rem; margin-bottom: 5px; }
 
-        .product-badge h4 {
-            font-family: 'Playfair Display';
-            font-size: 1.3rem;
-            margin-bottom: 5px;
-        }
+        .visual-content { position: relative; z-index: 2; }
+        .visual-content h2 { font-family: 'Playfair Display', serif; font-size: 4rem; line-height: 1; margin-bottom: 20px; }
+        .visual-content h2 span { font-style: italic; font-weight: 400; color: #fee500; }
 
-        .visual-content {
-            position: relative;
-            z-index: 2;
-        }
-
-        .visual-content h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 4rem;
-            line-height: 1;
-            margin-bottom: 20px;
-        }
-
-        .visual-content h2 span {
-            font-style: italic;
-            font-weight: 400;
-            color: #fee500;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
-        }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
 
         /* --- RIGHT SIDE FORM --- */
-        .login-form-section {
-            flex: 1;
-            background: var(--bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            position: relative;
-        }
+        .login-form-section { flex: 1; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 40px; position: relative; }
+        .form-box { width: 100%; max-width: 400px; opacity: 0; transform: translateY(30px); }
 
-        .form-box {
-            width: 100%;
-            max-width: 400px;
-            opacity: 0; 
-            transform: translateY(30px);
-        }
+        .logo-back { text-decoration: none; color: var(--text); font-family: 'Playfair Display'; font-weight: bold; font-size: 1.2rem; display: block; margin-bottom: 50px; letter-spacing: 2px; }
+        .form-box h3 { font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 10px; }
+        .form-box p { color: var(--gray); margin-bottom: 30px; font-size: 0.9rem; }
 
-        .logo-back {
-            text-decoration: none;
-            color: var(--text);
-            font-family: 'Playfair Display';
-            font-weight: bold;
-            font-size: 1.2rem;
-            display: block;
-            margin-bottom: 50px;
-            letter-spacing: 2px;
-        }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; font-size: 0.75rem; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .input-group input { width: 100%; padding: 15px; background: transparent; border: 1px solid #d1ccc0; border-radius: 4px; font-family: 'Poppins'; transition: 0.3s; }
+        .input-group input:focus { outline: none; border-color: var(--primary); background: white; }
 
-        .form-box h3 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
+        .sign-in-btn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 4px; font-weight: 600; font-size: 1rem; transition: 0.4s; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; }
+        .sign-in-btn:hover { background: #2D4739; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .sign-in-btn:disabled { background: #a0a0a0; cursor: not-allowed; transform: none; }
 
-        .form-box p {
-            color: var(--gray);
-            margin-bottom: 30px;
-            font-size: 0.9rem;
-        }
+        .signup-link { text-align: center; margin-top: 30px; font-size: 0.9rem; }
+        .signup-link a { color: var(--primary); font-weight: 600; text-decoration: none; cursor: pointer; }
 
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group label {
-            display: block;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 15px;
-            background: transparent;
-            border: 1px solid #d1ccc0;
-            border-radius: 4px;
-            font-family: 'Poppins';
-            transition: 0.3s;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: white;
-        }
-
-        .sign-in-btn {
-            width: 100%;
-            padding: 16px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: 0.4s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-        }
-
-        .sign-in-btn:hover {
-            background: #2D4739;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-
-        .sign-in-btn:disabled {
-            background: #a0a0a0;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .signup-link {
-            text-align: center;
-            margin-top: 30px;
-            font-size: 0.9rem;
-        }
-
-        .signup-link a {
-            color: var(--primary);
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        @media (max-width: 900px) {
-            .login-visual { display: none; }
-            .login-form-section { flex: 1; }
-        }
+        @media (max-width: 900px) { .login-visual { display: none; } .login-form-section { flex: 1; } }
     </style>
 </head>
 <body>
@@ -319,9 +174,7 @@
             const signupView = document.getElementById('signupView');
             
             gsap.to(".form-box", {
-                opacity: 0,
-                y: 20,
-                duration: 0.4,
+                opacity: 0, y: 20, duration: 0.4, 
                 onComplete: () => {
                     if (loginView.style.display === "none") {
                         loginView.style.display = "block";
@@ -330,20 +183,14 @@
                         loginView.style.display = "none";
                         signupView.style.display = "block";
                     }
-                    
-                    gsap.to(".form-box", {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        ease: "power2.out"
-                    });
+                    gsap.to(".form-box", { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" });
                 }
             });
         }
 
-        // --- 3. BACKEND INTEGRATION ---
+        // --- 3. AUTHENTICATION LOGIC ---
         
-        // SIGNUP LOGIC
+        // SIGNUP
         document.getElementById('signupForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const btn = document.getElementById('signupBtn');
@@ -379,7 +226,7 @@
             });
         });
 
-        // LOGIN LOGIC
+        // LOGIN (Admin Check Logic)
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const btn = document.getElementById('loginBtn');
@@ -398,6 +245,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Check if user is Staff (Admin)
                     if (data.is_staff) {
                         localStorage.setItem('isAdmin', 'true');
                         window.location.href = "{% url 'admin_dashboard' %}";

@@ -100,20 +100,22 @@ class ShippingAddress(models.Model):
 # --- 7. GALLERY MODEL ---
 class GalleryItem(models.Model):
     CATEGORY_CHOICES = [
-        ('ceramics', 'Ceramics'),
-        ('wood', 'Woodwork'),
-        ('textiles', 'Textiles'),
+        ('Ceramics', 'Ceramics'),
+        ('Wood', 'Woodwork'),
+        ('Textiles', 'Textiles'),
+        ('Other', 'Other')
     ]
     
-    title = models.CharField(max_length=100, blank=True)
+    title = models.CharField(max_length=100)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='Other')
     image = models.ImageField(upload_to='gallery/')
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='ceramics')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.title or f"Gallery Item {self.id}"
+        return self.title
 
-# --- 8. OFFER MODEL (NEW) ---
+# --- 8. OFFER MODEL ---
 class Offer(models.Model):
     CATEGORY_CHOICES = (
         ('Membership', 'Membership'),
@@ -136,40 +138,20 @@ class Offer(models.Model):
 
     def __str__(self):
         return self.title
-    
-    # --- 9. REVIEW MODEL (NEW) ---
+
+# --- 9. REVIEW MODEL ---
 class Review(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    rating = models.IntegerField(default=5) # 1 to 5
+    rating = models.IntegerField(default=5)
     comment = models.TextField()
-    is_liked = models.BooleanField(default=False) # The "Heart" status
+    is_liked = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.customer.full_name} - {self.product.name}"
-    from django.db import models
 
-class GalleryItem(models.Model):
-    CATEGORY_CHOICES = [
-        ('Ceramics', 'Ceramics'),
-        ('Wood', 'Woodwork'),
-        ('Textiles', 'Textiles'),
-        ('Other', 'Other')
-    ]
-
-    title = models.CharField(max_length=100)
-    # Added Price Field for Index Page Carousel
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00) 
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='Other')
-    image = models.ImageField(upload_to='gallery/')
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.title
-    
-    from django.db import models
-
+# --- 10. CAMPAIGN MODEL ---
 class Campaign(models.Model):
     STATUS_CHOICES = [
         ('Draft', 'Draft'),
@@ -185,11 +167,9 @@ class Campaign(models.Model):
 
     def __str__(self):
         return self.subject
-    
-    from django.db import models
 
+# --- 11. SITE SETTING MODEL ---
 class SiteSetting(models.Model):
-    # We generally only use ID=1 for site settings (Singleton pattern)
     store_name = models.CharField(max_length=100, default="Tranquil Trails")
     admin_email = models.EmailField(default="admin@tranquiltrails.com")
     contact_phone = models.CharField(max_length=20, default="+1 234 567 890")

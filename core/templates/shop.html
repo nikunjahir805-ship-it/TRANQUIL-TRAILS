@@ -217,8 +217,11 @@
 
                 <p class="price">₹{{ product.price }}</p>
                 
-                <button class="add-btn" 
-                        onclick="addToCart('{{ product.id }}', '{{ product.name }}', '{{ product.price }}', '{% if product.image %}{{ product.image.url }}{% else %}{% static 'placeholder.jpg' %}{% endif %}')">
+                <button class="add-btn"
+                        data-id="{{ product.id }}"
+                        data-name="{{ product.name }}"
+                        data-price="{{ product.price }}"
+                        data-image="{{ product.image.url }}">
                     Add to Cart
                 </button>
             </div>
@@ -320,22 +323,7 @@
         }
     </script>
     
-   <script src="{% static 'script.js' %}"></script>
-
-    <script>
-        // Set user context once
-        window.djangoUser = "{{ user.username|default:'guest' }}";
-
-        /** * RE-DEFINE SIDEBAR OPENER: 
-         * This ensures that when addToCart() is called from script.js,
-         * the 'active' class is applied to your specific sidebar ID.
-         */
-        function openCartSidebar() {
-            const sidebar = document.getElementById('cartSidebar');
-            if (sidebar) {
-                sidebar.classList.add('active');
-            }
-        }
-    </script>
+    <script src="{% static 'script.js' %}"></script>
+    <script src="{% static 'js/cart.js' %}"></script>
 </body>
 </html>
