@@ -187,6 +187,21 @@
         </ul>
     </nav>
 
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h2 style="font-family: 'Playfair Display';">Your Bag</h2>
+            <button class="close-cart" id="closeCart" aria-label="Close Cart">&times;</button>
+        </div>
+        <div class="cart-body"><ul id="cart-items-list"></ul></div>
+        <div class="cart-footer">
+            <div class="cart-total-row"><span>SubTotal</span><span class="total-amount">₹<span id="total-price">0</span></span></div>
+            <a href="{% url 'checkout' %}" class="checkout-btn" style="text-decoration:none; display:block; text-align:center;">
+                Proceed to Secure Checkout
+            </a>
+            <button class="clear-cart-link" onclick="clearCart()">Clear All Items</button>
+        </div>
+    </div>
+
     <header class="offers-hero">
         <div class="container">
             <h1>Heritage <span>Specials</span></h1>
@@ -217,6 +232,7 @@
     </section>
 
     <script src="{% static 'script.js' %}"></script>
+    <script src="{% static 'js/cart.js' %}"></script>
     
     {{ offers_data|json_script:"offers-json" }}
 

@@ -1,128 +1,286 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en" data-theme="light"> <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Admin | Tranquil Trails{% endblock %}</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
     <style>
+        /* --- THEME VARIABLES --- */
         :root {
-            --sidebar-bg: #1e1e2d;
-            --sidebar-text: #a2a3b7;
-            --sidebar-hover: #2b2b40;
-            --active-color: #8b5e3c;
+            /* Light Mode (Default) */
+            --sidebar-bg: #11111d; 
+            --sidebar-text: #94a3b8;
+            --sidebar-hover-bg: rgba(255, 255, 255, 0.08);
             
-            --main-bg: #f3f6f9;
+            --active-color: #c5a880; 
+            --active-gradient: linear-gradient(90deg, #8b5e3c, #c5a880);
+            
+            --main-bg: #f8fafc;
             --white: #ffffff;
-            --text-dark: #3f4254;
-            --border-color: #e4e6ef;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border-color: #e2e8f0;
+            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            --search-bg: #ffffff;
+        }
+
+        /* Dark Mode Overrides */
+        [data-theme="dark"] {
+            --sidebar-bg: #0b0b10; /* Darker sidebar */
+            --main-bg: #141419;    /* Very dark background */
+            --white: #1e1e24;      /* Dark cards */
+            --text-dark: #f1f5f9;  /* White text */
+            --text-light: #94a3b8; /* Muted text */
+            --border-color: #2d2d35;
+            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+            --search-bg: #1e1e24;
+        }
+
+        /* Global Transition for Smooth Animation */
+        body, .sidebar, .top-header, .content-wrapper, .nav-link, 
+        .search-box input, .user-profile, .card, div, span, i {
+            transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; text-decoration: none; list-style: none; outline: none; }
-        body { font-family: 'Poppins', sans-serif; background-color: var(--main-bg); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; }
+        
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background-color: var(--main-bg); 
+            color: var(--text-dark); 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
 
         /* --- SIDEBAR --- */
         .sidebar {
-            width: 265px;
+            width: 280px;
             background-color: var(--sidebar-bg);
-            display: flex; flex-direction: column;
-            height: 100vh;
+            display: flex; 
+            flex-direction: column;
+            height: 96vh;
+            margin: 2vh 0 2vh 20px;
+            border-radius: 20px;
             flex-shrink: 0;
-            transition: all 0.3s ease;
             z-index: 1000;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            overflow-x: hidden;
         }
 
         .logo-area {
-            height: 80px; display: flex; align-items: center; padding: 0 25px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            height: 100px; 
+            display: flex; 
+            align-items: center; 
+            padding: 0 30px;
+            margin-bottom: 10px;
+            flex-shrink: 0;
         }
-        .logo-text { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: #fff; letter-spacing: 1px; }
-        .logo-sub { font-size: 0.7rem; color: #6c7293; margin-top: 2px; }
+        
+        .logo-text { 
+            font-family: 'Playfair Display', serif; 
+            font-size: 1.4rem; 
+            font-weight: 700; 
+            color: #fff; 
+            letter-spacing: 1.5px;
+            background: linear-gradient(to right, #fff, var(--active-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .logo-sub { 
+            font-size: 0.65rem; 
+            color: #64748b; 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+            margin-top: 4px;
+        }
 
-        .nav-scroller { flex: 1; overflow-y: auto; padding: 20px 0; }
+        .nav-scroller { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 10px 20px; 
+            overflow-x: hidden;
+        }
         .nav-scroller::-webkit-scrollbar { width: 4px; }
-        .nav-scroller::-webkit-scrollbar-thumb { background: #3b3b52; border-radius: 2px; }
+        .nav-scroller::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
 
-        .nav-category { font-size: 0.75rem; text-transform: uppercase; color: #555770; padding: 20px 25px 8px; font-weight: 600; letter-spacing: 0.5px; }
-        
-        .nav-item { padding: 0 15px; margin-bottom: 4px; }
-        .nav-link {
-            display: flex; align-items: center; padding: 12px 15px;
-            color: var(--sidebar-text); border-radius: 8px; font-size: 0.9rem; font-weight: 500;
-            transition: 0.2s;
+        .nav-category { 
+            font-size: 0.7rem; 
+            text-transform: uppercase; 
+            color: #475569; 
+            padding: 25px 15px 10px; 
+            font-weight: 700; 
+            letter-spacing: 1.2px; 
         }
-        .nav-link i { width: 25px; font-size: 1.1rem; color: #606275; transition: 0.2s; }
+        .nav-item { margin-bottom: 6px; }
         
-        .nav-link:hover { background-color: var(--sidebar-hover); color: #fff; }
-        .nav-link:hover i { color: #fff; }
-        
-        .nav-link.active { background-color: #2b2b40; color: #fff; }
-        .nav-link.active i { color: var(--active-color); }
+        .nav-link {
+            display: flex; 
+            align-items: center; 
+            padding: 12px 18px;
+            color: var(--sidebar-text); 
+            border-radius: 12px; 
+            font-size: 0.9rem; 
+            font-weight: 400;
+            position: relative;
+            white-space: nowrap;
+        }
 
-        .badge { padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; margin-left: auto; }
-        .bg-accent { background: var(--active-color); color: white; }
-        .bg-danger { background: #f64e60; color: white; }
+        .nav-link:focus { outline: none !important; }
 
-        /* --- MAIN CONTENT --- */
-        .content-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .nav-link i { width: 30px; font-size: 1.1rem; transition: 0.3s; flex-shrink: 0; }
+        .nav-link:hover { background-color: var(--sidebar-hover-bg); color: #fff; transform: translateX(5px); }
 
-        /* Glassmorphism Header */
+        .nav-link.active { 
+            background: var(--active-gradient); 
+            color: #fff; 
+            box-shadow: 0 10px 15px -3px rgba(139, 94, 60, 0.3);
+            font-weight: 500;
+        }
+        .nav-link.active i { color: #fff; }
+
+        .nav-link.logout { color: #ef4444; margin-top: 30px; }
+        .nav-link.logout i { color: #ef4444; }
+        .nav-link.logout:hover { background-color: #ef4444; color: #fff; transform: translateX(5px); }
+        .nav-link.logout:hover i { color: #fff; }
+
+        .badge { 
+            padding: 2px 10px; border-radius: 20px; font-size: 0.65rem; font-weight: 600; margin-left: auto; 
+        }
+        .bg-accent { background: rgba(255,255,255,0.2); color: white; }
+        .bg-danger { background: #ef4444; color: white; }
+
+        /* --- CONTENT WRAPPER --- */
+        .content-wrapper { 
+            flex: 1; display: flex; flex-direction: column; overflow: hidden; padding-left: 20px; 
+        }
+
         .top-header {
-            height: 80px; display: flex; align-items: center; justify-content: space-between; padding: 0 30px;
-            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color); z-index: 100;
+            height: 80px; 
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 0 40px 0 20px;
+            background: transparent; 
+            z-index: 100;
+            flex-shrink: 0;
         }
 
         .header-left { display: flex; align-items: center; gap: 20px; }
-        .mobile-toggle { font-size: 1.4rem; cursor: pointer; display: none; color: var(--text-dark); }
+        .mobile-toggle { font-size: 1.4rem; cursor: pointer; display: none; color: var(--text-dark); transition: 0.2s; }
+        .mobile-toggle:hover { color: var(--active-color); }
         
-        .page-title h2 { font-family: 'Playfair Display'; font-size: 1.4rem; color: #181c32; }
-        .page-title p { font-size: 0.85rem; color: #b5b5c3; margin-top: -2px; }
+        .page-title h2 { 
+            font-family: 'Playfair Display'; font-size: 1.6rem; color: var(--text-dark); font-weight: 700;
+        }
+        .page-title p { font-size: 0.85rem; color: var(--text-light); margin-top: 2px; }
 
         .header-right { display: flex; align-items: center; gap: 20px; }
         
-        .search-box { position: relative; display: none; /* Hidden on small screens */ }
+        /* --- SEARCH BOX --- */
+        .search-box { position: relative; display: none; }
         .search-box input {
-            padding: 10px 15px 10px 40px; border-radius: 20px; border: 1px solid transparent; background: #eaecf0; width: 220px; transition: 0.3s;
+            padding: 12px 20px 12px 45px; 
+            border-radius: 15px; 
+            border: 1px solid var(--border-color); 
+            background: var(--search-bg); 
+            width: 260px; 
+            color: var(--text-dark);
+            box-shadow: var(--card-shadow);
         }
-        .search-box input:focus { background: white; border-color: var(--border-color); box-shadow: 0 0 0 4px rgba(139, 94, 60, 0.1); width: 280px; }
-        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #999; }
+        .search-box input:focus { 
+            width: 350px; 
+            border-color: var(--active-color); 
+            box-shadow: 0 0 0 4px rgba(139, 94, 60, 0.1); 
+        }
+        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-light); }
 
-        .notif-btn { position: relative; cursor: pointer; font-size: 1.2rem; color: #7e8299; transition: 0.2s; }
-        .notif-btn:hover { color: var(--active-color); }
-        .notif-dot { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: #f64e60; border-radius: 50%; border: 2px solid white; animation: pulse 2s infinite; }
+        /* --- COOL TOGGLE SWITCH (Light/Dark) --- */
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+        }
+        .theme-switch {
+            display: inline-block;
+            height: 26px;
+            position: relative;
+            width: 50px;
+        }
+        .theme-switch input { display: none; }
+        .slider {
+            background-color: #cbd5e1;
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: .4s;
+            border-radius: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 5px;
+        }
+        .slider:before {
+            background-color: #fff;
+            bottom: 3px;
+            content: "";
+            height: 20px;
+            left: 3px;
+            position: absolute;
+            transition: .4s;
+            width: 20px;
+            border-radius: 50%;
+            z-index: 2;
+        }
+        /* Icons inside the slider */
+        .slider .fa-moon { color: #f1c40f; font-size: 12px; opacity: 0; transition: 0.3s; }
+        .slider .fa-sun { color: #f39c12; font-size: 12px; opacity: 1; transition: 0.3s; }
 
-        .user-profile { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-        .user-avatar { width: 40px; height: 40px; border-radius: 8px; background: #e1f0ff; color: #009ef7; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; }
+        input:checked + .slider { background-color: var(--active-color); }
+        input:checked + .slider:before { transform: translateX(24px); background-color: #1e1e2d; }
+        
+        /* Icon Visibility Animation */
+        input:checked + .slider .fa-moon { opacity: 1; }
+        input:checked + .slider .fa-sun { opacity: 0; }
+
+        /* --- NOTIFICATION & PROFILE --- */
+        .notif-btn { position: relative; cursor: pointer; font-size: 1.3rem; color: var(--text-light); transition: 0.2s; }
+        .notif-btn:hover { color: var(--active-color); transform: rotate(15deg); }
+        .notif-dot { position: absolute; top: 0; right: 0; width: 10px; height: 10px; background: #ef4444; border-radius: 50%; border: 2px solid var(--main-bg); }
+
+        .user-profile { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .user-avatar { 
+            width: 45px; height: 45px; border-radius: 12px; background: var(--active-gradient); color: white; 
+            display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; 
+            box-shadow: 0 4px 12px rgba(139, 94, 60, 0.2); transition: 0.3s;
+        }
+        .user-profile:hover .user-avatar { transform: scale(1.05); }
+        
         .user-info { text-align: right; }
-        .user-info .name { font-size: 0.9rem; font-weight: 600; color: #181c32; }
-        .user-info .role { font-size: 0.75rem; color: #b5b5c3; display: block; }
+        .user-info .name { font-size: 0.95rem; font-weight: 600; color: var(--text-dark); }
+        .user-info .role { font-size: 0.75rem; color: var(--text-light); display: block; }
 
-        /* Content Body */
-        .content-body { flex: 1; overflow-y: auto; padding: 30px; }
-        .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; opacity: 0; transform: translateY(15px); }
+        .content-body { 
+            flex: 1; overflow-y: auto; padding: 20px 40px 40px 20px; scrollbar-width: none; 
+        }
 
-        /* Animations */
-        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(246, 78, 96, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(246, 78, 96, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(246, 78, 96, 0); } }
-
-        /* --- RESPONSIVE --- */
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 999; backdrop-filter: blur(2px); }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; backdrop-filter: blur(4px); }
 
         @media (min-width: 992px) { .search-box { display: block; } }
 
-        @media (max-width: 992px) {
-            .sidebar { position: fixed; left: -280px; height: 100%; box-shadow: 5px 0 20px rgba(0,0,0,0.1); }
+        @media (max-width: 1024px) {
+            .sidebar { position: fixed; left: -300px; height: 100vh; margin: 0; border-radius: 0; }
             .sidebar.active { left: 0; }
-            .mobile-toggle { display: block; }
+            .content-wrapper { padding-left: 0; }
+            .mobile-toggle { display: block; margin-right: 15px; }
             .overlay.active { display: block; }
             .content-body { padding: 20px; }
             .user-info { display: none; }
@@ -136,13 +294,13 @@
     <aside class="sidebar" id="sidebar">
         <div class="logo-area">
             <div>
-                <div class="logo-text">TRANQUIL TRAILS</div>
-                <div class="logo-sub">Administration Panel</div>
+                <div class="logo-text">TRANQUIL</div>
+                <div class="logo-sub">Trails Admin</div>
             </div>
         </div>
 
         <div class="nav-scroller">
-            <div class="nav-category">Dashboard</div>
+            <div class="nav-category">Main Menu</div>
             <div class="nav-item">
                 <a href="{% url 'admin_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
                     <i class="fas fa-th-large"></i> <span>Overview</span>
@@ -177,7 +335,7 @@
                 </a>
             </div>
 
-            <div class="nav-category">Sales</div>
+            <div class="nav-category">Sales & Social</div>
             <div class="nav-item">
                 <a href="{% url 'admin_orders' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_orders' %}active{% endif %}">
                     <i class="fas fa-shopping-cart"></i> <span>Orders</span>
@@ -202,35 +360,34 @@
                 </a>
             </div>
 
-           <div class="nav-category">Media</div>
+            <div class="nav-category">Media</div>
             <div class="nav-item">
                 <a href="{% url 'museum_manager' %}" class="nav-link {% if request.resolver_match.url_name == 'museum_manager' %}active{% endif %}">
                     <i class="fas fa-university"></i> <span>Museum Manager</span>
                 </a>
             </div>
-            
             <div class="nav-item">
                 <a href="{% url 'admin_media' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_media' %}active{% endif %}">
                     <i class="fas fa-images"></i> <span>Library</span>
                 </a>
             </div>
 
-            <div class="nav-category">Settings</div>
+            <div class="nav-category">System</div>
             <div class="nav-item">
                 <a href="{% url 'admin_settings' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_settings' %}active{% endif %}">
-                    <i class="fas fa-cog"></i> <span>General</span>
+                    <i class="fas fa-cog"></i> <span>Settings</span>
                 </a>
             </div>
+            
             <div class="nav-item">
-                <a href="{% url 'home' %}" class="nav-link">
-                    <i class="fas fa-sign-out-alt"></i> <span>View Store</span>
+                <a href="{% url 'home' %}" class="nav-link logout">
+                    <i class="fas fa-sign-out-alt"></i> <span>Exit Store</span>
                 </a>
             </div>
         </div>
     </aside>
 
     <div class="content-wrapper">
-        
         <header class="top-header">
             <div class="header-left">
                 <i class="fas fa-bars mobile-toggle" id="menuToggle"></i>
@@ -241,9 +398,20 @@
             </div>
 
             <div class="header-right">
+                
+                <div class="theme-switch-wrapper">
+                    <label class="theme-switch" for="checkbox">
+                        <input type="checkbox" id="checkbox" />
+                        <div class="slider round">
+                            <i class="fas fa-sun"></i>
+                            <i class="fas fa-moon"></i>
+                        </div>
+                    </label>
+                </div>
+
                 <div class="search-box">
                     <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search...">
+                    <input type="text" placeholder="Quick search...">
                 </div>
 
                 <div class="notif-btn">
@@ -270,7 +438,29 @@
     </div>
 
     <script>
-        // 1. Sidebar Toggle
+        // 1. Theme Switcher Logic
+        const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+        const currentTheme = localStorage.getItem('theme');
+
+        if (currentTheme) {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            if (currentTheme === 'dark') {
+                toggleSwitch.checked = true;
+            }
+        }
+
+        function switchTheme(e) {
+            if (e.target.checked) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+        toggleSwitch.addEventListener('change', switchTheme, false);
+
+        // 2. Sidebar Logic
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
         const toggle = document.getElementById('menuToggle');
@@ -283,17 +473,20 @@
         if(toggle) toggle.addEventListener('click', toggleSidebar);
         if(overlay) overlay.addEventListener('click', toggleSidebar);
 
-        // 2. Scroll Memory (Keep sidebar position on reload)
         const scroller = document.querySelector('.nav-scroller');
         const savedPos = localStorage.getItem('sidebarPos');
         if (savedPos) scroller.scrollTop = savedPos;
 
-        scroller.addEventListener('scroll', () => {
-            localStorage.setItem('sidebarPos', scroller.scrollTop);
-        });
+        if (scroller) {
+            scroller.addEventListener('scroll', () => {
+                localStorage.setItem('sidebarPos', scroller.scrollTop);
+            });
+        }
 
         // 3. GSAP Entry Animation
-        gsap.from(".top-header", { y: -20, opacity: 0, duration: 0.6, ease: "power2.out" });
+        gsap.from(".sidebar", { x: -50, opacity: 0, duration: 1.1, ease: "power3.out" });
+        gsap.from(".top-header", { y: -20, opacity: 0, duration: 0.8, delay: 0.2, ease: "power2.out" });
+        gsap.from(".content-body", { y: 20, opacity: 0, duration: 0.8, delay: 0.4, ease: "power2.out" });
     </script>
 
 </body>
