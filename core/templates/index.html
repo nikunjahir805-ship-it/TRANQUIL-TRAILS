@@ -231,8 +231,8 @@
     </section>
 
     <style>
-        .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
-        .cat-card { position: relative; height: 350px; border-radius: 12px; overflow: hidden; display: block; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .category-grid { display: flex;  gap: 20px; max-width: 1200px; margin: 0 auto; }
+        .cat-card { position: relative; height: 350px; width: 400px;  border-radius: 12px; overflow: hidden; display: block; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .cat-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
         .cat-overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 30px; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; transform: translateY(10px); transition: 0.4s; }
         .cat-overlay h3 { font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 5px; }
@@ -306,33 +306,48 @@
     </section>
 
     <section class="reviews-section">
-        <div style="text-align: center; margin-bottom: 50px;">
+        <div style="text-align: center; margin-bottom: 50px;" class="testimonial-header">
             <span style="font-family: 'Poppins'; color: #8B5E3C; letter-spacing: 2px; text-transform: uppercase; font-size: 0.9rem; font-weight: 600;">Testimonials</span>
             <h2 style="font-family: 'Playfair Display'; font-size: 2.5rem; color: #2c2c2c; margin-top: 10px;">Voices from the Community</h2>
         </div>
 
         <div class="reviews-grid">
-            <div class="review-card">
+            <div class="review-card" data-index="0">
+                <div class="quote-icon">
+                    <i class="fas fa-quote-left"></i>
+                </div>
                 <div class="stars">★★★★★</div>
                 <p>"The teak chair I ordered is absolutely stunning. You can feel the soul in the craftsmanship."</p>
                 <div class="reviewer">
-                    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
+                    <div class="reviewer-avatar">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
+                    </div>
                     <div><h4>Elena R.</h4><span>New York, USA</span></div>
                 </div>
             </div>
-            <div class="review-card">
+            <div class="review-card" data-index="1">
+                <div class="quote-icon">
+                    <i class="fas fa-quote-left"></i>
+                </div>
                 <div class="stars">★★★★★</div>
                 <p>"Incredible quality and fast shipping. I love knowing my purchase helps artisans in Ahmedabad."</p>
                 <div class="reviewer">
-                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+                    <div class="reviewer-avatar">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+                    </div>
                     <div><h4>David K.</h4><span>London, UK</span></div>
                 </div>
             </div>
-            <div class="review-card">
+            <div class="review-card" data-index="2">
+                <div class="quote-icon">
+                    <i class="fas fa-quote-left"></i>
+                </div>
                 <div class="stars">★★★★★</div>
                 <p>"Tranquil Trails is a gem. The handwoven shawl is softer than I imagined."</p>
                 <div class="reviewer">
-                    <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="User">
+                    <div class="reviewer-avatar">
+                        <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="User">
+                    </div>
                     <div><h4>Sarah M.</h4><span>Toronto, Canada</span></div>
                 </div>
             </div>
@@ -340,16 +355,244 @@
     </section>
 
     <style>
-        .reviews-section { padding: 100px 5%; background: #F9F9F9; }
-        .reviews-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; }
-        .review-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); transition: 0.3s; }
-        .review-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
-        .stars { color: #f4c150; font-size: 1.2rem; margin-bottom: 20px; letter-spacing: 3px; }
-        .review-card p { font-family: 'Poppins'; color: #555; line-height: 1.6; font-size: 1rem; margin-bottom: 30px; font-style: italic; }
-        .reviewer { display: flex; align-items: center; gap: 15px; }
-        .reviewer img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
-        .reviewer h4 { font-family: 'Playfair Display'; font-size: 1.1rem; color: #2c2c2c; margin: 0; }
-        .reviewer span { font-size: 0.8rem; color: #888; }
+        .reviews-section { 
+            padding: 100px 5%; 
+            background: linear-gradient(180deg, #F9F9F9 0%, #FFFFFF 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .testimonial-header {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        
+        .reviews-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 30px; 
+            max-width: 1200px; 
+            margin: 0 auto;
+        }
+        
+        .review-card { 
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(50px) scale(0.95);
+            border: 1px solid rgba(139, 94, 60, 0.1);
+        }
+        
+        /* Glassmorphic gradient overlay */
+        .review-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(139, 94, 60, 0.05) 0%, rgba(244, 239, 230, 0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+        
+        .review-card:hover::before {
+            opacity: 1;
+        }
+        
+        .review-card:hover { 
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 25px 60px rgba(139, 94, 60, 0.15);
+            border-color: rgba(139, 94, 60, 0.3);
+        }
+        
+        /* Quote Icon */
+        .quote-icon {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            font-size: 3rem;
+            color: rgba(139, 94, 60, 0.08);
+            transition: all 0.4s ease;
+        }
+        
+        .review-card:hover .quote-icon {
+            color: rgba(139, 94, 60, 0.15);
+            transform: scale(1.1) rotate(-5deg);
+        }
+        
+        .stars { 
+            color: #f4c150; 
+            font-size: 1.2rem; 
+            margin-bottom: 20px; 
+            letter-spacing: 3px;
+            display: inline-block;
+            animation: starGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes starGlow {
+            0%, 100% { text-shadow: 0 0 5px rgba(244, 193, 80, 0.3); }
+            50% { text-shadow: 0 0 15px rgba(244, 193, 80, 0.6), 0 0 25px rgba(244, 193, 80, 0.4); }
+        }
+        
+        .review-card p { 
+            font-family: 'Poppins'; 
+            color: #555; 
+            line-height: 1.8; 
+            font-size: 1rem; 
+            margin-bottom: 30px; 
+            font-style: italic;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .reviewer { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Floating Avatar Effect */
+        .reviewer-avatar {
+            position: relative;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .reviewer-avatar::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            background: linear-gradient(135deg, #8B5E3C, #D4A373);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: -1;
+        }
+        
+        .review-card:hover .reviewer-avatar::before {
+            opacity: 1;
+            animation: spin 3s linear infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .reviewer img { 
+            width: 50px; 
+            height: 50px; 
+            border-radius: 50%; 
+            object-fit: cover;
+            border: 2px solid white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .review-card:hover .reviewer img {
+            transform: scale(1.1);
+        }
+        
+        .reviewer h4 { 
+            font-family: 'Playfair Display'; 
+            font-size: 1.1rem; 
+            color: #2c2c2c; 
+            margin: 0;
+            transition: color 0.3s ease;
+        }
+        
+        .review-card:hover .reviewer h4 {
+            color: #8B5E3C;
+        }
+        
+        .reviewer span { 
+            font-size: 0.8rem; 
+            color: #888;
+        }
+        
+        /* Scroll-triggered reveal animations */
+        .review-card.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        
+        .review-card[data-index="0"].visible {
+            animation: fadeInUpScale 0.8s ease forwards;
+        }
+        
+        .review-card[data-index="1"].visible {
+            animation: fadeInUpScale 0.8s ease 0.15s forwards;
+        }
+        
+        .review-card[data-index="2"].visible {
+            animation: fadeInUpScale 0.8s ease 0.3s forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUpScale {
+            0% {
+                opacity: 0;
+                transform: translateY(50px) scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            .review-card,
+            .testimonial-header,
+            .stars,
+            .reviewer-avatar,
+            .quote-icon {
+                animation: none !important;
+                transition: none !important;
+            }
+            
+            .review-card {
+                opacity: 1;
+                transform: none;
+            }
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .reviews-section {
+                padding: 60px 5%;
+            }
+            
+            .review-card {
+                padding: 30px;
+            }
+            
+            .quote-icon {
+                font-size: 2rem;
+                top: 15px;
+                right: 15px;
+            }
+        }
     </style>
 
     <footer class="main-footer">
@@ -423,6 +666,54 @@
                 }
             });
         }
+
+        // --- 3. TESTIMONIALS SCROLL ANIMATION ---
+        (function() {
+            const observerOptions = {
+                threshold: 0.2,
+                rootMargin: '0px 0px -100px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+            
+            document.querySelectorAll('.review-card').forEach(card => {
+                observer.observe(card);
+            });
+            
+            const reviewsSection = document.querySelector('.reviews-section');
+            
+            if (reviewsSection && window.matchMedia('(min-width: 1024px)').matches) {
+                reviewsSection.addEventListener('mousemove', (e) => {
+                    const cards = document.querySelectorAll('.review-card');
+                    const { clientX, clientY } = e;
+                    const { left, top, width, height } = reviewsSection.getBoundingClientRect();
+                    
+                    const x = (clientX - left) / width - 0.5;
+                    const y = (clientY - top) / height - 0.5;
+                    
+                    cards.forEach((card, index) => {
+                        const depth = (index + 1) * 5;
+                        const moveX = x * depth;
+                        const moveY = y * depth;
+                        
+                        card.style.transform = `translate(${moveX}px, ${moveY}px)`;
+                    });
+                });
+                
+                reviewsSection.addEventListener('mouseleave', () => {
+                    const cards = document.querySelectorAll('.review-card');
+                    cards.forEach(card => {
+                        card.style.transform = '';
+                    });
+                });
+            }
+        })();
     </script>
 </body>
 </html>

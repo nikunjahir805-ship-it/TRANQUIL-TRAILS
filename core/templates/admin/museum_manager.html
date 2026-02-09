@@ -80,7 +80,7 @@
             <img src="{{ item.image.url }}" id="img-{{ item.id }}">
         </div>
         <div class="m-content">
-            <h4 id="name-{{ item.id }}">{{ item.name }}</h4>
+            <h4 id="name-{{ item.id }}">{{ item.title }}</h4>
             <p>₹<span id="price-{{ item.id }}">{{ item.price }}</span></p>
         </div>
         <div class="m-actions">
@@ -100,7 +100,11 @@
     <div class="museum-card" data-type="collections">
         <div class="m-img-wrapper">
             <span class="m-badge">COLLECTION</span>
+            {% if cat.image %}
             <img src="{{ cat.image.url }}" id="img-cat-{{ cat.id }}">
+            {% else %}
+            <img src="https://via.placeholder.com/400x200?text={{ cat.name }}" id="img-cat-{{ cat.id }}">
+            {% endif %}
         </div>
         <div class="m-content">
             <h4 id="name-cat-{{ cat.id }}">{{ cat.name }}</h4>
@@ -123,11 +127,11 @@
     <div class="museum-card" data-type="woodwork">
         <div class="m-img-wrapper">
             <span class="m-badge">WOODWORK</span>
-            <img src="{{ product.image.url }}" id="img-{{ product.id }}">
+            <img src="{{ product.image.url }}" id="img-wood-{{ product.id }}">
         </div>
         <div class="m-content">
-            <h4 id="name-{{ product.id }}">{{ product.name }}</h4>
-            <p>₹<span id="price-{{ product.id }}">{{ product.price }}</span></p>
+            <h4 id="name-wood-{{ product.id }}">{{ product.name }}</h4>
+            <p>₹<span id="price-wood-{{ product.id }}">{{ product.price }}</span></p>
         </div>
         <div class="m-actions">
             <button class="m-action-btn" onclick="openMuseumModal('edit', '{{ product.id }}', 'woodwork')"><i class="fas fa-edit"></i> Edit</button>
@@ -164,7 +168,7 @@
             </div>
 
             <div class="form-group">
-                <label>Update Image</label>
+                <label>Upload Image</label>
                 <input type="file" name="image" class="form-control" id="form_image">
             </div>
 
@@ -211,10 +215,24 @@
 
         if (mode === 'edit') {
             document.getElementById('modalTitle').innerText = "Edit Item";
-            const idPrefix = type === 'collections' ? 'cat-' : '';
-            document.getElementById('form_name').value = document.getElementById(`name-${idPrefix}${id}`).innerText;
+            
+            let nameElemId = '';
+            let priceElemId = '';
+            
+            if (type === 'collections') {
+                nameElemId = `name-cat-${id}`;
+            } else if (type === 'woodwork') {
+                nameElemId = `name-wood-${id}`;
+                priceElemId = `price-wood-${id}`;
+            } else {
+                nameElemId = `name-${id}`;
+                priceElemId = `price-${id}`;
+            }
+            
+            document.getElementById('form_name').value = document.getElementById(nameElemId).innerText;
+            
             if (type !== 'collections') {
-                document.getElementById('form_price').value = document.getElementById(`price-${id}`).innerText;
+                document.getElementById('form_price').value = document.getElementById(priceElemId).innerText;
             }
         } else {
             document.getElementById('modalTitle').innerText = "Add New Item";

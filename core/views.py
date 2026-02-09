@@ -269,8 +269,95 @@ def admin_discounts(request):
 def admin_reviews(request): 
     return render(request, 'admin/reviews.html')
 
+@login_required(login_url='login')
+@user_passes_test(admin_only, login_url='login')
 def admin_museum_manager(request):
-    return render(request, 'admin/museum_manager.html')
+    if request.method == "POST":
+        action = request.POST.get('action')
+        item_id = request.POST.get('item_id')
+        item_type = request.POST.get('item_type')
+        
+        # DELETE ACTION
+        if action == "delete":
+            if item_type == "collections":
+                get_object_or_404(Category, id=item_id).delete()
+            elif item_type == "gallery":
+                get_object_or_404(GalleryItem, id=item_id).delete()
+            elif item_type == "woodwork":
+                get_object_or_404(Product, id=item_id).delete()
+            messages.success(request, "Item removed from Museum.")
+            return redirect('museum_manager')
+        
+        # SAVE ACTION (Add/Edit)
+        elif action == "save":
+            name = request.POST.get('name')
+            price = request.POST.get('price', 0)
+            image = request.FILES.get('image')
+            
+            if item_type == "collections":
+                if item_id:  # Edit
+                    obj = get_object_or_404(Category, id=item_id)
+                    obj.name = name
+                    obj.slug = slugify(name)
+                    if image:
+                        obj.image = image
+                    obj.save()
+                else:  # Add New
+                    Category.objects.create(
+                        name=name,
+                        slug=slugify(name),
+                        image=image
+                    )
+            
+            elif item_type == "gallery":
+                if item_id:  # Edit
+                    obj = get_object_or_404(GalleryItem, id=item_id)
+                    obj.title = name
+                    obj.price = price
+                    if image:
+                        obj.image = image
+                    obj.save()
+                else:  # Add New
+                    GalleryItem.objects.create(
+                        title=name,
+                        price=price,
+                        image=image
+                    )
+            
+            elif item_type == "woodwork":
+                # Get or create Wood category
+                wood_category, _ = Category.objects.get_or_create(
+                    name='Wood',
+                    defaults={'slug': 'wood'}
+                )
+                
+                if item_id:  # Edit
+                    obj = get_object_or_404(Product, id=item_id)
+                    obj.name = name
+                    obj.slug = slugify(name)
+                    obj.price = price
+                    if image:
+                        obj.image = image
+                    obj.save()
+                else:  # Add New
+                    Product.objects.create(
+                        name=name,
+                        slug=slugify(name),
+                        price=price,
+                        image=image,
+                        category=wood_category
+                    )
+            
+            messages.success(request, "Museum updated successfully!")
+            return redirect('museum_manager')
+    
+    # GET REQUEST - Display Museum Manager
+    context = {
+        'gallery_items': GalleryItem.objects.all().order_by('-created_at'),
+        'categories': Category.objects.all(),
+        'wood_products': Product.objects.filter(category__name='Wood')
+    }
+    return render(request, 'admin/museum_manager.html', context)
 
 def admin_toggle_heart(request, pk):
     return redirect('admin_reviews')
