@@ -121,7 +121,7 @@
                 </td>
 
                 <td style="font-weight: 700; color: #2c2c2c; font-size: 1.05rem;">
-                    ${{ order.total_price }}
+                    ₹{{ order.total_price }}
                 </td>
 
                 <td>
@@ -185,25 +185,25 @@
     // 3. UPDATE STATUS (With Visual Transition)
     function updateOrderStatus(id, selectElement) {
         const newStatus = selectElement.value;
-        const row = document.getElementById(`order-row-${id}`);
+        const row = document.getElementById(`order-row-₹{id}`);
         
         // Remove all status classes
         row.classList.remove('row-paid', 'row-pending', 'row-shipped', 'row-cancelled');
         // Add new one
-        row.classList.add(`row-${newStatus.toLowerCase()}`);
+        row.classList.add(`row-₹{newStatus.toLowerCase()}`);
 
         // Simulation of Backend Update
         gsap.to(selectElement, { backgroundColor: "#e8f5e9", duration: 0.3, yoyo: true, repeat: 1 });
-        console.log(`Updating Database: Order ${id} is now ${newStatus}`);
+        console.log(`Updating Database: Order ₹{id} is now ₹{newStatus}`);
         
         // In real Django, you would use:
-        // fetch(`/admin/orders/update/${id}/`, { method: 'POST', body: JSON.stringify({status: newStatus}) })
+        // fetch(`/admin/orders/update/₹{id}/`, { method: 'POST', body: JSON.stringify({status: newStatus}) })
     }
 
     // 4. DELETE WITH ANIMATION
     function deleteOrder(id, name) {
-        if (confirm(`Are you sure you want to delete the order from ${name}?`)) {
-            const row = document.getElementById(`order-row-${id}`);
+        if (confirm(`Are you sure you want to delete the order from ₹{name}?`)) {
+            const row = document.getElementById(`order-row-₹{id}`);
             
             gsap.to(row, {
                 opacity: 0,

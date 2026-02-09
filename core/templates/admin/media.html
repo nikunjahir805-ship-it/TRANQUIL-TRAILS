@@ -216,7 +216,7 @@
                 <div class="asset-meta">
                     <span>{{ item.category }}</span>
                     {% if item.price > 0 %}
-                    <span class="asset-price">${{ item.price }}</span>
+                    <span class="asset-price">₹{{ item.price }}</span>
                     {% endif %}
                 </div>
             </div>
@@ -298,7 +298,7 @@
                     </div>
 
                     <div style="margin-bottom: 15px;">
-                        <label style="font-size: 0.8rem; font-weight: 600; color:#28a745;">Price ($)</label>
+                        <label style="font-size: 0.8rem; font-weight: 600; color:#28a745;">Price (₹)</label>
                         <input type="number" step="0.01" name="price" placeholder="120.00" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
                     </div>
 
@@ -404,7 +404,7 @@
         const toast = document.createElement('div');
         toast.className = 'toast show';
         toast.style.borderLeftColor = '#8b5e3c';
-        toast.innerHTML = `<i class="fas fa-check"></i> <span>${msg}</span>`;
+        toast.innerHTML = `<i class="fas fa-check"></i> <span>₹{msg}</span>`;
         container.appendChild(toast);
         setTimeout(() => {
             toast.classList.remove('show');

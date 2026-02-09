@@ -181,7 +181,7 @@
             </div>
             <div class="trend-indicator trend-up"><i class="fas fa-arrow-up"></i> 5%</div>
         </div>
-        <div class="metric-val">$<span class="counter" data-target="{{ avg_order_value|default:0 }}">0</span></div>
+        <div class="metric-val">₹<span class="counter" data-target="{{ avg_order_value|default:0 }}">0</span></div>
         <div class="metric-label">Avg. Order Value</div>
     </div>
 </div>
@@ -219,7 +219,7 @@
                     </div>
                 </div>
                 <div style="text-align: right;">
-                    <div style="font-weight: 700; color: #2c2c2c;">${{ product.total_revenue }}</div>
+                    <div style="font-weight: 700; color: #2c2c2c;">₹{{ product.total_revenue }}</div>
                     <div class="progress-bar-bg">
                         <div class="progress-bar-fill" style="width: {{ product.percentage }};"></div>
                     </div>
@@ -307,7 +307,7 @@
             data: {
                 labels: salesLabels,
                 datasets: [{
-                    label: 'Revenue ($)',
+                    label: 'Revenue (₹)',
                     data: salesData,
                     borderColor: brandColor,
                     backgroundColor: gradient1,
