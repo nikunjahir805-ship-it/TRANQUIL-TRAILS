@@ -4,6 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from core import views
 
+
 urlpatterns = [
 
     # ===== MAIN SITE PAGES =====
@@ -18,9 +19,16 @@ urlpatterns = [
     # Info Pages
     path('offers/', views.offers, name='offers'),
     path('about/', views.about, name='about'),
-    path('contact/', views.contact, name='Contact'),
+    # FIXED: Changed 'Contact' to 'contact' to match your template request
+    path('contact-us/', views.contact, name='contact'),
 
-    # Authentication
+    # Contact Submit + Admin contact
+    path('contact/submit/', views.contact_submit, name='contact_submit'),
+    path('admin/contact-messages/', views.admin_contact_messages, name='admin_contact_messages'),
+    path('admin/contact-message/<int:message_id>/mark-read/', views.mark_message_read, name='mark_message_read'),
+    path('admin/contact-message/<int:message_id>/delete/', views.delete_contact_message, name='delete_contact_message'),
+
+    # ===== Authentication =====
     path('login/', views.login_page, name='login'),
     path('signup/', views.signup_page, name='signup'),
 
@@ -29,14 +37,14 @@ urlpatterns = [
     path('api/login/', views.login_api, name='login_api'),
     path('api/logout/', views.logout_api, name='logout_api'),
 
-    # Cart & Payments
+    # ===== Cart & Payments =====
     path('cart/', views.cart_page, name='cart'),
     path('checkout/', views.checkout, name='checkout'),
     path('verify-payment/', views.verify_payment, name='verify_payment'),
     path('payment-success/', views.payment_success, name='payment_success'),
 
-    # ===== CUSTOM ADMIN PANEL (MUST COME BEFORE Django Admin) =====
-    
+    # ===== CUSTOM ADMIN PANEL =====
+
     # Dashboard & Analytics
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
@@ -47,16 +55,19 @@ urlpatterns = [
     path('admin/products/', views.admin_products, name='admin_products'),
     path('admin-add-product/', views.admin_add_product, name='admin_add_product'),
     path('admin/products/add/', views.admin_add_product, name='admin_add_product'),
+    path('admin-edit-product/<int:pk>/', views.admin_edit_product, name='admin_edit_product'),
     path('admin-delete-product/<int:pk>/', views.admin_delete_product, name='admin_delete_product'),
 
     # Categories
     path('admin-categories/', views.admin_categories, name='admin_categories'),
     path('admin/categories/', views.admin_categories, name='admin_categories'),
+    path('admin-edit-category/<int:pk>/', views.admin_edit_category, name='admin_edit_category'),
     path('admin-delete-category/<int:pk>/', views.admin_delete_category, name='admin_delete_category'),
 
     # Gallery / Media
     path('admin-media/', views.admin_media, name='admin_media'),
     path('admin/media/', views.admin_media, name='admin_media'),
+    path('admin-edit-gallery-item/<int:pk>/', views.admin_edit_gallery_item, name='admin_edit_gallery_item'),
     path('admin-delete-gallery-item/<int:pk>/', views.admin_delete_gallery_item, name='admin_delete_gallery_item'),
 
     # Inventory
@@ -97,10 +108,10 @@ urlpatterns = [
     # Museum Manager
     path('admin-dashboard/museum-manager/', views.admin_museum_manager, name='museum_manager'),
 
-    # ===== DJANGO BUILT-IN ADMIN (MUST BE LAST) =====
+    # ===== DJANGO BUILT-IN ADMIN (LAST) =====
     path('admin/', admin.site.urls),
-
 ]
+
 
 # Serve media files in development
 if settings.DEBUG:

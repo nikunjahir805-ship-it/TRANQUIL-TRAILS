@@ -25,36 +25,20 @@ def admin_only(user):
     return user.is_authenticated and user.is_staff
 
 def generate_unique_slug(model, name, slug_field='slug', instance_id=None):
-    """
-    Generate a unique slug by appending numbers if slug already exists.
-    
-    Args:
-        model: Django model class
-        name: String to generate slug from
-        slug_field: Name of the slug field (default: 'slug')
-        instance_id: ID of current instance (for updates, to exclude self)
-    
-    Returns:
-        Unique slug string
-    """
     base_slug = slugify(name)
     slug = base_slug
     counter = 1
     
     while True:
-        # Build query to check if slug exists
         query = {slug_field: slug}
         queryset = model.objects.filter(**query)
         
-        # Exclude current instance if updating
         if instance_id:
             queryset = queryset.exclude(id=instance_id)
         
-        # If slug doesn't exist, we can use it
         if not queryset.exists():
             return slug
         
-        # Otherwise, try next number
         slug = f"{base_slug}-{counter}"
         counter += 1
 
@@ -184,16 +168,14 @@ def admin_dashboard(request):
 @login_required(login_url='login')
 @user_passes_test(admin_only, login_url='login')
 def admin_analytics(request):
-    # Calculate analytics data
     total_revenue = OrderItem.objects.filter(
         order__complete=True
     ).aggregate(total=Sum(F('quantity') * F('product__price')))['total'] or 0
     
-    total_visits = 15420  # Mock data - integrate with analytics service
-    conversion_rate = 3.2  # Mock data
-    avg_order_value = 2450  # Mock data
+    total_visits = 15420
+    conversion_rate = 3.2
+    avg_order_value = 2450
     
-    # Top products by revenue
     top_products = OrderItem.objects.filter(
         order__complete=True
     ).values(
@@ -203,13 +185,11 @@ def admin_analytics(request):
         total_revenue=Sum(F('quantity') * F('product__price'))
     ).order_by('-total_revenue')[:10]
     
-    # Calculate percentage for progress bars
     if top_products:
         max_revenue = top_products[0]['total_revenue']
         for product in top_products:
             product['percentage'] = f"{(product['total_revenue'] / max_revenue * 100):.0f}%"
     
-    # Sales data by month (last 12 months)
     sales_by_month = OrderItem.objects.filter(
         order__complete=True,
         order__date_ordered__gte=timezone.now() - timedelta(days=365)
@@ -276,6 +256,33 @@ def admin_add_product(request):
 
 @login_required(login_url='login')
 @user_passes_test(admin_only, login_url='login')
+def admin_edit_product(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    
+    if request.method == 'POST':
+        product.name = request.POST.get('name')
+        category_id = request.POST.get('category')
+        product.category = get_object_or_404(Category, id=category_id)
+        product.price = request.POST.get('price')
+        product.description = request.POST.get('description')
+        product.slug = generate_unique_slug(Product, product.name, instance_id=pk)
+        
+        new_image = request.FILES.get('image')
+        if new_image:
+            product.image = new_image
+        
+        product.save()
+        messages.success(request, f"Product '{product.name}' updated successfully!")
+        return redirect('admin_products')
+    
+    categories = Category.objects.all()
+    return render(request, 'admin/edit_product.html', {
+        'product': product,
+        'categories': categories
+    })
+
+@login_required(login_url='login')
+@user_passes_test(admin_only, login_url='login')
 def admin_delete_product(request, pk):
     if request.method == 'POST':
         product = get_object_or_404(Product, pk=pk)
@@ -308,6 +315,27 @@ def admin_categories(request):
     
     return render(request, 'admin/categories.html', {
         'categories': categories
+    })
+
+@login_required(login_url='login')
+@user_passes_test(admin_only, login_url='login')
+def admin_edit_category(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+    
+    if request.method == 'POST':
+        category.name = request.POST.get('name')
+        category.slug = generate_unique_slug(Category, category.name, instance_id=pk)
+        
+        new_image = request.FILES.get('image')
+        if new_image:
+            category.image = new_image
+        
+        category.save()
+        messages.success(request, f"Category '{category.name}' updated successfully!")
+        return redirect('admin_categories')
+    
+    return render(request, 'admin/edit_category.html', {
+        'category': category
     })
 
 @login_required(login_url='login')
@@ -376,6 +404,30 @@ def admin_media(request):
 
 @login_required(login_url='login')
 @user_passes_test(admin_only, login_url='login')
+def admin_edit_gallery_item(request, pk):
+    item = get_object_or_404(GalleryItem, pk=pk)
+    
+    if request.method == 'POST':
+        item.title = request.POST.get('title')
+        item.category = request.POST.get('category', 'Other')
+        item.price = request.POST.get('price', 0)
+        
+        new_image = request.FILES.get('image')
+        if new_image:
+            item.image = new_image
+        
+        item.save()
+        messages.success(request, f"Gallery item '{item.title}' updated successfully!")
+        return redirect('admin_media')
+    
+    categories = Category.objects.all()
+    return render(request, 'admin/edit_gallery_item.html', {
+        'item': item,
+        'categories': categories
+    })
+
+@login_required(login_url='login')
+@user_passes_test(admin_only, login_url='login')
 def admin_delete_gallery_item(request, pk):
     if request.method == 'POST':
         item = get_object_or_404(GalleryItem, pk=pk)
@@ -393,74 +445,74 @@ def admin_museum_manager(request):
         item_id = request.POST.get('item_id')
         item_type = request.POST.get('item_type')
         
-        # DELETE ACTION
         if action == "delete":
             if item_type == "collections":
-                get_object_or_404(Category, id=item_id).delete()
+                obj = get_object_or_404(Category, id=item_id)
+                obj.delete()
             elif item_type == "gallery":
-                get_object_or_404(GalleryItem, id=item_id).delete()
+                obj = get_object_or_404(GalleryItem, id=item_id)
+                obj.delete()
             elif item_type == "woodwork":
-                get_object_or_404(Product, id=item_id).delete()
+                obj = get_object_or_404(Product, id=item_id)
+                obj.delete()
             messages.success(request, "Item removed from Museum.")
             return redirect('museum_manager')
         
-        # SAVE ACTION (Add/Edit)
         elif action == "save":
             name = request.POST.get('name')
             price = request.POST.get('price', 0)
-            image = request.FILES.get('image')
+            new_image = request.FILES.get('image')
             
             if item_type == "collections":
-                if item_id:  # Edit
+                if item_id:
                     obj = get_object_or_404(Category, id=item_id)
                     obj.name = name
                     obj.slug = generate_unique_slug(Category, name, instance_id=item_id)
-                    if image:
-                        obj.image = image
+                    if new_image:
+                        obj.image = new_image
                     obj.save()
-                else:  # Add New
+                else:
                     Category.objects.create(
                         name=name,
                         slug=generate_unique_slug(Category, name),
-                        image=image
+                        image=new_image
                     )
             
             elif item_type == "gallery":
-                if item_id:  # Edit
+                if item_id:
                     obj = get_object_or_404(GalleryItem, id=item_id)
                     obj.title = name
                     obj.price = price
-                    if image:
-                        obj.image = image
+                    if new_image:
+                        obj.image = new_image
                     obj.save()
-                else:  # Add New
+                else:
                     GalleryItem.objects.create(
                         title=name,
                         price=price,
-                        image=image
+                        image=new_image
                     )
             
             elif item_type == "woodwork":
-                # Get or create Wood category
                 wood_category, _ = Category.objects.get_or_create(
                     name='Wood',
                     defaults={'slug': 'wood'}
                 )
                 
-                if item_id:  # Edit
+                if item_id:
                     obj = get_object_or_404(Product, id=item_id)
                     obj.name = name
                     obj.slug = generate_unique_slug(Product, name, instance_id=item_id)
                     obj.price = price
-                    if image:
-                        obj.image = image
+                    if new_image:
+                        obj.image = new_image
                     obj.save()
-                else:  # Add New
+                else:
                     Product.objects.create(
                         name=name,
                         slug=generate_unique_slug(Product, name),
                         price=price,
-                        image=image,
+                        image=new_image,
                         category=wood_category,
                         stock=0,
                         available=True
@@ -469,7 +521,6 @@ def admin_museum_manager(request):
             messages.success(request, "Museum updated successfully!")
             return redirect('museum_manager')
     
-    # GET REQUEST - Display Museum Manager
     context = {
         'gallery_items': GalleryItem.objects.all().order_by('-created_at'),
         'categories': Category.objects.all(),
@@ -671,3 +722,79 @@ def payment_success(request):
 
 def verify_payment(request):
     return JsonResponse({'status': 'success'})
+
+
+    from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.paginator import Paginator
+from django.shortcuts import render, get_object_or_404
+from .models import ContactMessage
+
+@require_POST
+def contact_submit(request):
+    try:
+        name = request.POST.get('name', '').strip()
+        email = request.POST.get('email', '').strip()
+        message = request.POST.get('message', '').strip()
+        
+        if not name or not email or not message:
+            return JsonResponse({'success': False, 'error': 'All fields are required'}, status=400)
+        
+        if '@' not in email or '.' not in email:
+            return JsonResponse({'success': False, 'error': 'Invalid email format'}, status=400)
+        
+        ContactMessage.objects.create(name=name, email=email, message=message)
+        return JsonResponse({'success': True, 'message': 'Your message has been sent successfully!'})
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def admin_contact_messages(request):
+    filter_status = request.GET.get('status', None)
+    
+    if filter_status == 'unread':
+        messages_list = ContactMessage.objects.filter(is_read=False)
+    elif filter_status == 'read':
+        messages_list = ContactMessage.objects.filter(is_read=True)
+    else:
+        messages_list = ContactMessage.objects.all()
+    
+    paginator = Paginator(messages_list, 15)
+    page_obj = paginator.get_page(request.GET.get('page'))
+    
+    context = {
+        'messages': page_obj,
+        'page_obj': page_obj,
+        'is_paginated': page_obj.has_other_pages(),
+        'total_messages': ContactMessage.objects.count(),
+        'unread_count': ContactMessage.objects.filter(is_read=False).count(),
+        'read_count': ContactMessage.objects.filter(is_read=True).count(),
+        'filter_status': filter_status,
+    }
+    return render(request, 'admin/admin_contact_messages.html', context)
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+@require_POST
+def mark_message_read(request, message_id):
+    try:
+        message = get_object_or_404(ContactMessage, id=message_id)
+        message.is_read = True
+        message.save()
+        return JsonResponse({'success': True, 'message': 'Message marked as read'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+@require_POST
+def delete_contact_message(request, message_id):
+    try:
+        message = get_object_or_404(ContactMessage, id=message_id)
+        message.delete()
+        return JsonResponse({'success': True, 'message': 'Message deleted successfully'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

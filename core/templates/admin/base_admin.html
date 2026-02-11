@@ -378,7 +378,13 @@
                     <i class="fas fa-cog"></i> <span>Settings</span>
                 </a>
             </div>
-            
+                        <div class="nav-item">
+                <a href="{% url 'admin_contact_messages' %}" 
+                class="nav-link {% if request.resolver_match.url_name == 'admin_contact_messages' %}active{% endif %}">
+                    <i class="fas fa-envelope"></i> <span>Contact Messages</span>
+                </a>
+            </div>
+
             <div class="nav-item">
                 <a href="{% url 'home' %}" class="nav-link logout">
                     <i class="fas fa-sign-out-alt"></i> <span>Exit Store</span>

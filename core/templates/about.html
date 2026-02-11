@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Our Story | Tranquil Trails</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         /* --- Root Variables & Reset --- */
@@ -33,14 +34,39 @@
         .nav-links a { text-decoration: none; color: var(--text); font-size: 0.9rem; font-weight: 600; }
         .cart-count-pill { background: var(--accent); color: white; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; }
 
-        /* --- Hero Section --- */
+        /* --- Hero Section with Parallax --- */
         .about-hero {
             height: 60vh; display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('{% static "about-page-hero.jpg" %}') center/cover no-repeat fixed;
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('{% static "about-page-hero.jpg" %}') center/cover no-repeat;
+            background-attachment: fixed;
             color: white; text-align: center; padding: 0 20px;
+            position: relative;
+            overflow: hidden;
         }
-        .about-hero h1 { font-family: 'Playfair Display'; font-size: clamp(2.5rem, 6vw, 4.5rem); margin-bottom: 10px; }
-        .about-hero p { font-size: 1.2rem; letter-spacing: 1px; opacity: 0.9; }
+        .about-hero h1 { 
+            font-family: 'Playfair Display'; 
+            font-size: clamp(2.5rem, 6vw, 4.5rem); 
+            margin-bottom: 10px;
+            animation: fadeInUp 1s ease forwards;
+            opacity: 0;
+        }
+        .about-hero p { 
+            font-size: 1.2rem; 
+            letter-spacing: 1px; 
+            opacity: 0;
+            animation: fadeInUp 1.2s ease 0.3s forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+        }
 
         /* --- Philosophy Side-by-Side Section --- */
         .about-section {
@@ -59,6 +85,131 @@
         .stat-item h3 { font-family: 'Playfair Display'; font-size: 2rem; color: var(--primary); }
         .stat-item p { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin: 0; }
 
+        /* --- NEW: Meet The Founder Section --- */
+        .founder-section {
+            padding: 120px 8%;
+            background: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+        .founder-container {
+            display: flex;
+            align-items: center;
+            gap: 80px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .founder-image {
+            flex: 1;
+            position: relative;
+        }
+        .founder-image img {
+            width: 100%;
+            max-width: 450px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            transition: transform 0.5s ease;
+        }
+        .founder-image:hover img {
+            transform: scale(1.05);
+        }
+        .founder-story {
+            flex: 1;
+        }
+        .founder-story h2 {
+            font-family: 'Playfair Display';
+            font-size: 2.8rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+        .founder-story h3 {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 30px;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+        .founder-story p {
+            font-size: 1.05rem;
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+        .founder-signature {
+            font-family: 'Playfair Display';
+            font-style: italic;
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-top: 30px;
+        }
+
+        /* --- NEW: Brand Values Section --- */
+        .values-section {
+            padding: 120px 8%;
+            background: var(--bg);
+            text-align: center;
+        }
+        .values-section h2 {
+            font-family: 'Playfair Display';
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 60px;
+        }
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .value-card {
+            background: var(--white);
+            padding: 50px 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        .value-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--primary);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+        .value-card:hover::before {
+            transform: scaleX(1);
+        }
+        .value-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 20px 50px rgba(139, 94, 60, 0.15);
+        }
+        .value-icon {
+            font-size: 3.5rem;
+            color: var(--primary);
+            margin-bottom: 25px;
+            transition: transform 0.3s ease;
+        }
+        .value-card:hover .value-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+        .value-card h3 {
+            font-family: 'Playfair Display';
+            font-size: 1.8rem;
+            color: var(--accent);
+            margin-bottom: 15px;
+        }
+        .value-card p {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
         /* --- Process Timeline --- */
         .process-container { background: var(--white); padding: 100px 8%; text-align: center; }
         .process-grid { 
@@ -69,26 +220,6 @@
         .process-card:hover { transform: translateY(-10px); background: #fdfaf7; }
         .process-num { font-family: 'Playfair Display'; font-size: 3rem; color: rgba(139, 94, 60, 0.2); font-weight: bold; }
         
-        /* --- Quote --- */
-        .founder-quote { padding: 120px 10%; background: var(--accent); color: white; text-align: center; }
-        .founder-quote blockquote { font-family: 'Playfair Display'; font-size: 2.2rem; font-style: italic; margin-bottom: 20px; }
-
-        /* --- Responsive Logic --- */
-        @media (max-width: 992px) {
-            .about-section { flex-direction: column; text-align: center; padding: 60px 5%; }
-            .about-image img { box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-            .stats-grid { justify-items: center; }
-        }
-
-        @media (max-width: 480px) {
-            nav { padding: 15px 4%; }
-            .logo-text { font-size: 1rem; }
-            .about-hero h1 { font-size: 2.2rem; }
-            .about-text h2 { font-size: 2rem; }
-            .stats-grid { grid-template-columns: 1fr; gap: 30px; }
-        }
-
-        /* --- Updated Process Styles --- */
         .process-img {
             width: 100%;
             height: 180px;
@@ -113,12 +244,114 @@
             margin-bottom: 5px;
         }
 
-        /* Adjust grid for 5 items */
         @media (min-width: 1200px) {
             .process-grid {
                 grid-template-columns: repeat(5, 1fr);
                 gap: 20px;
             }
+        }
+
+        /* --- NEW: Behind The Craft Video Section --- */
+        .craft-video-section {
+            padding: 120px 8%;
+            background: var(--white);
+            text-align: center;
+        }
+        .craft-video-section h2 {
+            font-family: 'Playfair Display';
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+        .craft-video-section p {
+            font-size: 1.1rem;
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto 60px;
+        }
+        .video-container {
+            max-width: 900px;
+            margin: 0 auto;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            transition: transform 0.4s ease;
+        }
+        .video-container:hover {
+            transform: scale(1.02);
+        }
+        .video-container video {
+            width: 100%;
+            display: block;
+        }
+
+        /* --- Quote --- */
+        .founder-quote { padding: 120px 10%; background: var(--accent); color: white; text-align: center; }
+        .founder-quote blockquote { font-family: 'Playfair Display'; font-size: 2.2rem; font-style: italic; margin-bottom: 20px; }
+
+        /* --- NEW: Premium CTA Section --- */
+        .cta-section {
+            padding: 100px 8%;
+            background: linear-gradient(135deg, var(--primary) 0%, #6f4a2e 100%);
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        .cta-section::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -5%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 50%;
+        }
+        .cta-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .cta-section h2 {
+            font-family: 'Playfair Display';
+            font-size: 3.5rem;
+            margin-bottom: 25px;
+            line-height: 1.2;
+        }
+        .cta-section p {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            opacity: 0.95;
+            line-height: 1.7;
+        }
+        .cta-btn {
+            display: inline-block;
+            padding: 18px 50px;
+            background: white;
+            color: var(--primary);
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .cta-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            background: var(--bg);
         }
 
         /* --- Footer Styles --- */
@@ -127,7 +360,6 @@
             color: #bbb;
             padding: 80px 8% 30px;
             font-family: 'Poppins', sans-serif;
-            margin-top: 50px;
         }
 
         .footer-container {
@@ -206,7 +438,6 @@
             border-color: var(--primary);
         }
 
-        /* Newsletter Form */
         .subscribe-form {
             display: flex;
             margin-top: 20px;
@@ -237,7 +468,6 @@
             background-color: #6f4a2e;
         }
 
-        /* Bottom Bar */
         .footer-bottom {
             border-top: 1px solid #2a2a2a;
             margin-top: 60px;
@@ -260,29 +490,7 @@
             color: var(--primary);
         }
 
-        /* --- Footer Responsive --- */
-        @media (max-width: 992px) {
-            .footer-container {
-                grid-template-columns: 1fr 1fr;
-                gap: 40px;
-            }
-        }
-
-        @media (max-width: 580px) {
-            .footer-container {
-                grid-template-columns: 1fr;
-            }
-            .footer-bottom {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            .footer-legal a {
-                margin: 0 10px;
-            }
-        }
-
-        /* --- CART SIDEBAR & DROPDOWN CSS (ADDED) --- */
+        /* --- CART SIDEBAR & DROPDOWN CSS --- */
         .nav-user-container { position: relative; display: flex; align-items: center; }
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid #8B5E3C; transition: transform 0.2s; }
         .user-avatar:hover { transform: scale(1.1); }
@@ -291,13 +499,12 @@
             display: none; position: absolute; top: 55px; right: 0; background-color: #ffffff;
             min-width: 180px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); border-radius: 8px; z-index: 1000; overflow: hidden; border: 1px solid #e0e0e0;
         }
-        .profile-dropdown.show { display: block; animation: fadeIn 0.3s ease; }
+        .profile-dropdown.show { display: block; animation: fadeInDropdown 0.3s ease; }
         .profile-dropdown a { color: #2d2d2d; padding: 12px 16px; text-decoration: none; display: block; font-size: 0.9rem; border-bottom: 1px solid #f4f4f4; transition: 0.2s; }
         .profile-dropdown a:hover { background-color: #f4f1ea; }
         .profile-dropdown a.logout-btn { color: #d32f2f; border-bottom: none; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInDropdown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Cart Sidebar */
         .cart-sidebar {
             position: fixed; top: 0; right: -450px; width: 400px; height: 100%;
             background: var(--white); z-index: 2000; box-shadow: -10px 0 30px rgba(0,0,0,0.1);
@@ -311,8 +518,45 @@
         .checkout-btn { width: 100%; background: var(--primary); color: white; padding: 15px; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; text-decoration: none; display: block; text-align: center; }
         .clear-cart-link { display: block; width: 100%; background: none; border: none; margin-top: 15px; text-decoration: underline; font-size: 0.85rem; color: #999; cursor: pointer; }
         .close-cart { background: none; border: none; font-size: 2rem; cursor: pointer; }
-        
-        @media (max-width: 480px) { .cart-sidebar { width: 100%; } }
+
+        /* --- Scroll Reveal Animation --- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 992px) {
+            .about-section { flex-direction: column; text-align: center; padding: 60px 5%; }
+            .about-image img { box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+            .stats-grid { justify-items: center; }
+            .founder-container { flex-direction: column; text-align: center; }
+            .founder-image img { max-width: 100%; }
+            .cta-section h2 { font-size: 2.5rem; }
+            .footer-container { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 580px) {
+            nav { padding: 15px 4%; }
+            .logo-text { font-size: 1rem; }
+            .about-hero h1 { font-size: 2.2rem; }
+            .about-text h2 { font-size: 2rem; }
+            .stats-grid { grid-template-columns: 1fr; gap: 30px; }
+            .cta-section h2 { font-size: 2rem; }
+            .footer-container { grid-template-columns: 1fr; }
+            .footer-bottom { flex-direction: column; gap: 15px; text-align: center; }
+            .footer-legal a { margin: 0 10px; }
+            .cart-sidebar { width: 100%; }
+        }
+
+        @media (max-width: 480px) { 
+            .cart-sidebar { width: 100%; } 
+        }
     </style>
 </head>
 <body>
@@ -329,7 +573,7 @@
             <li><a href="{% url 'offers' %}">Offers</a></li>
             <li><a href="{% url 'gallery' %}">Gallery</a></li>
             <li><a href="{% url 'about' %}" style="color: #8B5E3C; font-weight: bold;">About</a></li>
-            <li><a href="{% url 'Contact' %}">Contact</a></li>
+            <li><a href="{% url 'contact' %}">Contact</a></li>
 
             {% if user.is_staff %}
             <li>
@@ -391,7 +635,7 @@
         </div>
     </header>
 
-    <section class="about-section">
+    <section class="about-section reveal">
         <div class="about-image">
             <img src="{% static 'home decor idea.jpg' %}" alt="Handcrafted pottery process">
         </div>
@@ -407,7 +651,51 @@
             </div>
         </div>
     </section>
-     <section class="process-container">
+
+    <section class="founder-section reveal">
+        <div class="founder-container">
+            <div class="founder-image">
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop" alt="Malvaniya Meet - Founder">
+            </div>
+            <div class="founder-story">
+                <h2>Meet The Founder</h2>
+                <h3>Malvaniya Meet</h3>
+                <p>Growing up surrounded by artisans in Ahmedabad, I witnessed firsthand the slow disappearance of traditional crafts in favor of mass production. Tranquil Trails was born from a desire to preserve these dying arts while making them accessible to modern homes.</p>
+                <p>Every product we offer represents a partnership with local craftspeople who have dedicated their lives to perfecting their trade. We don't just sell home decor—we tell stories, honor heritage, and build sustainable livelihoods.</p>
+                <p>My vision is simple: to create a world where beauty and ethics coexist, where every purchase supports a family, and where your home becomes a canvas for meaningful artistry.</p>
+                <div class="founder-signature">— Malvaniya Meet</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="values-section reveal">
+        <h2>What We Stand For</h2>
+        <div class="values-grid">
+            <div class="value-card">
+                <div class="value-icon">
+                    <i class="fas fa-certificate"></i>
+                </div>
+                <h3>Authenticity</h3>
+                <p>Every piece is crafted by hand using traditional techniques passed down through generations. No shortcuts, no mass production—just honest craftsmanship.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <h3>Sustainability</h3>
+                <p>We source only eco-friendly materials and use renewable energy in our workshops. Our commitment to the planet is woven into every stitch and carving.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>Community</h3>
+                <p>We believe in fair wages, safe working conditions, and empowering local artisans. When you buy from us, you directly support families and preserve cultural heritage.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="process-container reveal">
         <h2 style="font-family: 'Playfair Display'; font-size: clamp(2rem, 5vw, 3rem); margin-bottom: 20px;">The Journey: From Earth to Home</h2>
         <p style="max-width: 700px; margin: 0 auto 60px; color: #666;">Transparency is at the heart of everything we do. Follow the lifecycle of a Tranquil Trails piece—from the raw materials of the earth to its final place in your sanctuary.</p>
         
@@ -469,10 +757,29 @@
         </div>
     </section>
 
-    <section class="founder-quote">
+    <section class="craft-video-section reveal">
+        <h2>Behind The Craft</h2>
+        <p>Watch our artisans at work, transforming raw earth and wood into heirloom-quality pieces that bring warmth to your home.</p>
+        <div class="video-container">
+            <video autoplay muted loop playsinline>
+                <source src="https://cdn.pixabay.com/video/2023/04/21/159256-821688076_large.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </section>
+
+    <section class="founder-quote reveal">
         <div style="max-width: 900px; margin: 0 auto;">
             <blockquote style="line-height: 1.4;">"Art is not just what we make, but how we live. Our mission is to make intentional living accessible to all."</blockquote>
             <p style="letter-spacing: 2px; text-transform: uppercase; font-size: 0.9rem;">— Ladumor Nikunj, Founder</p>
+        </div>
+    </section>
+
+    <section class="cta-section reveal">
+        <div class="cta-content">
+            <h2>Ready to Transform Your Space?</h2>
+            <p>Explore our collection of handcrafted treasures and bring the soul of artisan craftsmanship into your home.</p>
+            <a href="{% url 'shop' %}" class="cta-btn">Shop The Collection</a>
         </div>
     </section>
 
@@ -501,7 +808,7 @@
             <div class="footer-section links">
                 <h4>Support</h4>
                 <ul>
-                    <li><a href="{% url 'Contact' %}">Contact Us</a></li>
+                    <li><a href="{% url 'contact' %}">Contact Us</a></li>
                     <li><a href="#">Shipping Policy</a></li>
                     <li><a href="#">Returns & Exchanges</a></li>
                     <li><a href="#">FAQs</a></li>
@@ -527,15 +834,19 @@
         </div>
     </footer>
 
+    <script src="{% static 'script.js' %}"></script>
+    
+    <script>
+        // Disable Add-to-Cart button logic, but enable Cart Sidebar logic
+        window.IS_GALLERY_PAGE = true;
+    </script>
+    
+    <script src="{% static 'js/cart.js' %}"></script>
+    
     <script>
         window.djangoUser = "{{ user.username|default:'guest' }}";
-    </script>
 
-    <script src="{% static 'script.js' %}"></script>
-    <script src="{% static 'js/cart.js' %}"></script>
-
-    <script>
-        // --- 1. DROPDOWN TOGGLE (Local script for page specific elements) ---
+        // --- DROPDOWN TOGGLE ---
         const userAvatarBtn = document.getElementById('userAvatarBtn');
         const profileDropdown = document.getElementById('profileDropdown');
 
@@ -552,19 +863,39 @@
             });
         }
 
-        // --- 2. BACKEND LOGOUT LOGIC ---
+        // --- LOGOUT LOGIC ---
         function logoutUser() {
             fetch('/api/logout/')
             .then(res => res.json())
             .then(data => {
                 if(data.success) {
                     localStorage.removeItem('isAdmin');
+                    localStorage.removeItem('cart');
                     window.location.href = "{% url 'home' %}";
                 }
             });
         }
 
-        // Simple Fade-in Animation on Scroll
+        // --- SCROLL REVEAL ANIMATION ---
+        const revealElements = document.querySelectorAll('.reveal');
+
+        const revealOnScroll = () => {
+            const windowHeight = window.innerHeight;
+            
+            revealElements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const revealPoint = 100;
+                
+                if (elementTop < windowHeight - revealPoint) {
+                    element.classList.add('active');
+                }
+            });
+        };
+
+        window.addEventListener('scroll', revealOnScroll);
+        revealOnScroll(); // Trigger on load
+
+        // --- LEGACY FADE-IN ANIMATION ---
         const observerOptions = { threshold: 0.1 };
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {

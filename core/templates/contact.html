@@ -10,70 +10,294 @@
     <link rel="stylesheet" href="{% static 'styles.css' %}">
 
     <style>
+        /* --- Floating Background Shapes --- */
+        .bg-shapes {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.05;
+            animation: float 20s infinite ease-in-out;
+        }
+        .shape-1 { width: 300px; height: 300px; background: #8B5E3C; top: 10%; left: 5%; animation-delay: 0s; }
+        .shape-2 { width: 200px; height: 200px; background: #2d2d2d; top: 60%; right: 10%; animation-delay: 5s; }
+        .shape-3 { width: 150px; height: 150px; background: #8B5E3C; bottom: 15%; left: 15%; animation-delay: 10s; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(5deg); }
+            50% { transform: translateY(10px) rotate(-5deg); }
+            75% { transform: translateY(-10px) rotate(3deg); }
+        }
+
         /* --- Contact Page Specific Styles --- */
+        .contact-wrapper {
+            position: relative;
+            z-index: 1;
+        }
         .contact-container {
-            padding: 80px 10%;
+            padding: 100px 10%;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 100px;
-            background: #F4EFE6; /* Match site bg */
+            background: #F4EFE6;
             min-height: 80vh;
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards;
         }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .contact-info {
+            animation: slideInLeft 1s ease 0.3s forwards;
+            opacity: 0;
+        }
+        
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
         .contact-info h2 {
             font-family: 'Playfair Display';
-            font-size: 3rem;
-            margin-bottom: 20px;
+            font-size: 3.5rem;
+            margin-bottom: 30px;
             color: #2d2d2d;
+            line-height: 1.2;
         }
         .contact-info p {
             color: #555;
-            line-height: 1.6;
+            line-height: 1.8;
+            font-size: 1.05rem;
         }
+        .info-item {
+            margin: 30px 0;
+            padding: 20px 0;
+            border-left: 3px solid #8B5E3C;
+            padding-left: 20px;
+            transition: all 0.3s ease;
+        }
+        .info-item:hover {
+            transform: translateX(10px);
+            border-left-width: 5px;
+        }
+        .info-item strong {
+            color: #2d2d2d;
+            font-size: 1.1rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+
         .contact-form {
             background: #fff;
-            padding: 40px;
+            padding: 50px;
             border: 1px solid #eee;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+            opacity: 0;
+            animation: slideInRight 1s ease 0.5s forwards;
+            transition: all 0.3s ease;
         }
+        
+        .contact-form:hover {
+            box-shadow: 0 25px 70px rgba(0,0,0,0.12);
+            transform: translateY(-5px);
+        }
+        
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            position: relative;
         }
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
             font-weight: 600;
             color: #2d2d2d;
+            transition: color 0.3s ease;
         }
         .form-group input, .form-group textarea {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
             font-family: 'Poppins';
             outline: none;
-            border-radius: 6px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
         }
-        .form-group input:focus, .form-group textarea:focus { border-color: #8B5E3C; }
+        .form-group input:focus, .form-group textarea:focus { 
+            border-color: #8B5E3C;
+            box-shadow: 0 0 0 4px rgba(139, 94, 60, 0.1);
+            transform: translateY(-2px);
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
         .submit-btn {
-            background: #8B5E3C;
+            background: linear-gradient(135deg, #8B5E3C 0%, #6d4a2e 100%);
             color: white;
-            padding: 15px 30px;
+            padding: 16px 40px;
             border: none;
             cursor: pointer;
             font-family: 'Poppins';
-            transition: 0.3s;
-            border-radius: 6px;
+            transition: all 0.4s ease;
+            border-radius: 8px;
             font-weight: 600;
             width: 100%;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
         }
-        .submit-btn:hover { background: #2d2d2d; }
-        
-        @media (max-width: 900px) {
-            .contact-container { grid-template-columns: 1fr; gap: 40px; padding: 60px 5%; }
+        .submit-btn:before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        .submit-btn:hover:before {
+            width: 300px;
+            height: 300px;
+        }
+        .submit-btn:hover { 
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(139, 94, 60, 0.3);
+        }
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
-        /* Nav Dropdown Styles (Ensure consistency if not in styles.css) */
+        /* Success Message */
+        .success-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: white;
+            padding: 40px 60px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            z-index: 10000;
+            text-align: center;
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .success-message.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #4CAF50;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: scaleIn 0.5s ease;
+        }
+        @keyframes scaleIn {
+            0% { transform: scale(0) rotate(-180deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        .success-icon svg {
+            width: 40px;
+            height: 40px;
+            stroke: white;
+            stroke-width: 3;
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: checkmark 0.5s ease 0.3s forwards;
+        }
+        @keyframes checkmark {
+            to { stroke-dashoffset: 0; }
+        }
+        .success-message h3 {
+            font-family: 'Playfair Display';
+            font-size: 2rem;
+            color: #2d2d2d;
+            margin-bottom: 10px;
+        }
+        .success-message p {
+            color: #555;
+            font-size: 1rem;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Loading Spinner */
+        .btn-loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .contact-container { 
+                grid-template-columns: 1fr; 
+                gap: 50px; 
+                padding: 60px 5%;
+            }
+            .contact-info h2 {
+                font-size: 2.5rem;
+            }
+            .contact-form {
+                padding: 35px;
+            }
+            .info-item:hover {
+                transform: translateX(5px);
+            }
+        }
+
+        /* Nav Dropdown Styles */
         .nav-user-container { position: relative; display: flex; align-items: center; }
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid #8B5E3C; transition: transform 0.2s; }
         .user-avatar:hover { transform: scale(1.1); }
@@ -89,6 +313,12 @@
     </style>
 </head>
 <body>
+    <!-- Floating Background Shapes -->
+    <div class="bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
 
     <nav>
         <a href="{% url 'home' %}" class="logo-container">
@@ -106,7 +336,7 @@
             <li><a href="{% url 'offers' %}">Offers</a></li>
             <li><a href="{% url 'gallery' %}">Gallery</a></li>
             <li><a href="{% url 'about' %}">About</a></li>
-            <li><a href="{% url 'Contact' %}" style="color: #8B5E3C; font-weight: bold;">Contact</a></li>
+            <li><a href="{% url 'contact' %}" style="color: #8B5E3C; font-weight: bold;">Contact</a></li>
 
             {% if user.is_staff %}
             <li>
@@ -158,36 +388,63 @@
         </div>
     </div>
 
-    <section class="contact-container">
-        <div class="contact-info">
-            <h2>Get in Touch</h2>
-            <p>Have a question about a specific piece or an order? We're here to help you bring artistry into your home.</p>
-            <br>
-            <p><strong>Studio Address:</strong><br>123 Artisan Way, Ahmedabad, Gujarat</p>
-            <br>
-            <p><strong>Email:</strong><br>hello@tranquiltrails.com</p>
-            <br>
-            <p><strong>Hours:</strong><br>Mon — Fri, 9am — 5pm</p>
+    <!-- Success Message Overlay -->
+    <div class="overlay" id="successOverlay"></div>
+    <div class="success-message" id="successMessage">
+        <div class="success-icon">
+            <svg fill="none" viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
         </div>
+        <h3>Message Sent!</h3>
+        <p>We'll get back to you within 24 hours.</p>
+    </div>
 
-        <div class="contact-form">
-            <form action="#">
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" placeholder="Your Name" required>
+    <div class="contact-wrapper">
+        <section class="contact-container">
+            <div class="contact-info">
+                <h2>Get in Touch</h2>
+                <p>Have a question about a specific piece or an order? We're here to help you bring artistry into your home.</p>
+                
+                <div class="info-item">
+                    <strong>Studio Address:</strong>
+                    123 Artisan Way, Ahmedabad, Gujarat
                 </div>
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" placeholder="email@example.com" required>
+                
+                <div class="info-item">
+                    <strong>Email:</strong>
+                    hello@tranquiltrails.com
                 </div>
-                <div class="form-group">
-                    <label>Message</label>
-                    <textarea rows="5" placeholder="How can we help?"></textarea>
+                
+                <div class="info-item">
+                    <strong>Hours:</strong>
+                    Mon — Fri, 9am — 5pm
                 </div>
-                <button type="submit" class="submit-btn">Send Message</button>
-            </form>
-        </div>
-    </section>
+            </div>
+
+            <div class="contact-form">
+                <form id="contactForm">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="name" name="name" placeholder="Your Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="email" name="email" placeholder="email@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea id="message" name="message" rows="5" placeholder="How can we help?" required></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <span id="btnText">Send Message</span>
+                        <span id="btnLoading" class="btn-loading" style="display: none;"></span>
+                    </button>
+                </form>
+            </div>
+        </section>
+    </div>
 
     <footer class="main-footer">
         <div class="footer-container">
@@ -198,7 +455,7 @@
             <div class="footer-section links">
                 <h4>Support</h4>
                 <ul>
-                    <li><a href="{% url 'Contact' %}">Contact Us</a></li>
+                    <li><a href="{% url 'contact' %}">Contact Us</a></li>
                     <li><a href="{% url 'about' %}">Our Story</a></li>
                 </ul>
             </div>
@@ -240,6 +497,62 @@
                 }
             });
         }
+
+        // --- 3. CONTACT FORM AJAX SUBMISSION ---
+        const contactForm = document.getElementById('contactForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnLoading = document.getElementById('btnLoading');
+        const successMessage = document.getElementById('successMessage');
+        const successOverlay = document.getElementById('successOverlay');
+
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline-block';
+
+            const formData = new FormData(contactForm);
+
+            fetch('{% url "contact_submit" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    successOverlay.classList.add('show');
+                    successMessage.classList.add('show');
+                    
+                    // Clear form
+                    contactForm.reset();
+                    
+                    // Hide success message after 3 seconds
+                    setTimeout(() => {
+                        successOverlay.classList.remove('show');
+                        successMessage.classList.remove('show');
+                    }, 3000);
+                } else {
+                    alert('Error: ' + (data.error || 'Something went wrong'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            })
+            .finally(() => {
+                // Re-enable button
+                submitBtn.disabled = false;
+                btnText.style.display = 'inline';
+                btnLoading.style.display = 'none';
+            });
+        });
     </script>
 </body>
 </html>

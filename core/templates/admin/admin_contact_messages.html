@@ -1,0 +1,602 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Messages | Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    
+    <style>
+        body {
+            background: #f5f5f5;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .admin-container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .admin-header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-header h1 {
+            font-family: 'Playfair Display';
+            font-size: 2.5rem;
+            color: #2d2d2d;
+            margin: 0;
+        }
+        
+        .back-btn {
+            background: #8B5E3C;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .back-btn:hover {
+            background: #6d4a2e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 94, 60, 0.3);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        
+        .stat-card h3 {
+            font-size: 0.9rem;
+            color: #666;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-card .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #8B5E3C;
+        }
+        
+        .messages-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        
+        .messages-header {
+            padding: 25px 30px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .messages-header h2 {
+            font-family: 'Playfair Display';
+            font-size: 1.8rem;
+            color: #2d2d2d;
+            margin: 0;
+        }
+        
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .filter-tab {
+            padding: 8px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .filter-tab.active {
+            background: #8B5E3C;
+            color: white;
+            border-color: #8B5E3C;
+        }
+        
+        .messages-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .messages-table th {
+            background: #f9f9f9;
+            padding: 15px 20px;
+            text-align: left;
+            font-weight: 600;
+            color: #2d2d2d;
+            border-bottom: 2px solid #e0e0e0;
+            font-size: 0.9rem;
+        }
+        
+        .messages-table td {
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #555;
+        }
+        
+        .messages-table tr {
+            transition: background 0.2s ease;
+        }
+        
+        .messages-table tr:hover {
+            background: #fafafa;
+        }
+        
+        .message-row.unread {
+            background: #fffbf5;
+        }
+        
+        .message-row.unread td {
+            font-weight: 500;
+        }
+        
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge-unread {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .badge-read {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .message-preview {
+            max-width: 400px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #666;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-view {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .btn-view:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+        }
+        
+        .btn-mark {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-mark:hover {
+            background: #388E3C;
+            transform: translateY(-2px);
+        }
+        
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-state svg {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        .empty-state h3 {
+            font-family: 'Playfair Display';
+            font-size: 1.8rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 25px;
+            gap: 10px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .pagination a, .pagination span {
+            padding: 8px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #555;
+            transition: all 0.3s ease;
+        }
+        
+        .pagination a:hover {
+            background: #8B5E3C;
+            color: white;
+            border-color: #8B5E3C;
+        }
+        
+        .pagination .current {
+            background: #8B5E3C;
+            color: white;
+            border-color: #8B5E3C;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .modal-header h2 {
+            font-family: 'Playfair Display';
+            font-size: 1.8rem;
+            color: #2d2d2d;
+            margin: 0;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .close-modal:hover {
+            color: #2d2d2d;
+        }
+        
+        .modal-field {
+            margin-bottom: 20px;
+        }
+        
+        .modal-field label {
+            display: block;
+            font-weight: 600;
+            color: #2d2d2d;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .modal-field p {
+            color: #555;
+            line-height: 1.6;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 6px;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .messages-table {
+                font-size: 0.85rem;
+            }
+            
+            .messages-table th, .messages-table td {
+                padding: 12px 10px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .message-preview {
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>Contact Messages</h1>
+            <a href="{% url 'admin_dashboard' %}" class="back-btn">← Back to Dashboard</a>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Messages</h3>
+                <div class="stat-number">{{ total_messages }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Unread Messages</h3>
+                <div class="stat-number">{{ unread_count }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Read Messages</h3>
+                <div class="stat-number">{{ read_count }}</div>
+            </div>
+        </div>
+        
+        <div class="messages-container">
+            <div class="messages-header">
+                <h2>All Messages</h2>
+                <div class="filter-tabs">
+                    <button class="filter-tab {% if not filter_status %}active{% endif %}" onclick="window.location.href='{% url 'admin_contact_messages' %}'">
+                        All
+                    </button>
+                    <button class="filter-tab {% if filter_status == 'unread' %}active{% endif %}" onclick="window.location.href='{% url 'admin_contact_messages' %}?status=unread'">
+                        Unread
+                    </button>
+                    <button class="filter-tab {% if filter_status == 'read' %}active{% endif %}" onclick="window.location.href='{% url 'admin_contact_messages' %}?status=read'">
+                        Read
+                    </button>
+                </div>
+            </div>
+            
+            {% if messages %}
+            <table class="messages-table">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Message</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for msg in messages %}
+                    <tr class="message-row {% if not msg.is_read %}unread{% endif %}">
+                        <td>
+                            <span class="badge {% if msg.is_read %}badge-read{% else %}badge-unread{% endif %}">
+                                {% if msg.is_read %}Read{% else %}New{% endif %}
+                            </span>
+                        </td>
+                        <td>{{ msg.name }}</td>
+                        <td>{{ msg.email }}</td>
+                        <td>
+                            <div class="message-preview">{{ msg.message }}</div>
+                        </td>
+                        <td>{{ msg.created_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-view" onclick="viewMessage({{ msg.id }}, '{{ msg.name|escapejs }}', '{{ msg.email|escapejs }}', '{{ msg.message|escapejs }}', '{{ msg.created_at|date:'M d, Y H:i' }}')">
+                                    View
+                                </button>
+                                {% if not msg.is_read %}
+                                <button class="btn btn-mark" onclick="markAsRead({{ msg.id }})">
+                                    Mark Read
+                                </button>
+                                {% endif %}
+                                <button class="btn btn-delete" onclick="deleteMessage({{ msg.id }})">
+                                    Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            {% if is_paginated %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1{% if filter_status %}&status={{ filter_status }}{% endif %}">First</a>
+                    <a href="?page={{ page_obj.previous_page_number }}{% if filter_status %}&status={{ filter_status }}{% endif %}">Previous</a>
+                {% endif %}
+                
+                <span class="current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if filter_status %}&status={{ filter_status }}{% endif %}">Next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}{% if filter_status %}&status={{ filter_status }}{% endif %}">Last</a>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            {% else %}
+            <div class="empty-state">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                <h3>No Messages Found</h3>
+                <p>There are no contact messages to display.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- View Message Modal -->
+    <div class="modal" id="viewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Message Details</h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-field">
+                <label>From:</label>
+                <p id="modalName"></p>
+            </div>
+            <div class="modal-field">
+                <label>Email:</label>
+                <p id="modalEmail"></p>
+            </div>
+            <div class="modal-field">
+                <label>Date:</label>
+                <p id="modalDate"></p>
+            </div>
+            <div class="modal-field">
+                <label>Message:</label>
+                <p id="modalMessage"></p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function viewMessage(id, name, email, message, date) {
+            document.getElementById('modalName').textContent = name;
+            document.getElementById('modalEmail').textContent = email;
+            document.getElementById('modalMessage').textContent = message;
+            document.getElementById('modalDate').textContent = date;
+            document.getElementById('viewModal').classList.add('show');
+            
+            // Auto mark as read when viewed
+            markAsRead(id);
+        }
+        
+        function closeModal() {
+            document.getElementById('viewModal').classList.remove('show');
+        }
+        
+        function markAsRead(messageId) {
+            fetch(`/admin/contact-message/${messageId}/mark-read/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        
+        function deleteMessage(messageId) {
+            if (confirm('Are you sure you want to delete this message?')) {
+                fetch(`/admin/contact-message/${messageId}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+        
+        // Close modal on outside click
+        document.getElementById('viewModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

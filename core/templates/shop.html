@@ -139,7 +139,7 @@
             <li><a href="{% url 'offers' %}">Offers</a></li>
             <li><a href="{% url 'gallery' %}">Gallery</a></li>
             <li><a href="{% url 'about' %}">About</a></li>
-            <li><a href="{% url 'Contact' %}">Contact</a></li>
+            <li><a href="{% url 'contact' %}">Contact</a></li>
 
             {% if user.is_staff %}
             <li><a href="{% url 'admin_dashboard' %}" style="color: #d32f2f; font-weight: bold;">Admin Panel</a></li>
@@ -240,7 +240,7 @@
             <div class="footer-section">
                 <h4>Support</h4>
                 <ul>
-                    <li><a href="{% url 'Contact' %}">Contact Us</a></li>
+                    <li><a href="{% url 'contact' %}">Contact Us</a></li>
                     <li><a href="{% url 'about' %}">Our Story</a></li>
                     <li><a href="#">Shipping & Returns</a></li>
                     <li><a href="#">FAQs</a></li>
