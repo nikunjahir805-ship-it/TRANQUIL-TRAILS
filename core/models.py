@@ -196,3 +196,43 @@ class ContactMessage(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.email}"
+    
+    # core/models.py
+
+from django.db import models
+
+class AboutPage(models.Model):
+    # Hero Section
+    hero_title = models.CharField(max_length=200, default="Crafting Tranquility")
+    hero_subtitle = models.CharField(max_length=200, default="Sustainable Artistry for the Intentional Home")
+    hero_bg_image = models.ImageField(upload_to='about/', blank=True, null=True)
+
+    # Philosophy Section
+    philosophy_title = models.CharField(max_length=200, default="Our Philosophy")
+    philosophy_text_1 = models.TextField(default="Tranquil Trails began with a simple mission...")
+    philosophy_text_2 = models.TextField(blank=True)
+    philosophy_image = models.ImageField(upload_to='about/', blank=True, null=True)
+    
+    # Stats
+    stat_1_number = models.CharField(max_length=50, default="100%")
+    stat_1_label = models.CharField(max_length=50, default="Handmade")
+    stat_2_number = models.CharField(max_length=50, default="50+")
+    stat_2_label = models.CharField(max_length=50, default="Local Artisans")
+    stat_3_number = models.CharField(max_length=50, default="Eco")
+    stat_3_label = models.CharField(max_length=50, default="Friendly")
+
+    # Founder Section
+    founder_name = models.CharField(max_length=100, default="Malvaniya Meet")
+    founder_image = models.ImageField(upload_to='about/', blank=True, null=True)
+    founder_story_1 = models.TextField(default="Growing up surrounded by artisans...")
+    founder_story_2 = models.TextField(blank=True)
+    founder_quote = models.TextField(default="Art is not just what we make, but how we live.")
+
+    # Video Section
+    video_url = models.URLField(default="https://cdn.pixabay.com/video/2023/04/21/159256-821688076_large.mp4")
+
+    def __str__(self):
+        return "About Page Content"
+
+    class Meta:
+        verbose_name_plural = "About Page Settings"

@@ -798,3 +798,53 @@ def delete_contact_message(request, message_id):
         return JsonResponse({'success': True, 'message': 'Message deleted successfully'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+
+
+
+    # core/views.py
+
+from .models import AboutPage  # Ensure this is imported
+
+def about(request):
+    about_content, created = AboutPage.objects.get_or_create(id=1)
+
+    return render(request, 'about.html', {
+        'about': about_content
+    })
+
+
+@login_required
+def admin_about_editor(request):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    about_content, created = AboutPage.objects.get_or_create(id=1)
+
+    if request.method == 'POST':
+        # Manually save fields (or use a ModelForm for cleaner code)
+        about_content.hero_title = request.POST.get('hero_title')
+        about_content.hero_subtitle = request.POST.get('hero_subtitle')
+        
+        about_content.philosophy_title = request.POST.get('philosophy_title')
+        about_content.philosophy_text_1 = request.POST.get('philosophy_text_1')
+        about_content.philosophy_text_2 = request.POST.get('philosophy_text_2')
+        
+        about_content.founder_name = request.POST.get('founder_name')
+        about_content.founder_story_1 = request.POST.get('founder_story_1')
+        about_content.founder_quote = request.POST.get('founder_quote')
+        about_content.video_url = request.POST.get('video_url')
+
+        # Handle Images
+        if request.FILES.get('hero_bg_image'):
+            about_content.hero_bg_image = request.FILES.get('hero_bg_image')
+        if request.FILES.get('philosophy_image'):
+            about_content.philosophy_image = request.FILES.get('philosophy_image')
+        if request.FILES.get('founder_image'):
+            about_content.founder_image = request.FILES.get('founder_image')
+
+        about_content.save()
+        messages.success(request, "About Page updated successfully!")
+        return redirect('admin_about_editor')
+
+    return render(request, 'admin/about_editor.html', {'about': about_content})

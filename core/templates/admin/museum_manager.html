@@ -182,23 +182,32 @@
 
     function filterMuseum(type) {
         activeType = type;
-        // Update Tabs
-        document.querySelectorAll('.m-tab').forEach(t => t.classList.remove('active'));
-        event.currentTarget.classList.add('active');
         
-        // Update Add Button Text
+        // 1. Update Tabs
+        document.querySelectorAll('.m-tab').forEach(t => t.classList.remove('active'));
+        if(event) event.currentTarget.classList.add('active');
+        
+        // 2. Update Add Button Text
         const typeLabel = type === 'gallery' ? 'Gallery Item' : (type === 'collections' ? 'Collection' : 'Woodwork Item');
         document.getElementById('addBtnText').innerText = typeLabel;
 
-        // Filter Grid
+        // 3. Filter Grid
         const cards = document.querySelectorAll('.museum-card');
+        
         gsap.to(cards, {
             opacity: 0, scale: 0.9, duration: 0.2, 
             onComplete: () => {
                 cards.forEach(card => {
-                    card.style.display = card.dataset.type === type ? "flex" : "none";
+                    // Important: Using proper JS syntax for variables here
+                    if (card.dataset.type === type) {
+                        card.style.display = "flex";
+                    } else {
+                        card.style.display = "none";
+                    }
                 });
-                gsap.to(`.museum-card[data-type="₹{type}"]`, {
+                
+                // Fixed the selector syntax (replaced ₹ with $)
+                gsap.to(`.museum-card[data-type="${type}"]`, { 
                     opacity: 1, scale: 1, duration: 0.4, stagger: 0.05
                 });
             }
@@ -219,20 +228,23 @@
             let nameElemId = '';
             let priceElemId = '';
             
+            // Fixed String Interpolation (replaced ₹ with $)
             if (type === 'collections') {
-                nameElemId = `name-cat-₹{id}`;
+                nameElemId = `name-cat-${id}`;
             } else if (type === 'woodwork') {
-                nameElemId = `name-wood-₹{id}`;
-                priceElemId = `price-wood-₹{id}`;
+                nameElemId = `name-wood-${id}`;
+                priceElemId = `price-wood-${id}`;
             } else {
-                nameElemId = `name-₹{id}`;
-                priceElemId = `price-₹{id}`;
+                nameElemId = `name-${id}`;
+                priceElemId = `price-${id}`;
             }
             
-            document.getElementById('form_name').value = document.getElementById(nameElemId).innerText;
+            const nameEl = document.getElementById(nameElemId);
+            if(nameEl) document.getElementById('form_name').value = nameEl.innerText;
             
             if (type !== 'collections') {
-                document.getElementById('form_price').value = document.getElementById(priceElemId).innerText;
+                const priceEl = document.getElementById(priceElemId);
+                if(priceEl) document.getElementById('form_price').value = priceEl.innerText;
             }
         } else {
             document.getElementById('modalTitle').innerText = "Add New Item";
@@ -250,10 +262,16 @@
 
     // Initial load
     window.onload = () => {
-        gsap.to('.museum-card[data-type="gallery"]', { opacity: 1, y: 0, stagger: 0.1, duration: 0.8 });
-        document.querySelectorAll('.museum-card').forEach(c => {
-            if(c.dataset.type !== 'gallery') c.style.display = 'none';
+        const cards = document.querySelectorAll('.museum-card');
+        cards.forEach(c => {
+            if(c.dataset.type !== 'gallery') {
+                c.style.display = 'none';
+                c.style.opacity = '0';
+            } else {
+                c.style.display = 'flex';
+            }
         });
+        gsap.to('.museum-card[data-type="gallery"]', { opacity: 1, y: 0, stagger: 0.1, duration: 0.8 });
     }
 </script>
 {% endblock %}

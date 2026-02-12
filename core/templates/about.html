@@ -37,7 +37,11 @@
         /* --- Hero Section with Parallax --- */
         .about-hero {
             height: 60vh; display: flex; align-items: center; justify-content: center;
+            {% if about.hero_bg_image %}
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('{{ about.hero_bg_image.url }}') center/cover no-repeat;
+            {% else %}
             background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('{% static "about-page-hero.jpg" %}') center/cover no-repeat;
+            {% endif %}
             background-attachment: fixed;
             color: white; text-align: center; padding: 0 20px;
             position: relative;
@@ -630,19 +634,27 @@
 
     <header class="about-hero">
         <div>
-            <h1>Crafting Tranquility</h1>
-            <p>Sustainable Artistry for the Intentional Home</p>
+            <h1>{{ about.hero_title|default:"Crafting Tranquility" }}</h1>
+            <p>{{ about.hero_subtitle|default:"Sustainable Artistry for the Intentional Home" }}</p>
         </div>
     </header>
 
     <section class="about-section reveal">
         <div class="about-image">
-            <img src="{% static 'home decor idea.jpg' %}" alt="Handcrafted pottery process">
+            {% if about.philosophy_image %}
+                <img src="{{ about.philosophy_image.url }}" alt="Handcrafted pottery process">
+            {% else %}
+                <img src="{% static 'home decor idea.jpg' %}" alt="Handcrafted pottery process">
+            {% endif %}
         </div>
         <div class="about-text">
-            <h2>Our Philosophy</h2>
-            <p>Tranquil Trails began with a simple mission: to reconnect the modern home with the soul of the artisan. We believe that the objects you surround yourself with should have a story, a heartbeat, and a footprint that respects the Earth.</p>
-            <p>Every piece in our Curated Gallery is hand-selected and crafted using sustainable materials like reclaimed wood, organic clay, and natural fibers.</p>
+            <h2>{{ about.philosophy_title|default:"Our Philosophy" }}</h2>
+            <p>{{ about.philosophy_text_1|default:"Tranquil Trails began with a simple mission: to reconnect the modern home with the soul of the artisan. We believe that the objects you surround yourself with should have a story, a heartbeat, and a footprint that respects the Earth." }}</p>
+            {% if about.philosophy_text_2 %}
+                <p>{{ about.philosophy_text_2 }}</p>
+            {% else %}
+                <p>Every piece in our Curated Gallery is hand-selected and crafted using sustainable materials like reclaimed wood, organic clay, and natural fibers.</p>
+            {% endif %}
             
             <div class="stats-grid">
                 <div class="stat-item"><h3>100%</h3><p>Handmade</p></div>
@@ -655,15 +667,23 @@
     <section class="founder-section reveal">
         <div class="founder-container">
             <div class="founder-image">
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop" alt="Malvaniya Meet - Founder">
+                {% if about.founder_image %}
+                    <img src="{{ about.founder_image.url }}" alt="{{ about.founder_name|default:'Founder' }}">
+                {% else %}
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop" alt="Founder">
+                {% endif %}
             </div>
             <div class="founder-story">
                 <h2>Meet The Founder</h2>
-                <h3>Malvaniya Meet</h3>
-                <p>Growing up surrounded by artisans in Ahmedabad, I witnessed firsthand the slow disappearance of traditional crafts in favor of mass production. Tranquil Trails was born from a desire to preserve these dying arts while making them accessible to modern homes.</p>
-                <p>Every product we offer represents a partnership with local craftspeople who have dedicated their lives to perfecting their trade. We don't just sell home decor—we tell stories, honor heritage, and build sustainable livelihoods.</p>
-                <p>My vision is simple: to create a world where beauty and ethics coexist, where every purchase supports a family, and where your home becomes a canvas for meaningful artistry.</p>
-                <div class="founder-signature">— Malvaniya Meet</div>
+                <h3>{{ about.founder_name|default:"Malvaniya Meet" }}</h3>
+                {% if about.founder_story_1 %}
+                    <p>{{ about.founder_story_1 }}</p>
+                {% else %}
+                    <p>Growing up surrounded by artisans in Ahmedabad, I witnessed firsthand the slow disappearance of traditional crafts in favor of mass production. Tranquil Trails was born from a desire to preserve these dying arts while making them accessible to modern homes.</p>
+                    <p>Every product we offer represents a partnership with local craftspeople who have dedicated their lives to perfecting their trade. We don't just sell home decor—we tell stories, honor heritage, and build sustainable livelihoods.</p>
+                    <p>My vision is simple: to create a world where beauty and ethics coexist, where every purchase supports a family, and where your home becomes a canvas for meaningful artistry.</p>
+                {% endif %}
+                <div class="founder-signature">— {{ about.founder_name|default:"Malvaniya Meet" }}</div>
             </div>
         </div>
     </section>
@@ -761,17 +781,24 @@
         <h2>Behind The Craft</h2>
         <p>Watch our artisans at work, transforming raw earth and wood into heirloom-quality pieces that bring warmth to your home.</p>
         <div class="video-container">
-            <video autoplay muted loop playsinline>
-                <source src="https://cdn.pixabay.com/video/2023/04/21/159256-821688076_large.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
+            {% if about.video_url %}
+                <video autoplay muted loop playsinline>
+                    <source src="{{ about.video_url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            {% else %}
+                <video autoplay muted loop playsinline>
+                    <source src="https://cdn.pixabay.com/video/2023/04/21/159256-821688076_large.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            {% endif %}
         </div>
     </section>
 
     <section class="founder-quote reveal">
         <div style="max-width: 900px; margin: 0 auto;">
-            <blockquote style="line-height: 1.4;">"Art is not just what we make, but how we live. Our mission is to make intentional living accessible to all."</blockquote>
-            <p style="letter-spacing: 2px; text-transform: uppercase; font-size: 0.9rem;">— Ladumor Nikunj, Founder</p>
+            <blockquote style="line-height: 1.4;">{{ about.founder_quote|default:'"Art is not just what we make, but how we live. Our mission is to make intentional living accessible to all."' }}</blockquote>
+            <p style="letter-spacing: 2px; text-transform: uppercase; font-size: 0.9rem;">— {{ about.founder_name|default:"Ladumor Nikunj" }}, Founder</p>
         </div>
     </section>
 
@@ -834,18 +861,14 @@
         </div>
     </footer>
 
-    <script src="{% static 'script.js' %}"></script>
-    
-    <script>
-        // Disable Add-to-Cart button logic, but enable Cart Sidebar logic
-        window.IS_GALLERY_PAGE = true;
-    </script>
-    
-    <script src="{% static 'js/cart.js' %}"></script>
-    
     <script>
         window.djangoUser = "{{ user.username|default:'guest' }}";
+    </script>
 
+    <script src="{% static 'script.js' %}"></script>
+    <script src="{% static 'js/cart.js' %}"></script>
+
+    <script>
         // --- DROPDOWN TOGGLE ---
         const userAvatarBtn = document.getElementById('userAvatarBtn');
         const profileDropdown = document.getElementById('profileDropdown');

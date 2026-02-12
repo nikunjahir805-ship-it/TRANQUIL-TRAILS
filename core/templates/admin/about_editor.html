@@ -1,0 +1,165 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block page_title %}Edit About Page{% endblock %}
+{% block page_desc %}Update the brand story, founder details, and imagery.{% endblock %}
+
+{% block content %}
+<style>
+    /* Admin Editor Styles */
+    .editor-container {
+        display: grid; grid-template-columns: 1fr 2fr; gap: 40px;
+        opacity: 0; transform: translateY(20px); animation: fadeInUp 0.8s ease forwards;
+    }
+    .preview-pane {
+        background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        position: sticky; top: 100px; height: fit-content;
+    }
+    .form-pane {
+        background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+    
+    .section-title { font-family: 'Playfair Display'; font-size: 1.5rem; margin-bottom: 20px; color: #8B5E3C; border-bottom: 2px solid #f4f1ea; padding-bottom: 10px; }
+    
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; color: #555; }
+    .form-control { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Poppins'; transition: 0.3s; }
+    .form-control:focus { border-color: #8B5E3C; outline: none; box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.1); }
+    
+    textarea.form-control { min-height: 120px; resize: vertical; }
+    
+    .image-preview {
+        width: 100%; height: 200px; background: #f9f9f9; border: 2px dashed #ddd; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center; margin-top: 10px; overflow: hidden;
+    }
+    .image-preview img { width: 100%; height: 100%; object-fit: cover; }
+    
+    .btn-submit {
+        background: #2c2c2c; color: white; padding: 15px 30px; border: none; border-radius: 8px;
+        font-weight: 600; cursor: pointer; width: 100%; font-size: 1rem; transition: 0.3s; margin-top: 20px;
+    }
+    .btn-submit:hover { background: #8B5E3C; transform: translateY(-2px); }
+
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+</style>
+
+<div class="editor-container">
+    <div class="preview-pane">
+        <h3 style="font-family: 'Playfair Display'; margin-bottom: 15px;">Live Preview Tips</h3>
+        <p style="color: #666; font-size: 0.9rem; line-height: 1.6;">
+            Changes made here update the public "About Us" page instantly.
+            <br><br>
+            <strong>Images:</strong> Use high-quality JPGs under 2MB for faster loading.
+            <br><br>
+            <strong>Founder Story:</strong> Keep it personal and authentic. This connects customers to your brand.
+        </p>
+        <div style="margin-top: 30px; padding: 20px; background: #F4EFE6; border-radius: 8px;">
+            <h4 style="color: #8B5E3C;">Current Status</h4>
+            <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                <div style="width: 10px; height: 10px; background: #4CAF50; border-radius: 50%;"></div>
+                <span style="font-size: 0.9rem; font-weight: 600;">Published</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-pane">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="section-title">1. Hero Section</div>
+            <div class="form-group">
+                <label>Main Headline</label>
+                <input type="text" name="hero_title" class="form-control" value="{{ about.hero_title }}">
+            </div>
+            <div class="form-group">
+                <label>Subtitle</label>
+                <input type="text" name="hero_subtitle" class="form-control" value="{{ about.hero_subtitle }}">
+            </div>
+            <div class="form-group">
+                <label>Hero Background Image</label>
+                <input type="file" name="hero_bg_image" class="form-control" onchange="previewImage(this, 'heroPreview')">
+                <div class="image-preview" id="heroPreview">
+                    {% if about.hero_bg_image %}
+                    <img src="{{ about.hero_bg_image.url }}">
+                    {% else %}
+                    <span style="color:#aaa;">No Image</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="section-title" style="margin-top: 40px;">2. Our Philosophy</div>
+            <div class="form-group">
+                <label>Section Title</label>
+                <input type="text" name="philosophy_title" class="form-control" value="{{ about.philosophy_title }}">
+            </div>
+            <div class="form-group">
+                <label>Paragraph 1</label>
+                <textarea name="philosophy_text_1" class="form-control">{{ about.philosophy_text_1 }}</textarea>
+            </div>
+            <div class="form-group">
+                <label>Paragraph 2 (Optional)</label>
+                <textarea name="philosophy_text_2" class="form-control">{{ about.philosophy_text_2 }}</textarea>
+            </div>
+            <div class="form-group">
+                <label>Philosophy Image</label>
+                <input type="file" name="philosophy_image" class="form-control" onchange="previewImage(this, 'philoPreview')">
+                <div class="image-preview" id="philoPreview">
+                    {% if about.philosophy_image %}
+                    <img src="{{ about.philosophy_image.url }}">
+                    {% else %}
+                    <span style="color:#aaa;">No Image</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="section-title" style="margin-top: 40px;">3. Meet The Founder</div>
+            <div class="form-group">
+                <label>Founder Name</label>
+                <input type="text" name="founder_name" class="form-control" value="{{ about.founder_name }}">
+            </div>
+            <div class="form-group">
+                <label>Founder Story</label>
+                <textarea name="founder_story_1" class="form-control">{{ about.founder_story_1 }}</textarea>
+            </div>
+            <div class="form-group">
+                <label>Quote</label>
+                <input type="text" name="founder_quote" class="form-control" value="{{ about.founder_quote }}">
+            </div>
+            <div class="form-group">
+                <label>Founder Portrait</label>
+                <input type="file" name="founder_image" class="form-control" onchange="previewImage(this, 'founderPreview')">
+                <div class="image-preview" id="founderPreview" style="height: 300px;">
+                    {% if about.founder_image %}
+                    <img src="{{ about.founder_image.url }}">
+                    {% else %}
+                    <span style="color:#aaa;">No Image</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Craft Video URL (MP4)</label>
+                <input type="url" name="video_url" class="form-control" value="{{ about.video_url }}">
+            </div>
+
+            <button type="submit" class="btn-submit">Save Changes</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Simple Image Preview Script
+    function previewImage(input, previewId) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById(previewId).innerHTML = '<img src="'+e.target.result+'">';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    
+    // GSAP Entrance
+    gsap.from(".form-pane", { y: 30, opacity: 0, duration: 0.8, ease: "power2.out", delay: 0.2 });
+</script>
+{% endblock %}

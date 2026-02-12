@@ -110,6 +110,7 @@ urlpatterns = [
 
     # ===== DJANGO BUILT-IN ADMIN (LAST) =====
     path('admin/', admin.site.urls),
+    path('admin-dashboard/about-editor/', views.admin_about_editor, name='admin_about_editor'),
 ]
 
 
