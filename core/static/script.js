@@ -186,7 +186,7 @@ function renderCartUI() {
         totalItems += item.quantity;
 
         let displayImg = item.img;
-        if (displayImg && !displayImg.startsWith('/static/') && !displayImg.startsWith('http')) {
+        if (displayImg && !displayImg.startsWith('/static/') && !displayImg.startsWith('http') && !displayImg.startsWith('/media/')) {
             displayImg = staticBasePath + displayImg;
         }
 
@@ -341,7 +341,7 @@ function renderCartUI() {
         // --- THE FIX END ---
 
         let displayImg = item.img;
-        if (displayImg && !displayImg.startsWith('/static/') && !displayImg.startsWith('http')) {
+        if (displayImg && !displayImg.startsWith('/static/') && !displayImg.startsWith('http') && !displayImg.startsWith('/media/')) {
             displayImg = staticBasePath + displayImg;
         }
 

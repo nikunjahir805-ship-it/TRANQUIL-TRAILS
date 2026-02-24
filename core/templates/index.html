@@ -192,7 +192,7 @@
                             data-id="{{ item.id }}"
                             data-name="{{ item.title }}"
                             data-price="{{ item.price }}"
-                            data-image="{{ item.image.url }}">Add to Cart - ₹{{ item.price }}</button>
+                            data-img="{{ item.image.url }}">Add to Cart - ₹{{ item.price }}</button>
                 </div>
                 {% empty %}
                 <div class="slide active"><img src="{% static 'placeholder.jpg' %}" alt="Empty"><button class="add-to-cart-btn">No Items</button></div>
@@ -261,7 +261,7 @@
                                 data-id="{{ product.id }}"
                                 data-name="{{ product.name }}"
                                 data-price="{{ product.price }}"
-                                data-image="{{ product.image.url }}">Add to Bag</button>
+                                data-img="{{ product.image.url }}">Add to Bag</button>
                     </div>
                 </div>
                 {% empty %}
