@@ -29,6 +29,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         
         .admin-header h1 {
@@ -46,6 +48,7 @@
             text-decoration: none;
             transition: all 0.3s ease;
             font-weight: 600;
+            white-space: nowrap;
         }
         
         .back-btn:hover {
@@ -101,6 +104,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         
         .messages-header h2 {
@@ -113,6 +118,7 @@
         .filter-tabs {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
         
         .filter-tab {
@@ -123,6 +129,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 500;
+            font-size: 0.9rem;
         }
         
         .filter-tab.active {
@@ -131,9 +138,16 @@
             border-color: #8B5E3C;
         }
         
+        /* Table Wrapper for Horizontal Scroll */
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
         .messages-table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 900px; /* Ensures table doesn't get too cramped */
         }
         
         .messages-table th {
@@ -144,12 +158,14 @@
             color: #2d2d2d;
             border-bottom: 2px solid #e0e0e0;
             font-size: 0.9rem;
+            white-space: nowrap;
         }
         
         .messages-table td {
             padding: 20px;
             border-bottom: 1px solid #f0f0f0;
             color: #555;
+            font-size: 0.9rem;
         }
         
         .messages-table tr {
@@ -175,6 +191,7 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            display: inline-block;
         }
         
         .badge-unread {
@@ -198,6 +215,7 @@
         .action-buttons {
             display: flex;
             gap: 8px;
+            flex-wrap: wrap;
         }
         
         .btn {
@@ -210,6 +228,7 @@
             transition: all 0.3s ease;
             text-decoration: none;
             display: inline-block;
+            white-space: nowrap;
         }
         
         .btn-view {
@@ -269,6 +288,7 @@
             padding: 25px;
             gap: 10px;
             border-top: 1px solid #e0e0e0;
+            flex-wrap: wrap;
         }
         
         .pagination a, .pagination span {
@@ -278,6 +298,7 @@
             text-decoration: none;
             color: #555;
             transition: all 0.3s ease;
+            font-size: 0.85rem;
         }
         
         .pagination a:hover {
@@ -304,6 +325,7 @@
             z-index: 10000;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
         
         .modal.show {
@@ -311,12 +333,17 @@
             animation: fadeIn 0.3s ease;
         }
         
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
         .modal-content {
             background: white;
             padding: 40px;
             border-radius: 12px;
             max-width: 600px;
-            width: 90%;
+            width: 100%;
             max-height: 80vh;
             overflow-y: auto;
             animation: slideUp 0.3s ease;
@@ -350,6 +377,8 @@
             color: #999;
             cursor: pointer;
             transition: color 0.3s ease;
+            padding: 0;
+            line-height: 1;
         }
         
         .close-modal:hover {
@@ -374,29 +403,202 @@
             padding: 12px;
             background: #f9f9f9;
             border-radius: 6px;
+            word-wrap: break-word;
         }
+
+        /* ========================================
+           RESPONSIVE BREAKPOINTS
+           ======================================== */
         
-        @media (max-width: 768px) {
-            .admin-header {
-                flex-direction: column;
-                gap: 20px;
-                text-align: center;
+        /* TABLET (768px - 1024px) */
+        @media (max-width: 1024px) {
+            .admin-container {
+                padding: 0 15px;
+                margin: 30px auto;
+            }
+            
+            .admin-header h1 {
+                font-size: 2rem;
+            }
+            
+            .messages-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            .stat-card .stat-number {
+                font-size: 2rem;
             }
             
             .messages-table {
-                font-size: 0.85rem;
+                min-width: 800px;
+            }
+        }
+        
+        /* MOBILE (320px - 767px) */
+        @media (max-width: 767px) {
+            .admin-container {
+                margin: 20px auto;
+                padding: 0 10px;
             }
             
-            .messages-table th, .messages-table td {
+            .admin-header {
+                flex-direction: column;
+                padding: 20px;
+                text-align: center;
+            }
+            
+            .admin-header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .back-btn {
+                width: 100%;
+                text-align: center;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .stat-card {
+                padding: 20px;
+            }
+            
+            .stat-card h3 {
+                font-size: 0.8rem;
+            }
+            
+            .stat-card .stat-number {
+                font-size: 1.8rem;
+            }
+            
+            .messages-header {
+                flex-direction: column;
+                padding: 20px;
+                align-items: flex-start;
+            }
+            
+            .messages-header h2 {
+                font-size: 1.3rem;
+                width: 100%;
+            }
+            
+            .filter-tabs {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .filter-tab {
+                flex: 1;
+                text-align: center;
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+            
+            /* Table remains scrollable horizontally on mobile */
+            .table-wrapper {
+                margin: 0 -10px; /* Extends to screen edges */
+            }
+            
+            .messages-table {
+                min-width: 700px;
+                font-size: 0.8rem;
+            }
+            
+            .messages-table th,
+            .messages-table td {
                 padding: 12px 10px;
+            }
+            
+            .message-preview {
+                max-width: 150px;
             }
             
             .action-buttons {
                 flex-direction: column;
+                gap: 5px;
             }
             
-            .message-preview {
-                max-width: 200px;
+            .btn {
+                width: 100%;
+                text-align: center;
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+            
+            .empty-state {
+                padding: 40px 15px;
+            }
+            
+            .empty-state svg {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .empty-state h3 {
+                font-size: 1.3rem;
+            }
+            
+            .pagination {
+                padding: 15px;
+                gap: 5px;
+            }
+            
+            .pagination a, .pagination span {
+                padding: 6px 10px;
+                font-size: 0.75rem;
+            }
+            
+            /* Modal Responsive */
+            .modal {
+                padding: 10px;
+            }
+            
+            .modal-content {
+                padding: 25px 20px;
+                max-height: 85vh;
+            }
+            
+            .modal-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .modal-field label {
+                font-size: 0.85rem;
+            }
+            
+            .modal-field p {
+                font-size: 0.9rem;
+                padding: 10px;
+            }
+        }
+        
+        /* SMALL MOBILE (320px - 480px) */
+        @media (max-width: 480px) {
+            .admin-header h1 {
+                font-size: 1.4rem;
+            }
+            
+            .messages-header h2 {
+                font-size: 1.2rem;
+            }
+            
+            .filter-tab {
+                font-size: 0.75rem;
+                padding: 6px 10px;
+            }
+            
+            .stat-card .stat-number {
+                font-size: 1.6rem;
+            }
+            
+            .messages-table {
+                min-width: 600px;
+            }
+            
+            .modal-content {
+                padding: 20px 15px;
             }
         }
     </style>
@@ -440,50 +642,52 @@
             </div>
             
             {% if messages %}
-            <table class="messages-table">
-                <thead>
-                    <tr>
-                        <th>Status</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Message</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for msg in messages %}
-                    <tr class="message-row {% if not msg.is_read %}unread{% endif %}">
-                        <td>
-                            <span class="badge {% if msg.is_read %}badge-read{% else %}badge-unread{% endif %}">
-                                {% if msg.is_read %}Read{% else %}New{% endif %}
-                            </span>
-                        </td>
-                        <td>{{ msg.name }}</td>
-                        <td>{{ msg.email }}</td>
-                        <td>
-                            <div class="message-preview">{{ msg.message }}</div>
-                        </td>
-                        <td>{{ msg.created_at|date:"M d, Y H:i" }}</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn btn-view" onclick="viewMessage({{ msg.id }}, '{{ msg.name|escapejs }}', '{{ msg.email|escapejs }}', '{{ msg.message|escapejs }}', '{{ msg.created_at|date:'M d, Y H:i' }}')">
-                                    View
-                                </button>
-                                {% if not msg.is_read %}
-                                <button class="btn btn-mark" onclick="markAsRead({{ msg.id }})">
-                                    Mark Read
-                                </button>
-                                {% endif %}
-                                <button class="btn btn-delete" onclick="deleteMessage({{ msg.id }})">
-                                    Delete
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="table-wrapper">
+                <table class="messages-table">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Message</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for msg in messages %}
+                        <tr class="message-row {% if not msg.is_read %}unread{% endif %}">
+                            <td>
+                                <span class="badge {% if msg.is_read %}badge-read{% else %}badge-unread{% endif %}">
+                                    {% if msg.is_read %}Read{% else %}New{% endif %}
+                                </span>
+                            </td>
+                            <td>{{ msg.name }}</td>
+                            <td>{{ msg.email }}</td>
+                            <td>
+                                <div class="message-preview">{{ msg.message }}</div>
+                            </td>
+                            <td>{{ msg.created_at|date:"M d, Y H:i" }}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-view" onclick="viewMessage({{ msg.id }}, '{{ msg.name|escapejs }}', '{{ msg.email|escapejs }}', '{{ msg.message|escapejs }}', '{{ msg.created_at|date:'M d, Y H:i' }}')">
+                                        View
+                                    </button>
+                                    {% if not msg.is_read %}
+                                    <button class="btn btn-mark" onclick="markAsRead({{ msg.id }})">
+                                        Mark Read
+                                    </button>
+                                    {% endif %}
+                                    <button class="btn btn-delete" onclick="deleteMessage({{ msg.id }})">
+                                        Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             
             {% if is_paginated %}
             <div class="pagination">

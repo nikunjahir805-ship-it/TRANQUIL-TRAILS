@@ -63,12 +63,23 @@
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
         
-        <div style="position: relative;">
-            <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #aaa;"></i>
-            <input type="text" id="productSearch" placeholder="Search by name, SKU, or category..." 
-                   style="padding: 12px 12px 12px 40px; border: 1px solid #eee; border-radius: 30px; width: 350px; outline: none; transition: 0.3s;"
-                   onfocus="this.style.borderColor='#8b5e3c'; this.style.width='370px'"
-                   onblur="this.style.borderColor='#eee'; this.style.width='350px'">
+        <div style="position: relative; display:flex; gap:12px; align-items:center;">
+            <div style="position: relative;">
+                <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #aaa;"></i>
+                <input type="text" id="productSearch" placeholder="Search by name, SKU, or category..." 
+                       style="padding: 12px 12px 12px 40px; border: 1px solid #eee; border-radius: 30px; width: 350px; outline: none; transition: 0.3s;"
+                       onfocus="this.style.borderColor='#8b5e3c'; this.style.width='370px'"
+                       onblur="this.style.borderColor='#eee'; this.style.width='350px'">
+            </div>
+
+            <form method="POST" action="{% url 'admin_import_products' %}" enctype="multipart/form-data" style="display:flex; gap:8px; align-items:center;">
+                {% csrf_token %}
+                <input type="file" name="csv_file" accept="text/csv" style="display:none;" id="csvInput">
+                <label for="csvInput" style="background:#fff; border:1px solid #eee; padding:8px 12px; border-radius:8px; cursor:pointer;">Import CSV</label>
+                <button type="submit" style="padding:8px 12px; border-radius:8px; background:#2c2c2c; color:white; border:none; cursor:pointer;">Upload</button>
+            </form>
+
+            <a href="{% url 'admin_export_products' %}" style="background:#fff; border:1px solid #eee; padding:8px 12px; border-radius:8px; text-decoration:none; color:#333;">Export CSV</a>
         </div>
 
         <a href="{% url 'admin_add_product' %}" 
@@ -115,15 +126,15 @@
 
                 <td style="font-weight: 600; color: #333;">₹{{ p.price }}</td>
 
-                <td>
-                    {% if p.stock > 10 %}
-                        <span class="badge status-in">{{ p.stock }} In Stock</span>
-                    {% elif p.stock > 0 %}
-                        <span class="badge status-low">{{ p.stock }} Low Stock</span>
-                    {% else %}
-                        <span class="badge status-out">Out of Stock</span>
-                    {% endif %}
-                </td>
+                <form method="POST" action="{% url 'admin_update_stock' p.id %}">
+                    {% csrf_token %}
+                    <td>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <input type="number" name="stock" value="{{ p.stock|default:0 }}" min="0" class="stock-input" style="width:90px; padding:8px; border-radius:6px; border:1px solid #e6e6e6;">
+                            <button type="submit" class="btn-update" style="padding:8px 12px; border-radius:6px;">Save</button>
+                        </div>
+                    </td>
+                </form>
 
                 <td style="text-align: right;">
                     <a href="{% url 'admin_edit_product' p.id %}" class="action-btn" title="Edit Details & View All" style="text-decoration: none;">

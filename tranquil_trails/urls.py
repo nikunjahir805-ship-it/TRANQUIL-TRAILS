@@ -56,6 +56,8 @@ urlpatterns = [
     path('admin/products/', views.admin_products, name='admin_products'),
     path('admin-add-product/', views.admin_add_product, name='admin_add_product'),
     path('admin/products/add/', views.admin_add_product, name='admin_add_product'),
+    path('admin-products/export/', views.admin_export_products, name='admin_export_products'),
+    path('admin/products/import/', views.admin_import_products, name='admin_import_products'),
     path('admin-edit-product/<int:pk>/', views.admin_edit_product, name='admin_edit_product'),
     path('admin-delete-product/<int:pk>/', views.admin_delete_product, name='admin_delete_product'),
 

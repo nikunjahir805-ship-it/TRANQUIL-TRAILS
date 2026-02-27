@@ -13,6 +13,7 @@ from django.db.models import Count, Sum, F
 from django.db.models.functions import TruncMonth
 from django.conf import settings
 import razorpay
+import csv
 
 from .models import (
     Product, Customer, Category, GalleryItem, Order, OrderItem,
@@ -391,6 +392,103 @@ def admin_update_stock(request, pk):
         messages.success(request, f"Stock updated for '{product.name}'")
     
     return redirect('admin_inventory')
+
+# CSV Export / Import for Products
+@login_required(login_url='login')
+@user_passes_test(admin_only, login_url='login')
+def admin_export_products(request):
+    """Export products as CSV (admin only)."""
+    products = Product.objects.select_related('category').all()
+
+    from django.http import HttpResponse
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="products_export.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['id', 'name', 'slug', 'category', 'price', 'stock', 'available', 'description', 'image'])
+
+    for p in products:
+        writer.writerow([
+            p.id,
+            p.name,
+            p.slug,
+            p.category.name if p.category else '',
+            float(p.price),
+            p.stock,
+            '1' if p.available else '0',
+            p.description or '',
+            p.image.url if p.image else ''
+        ])
+
+    return response
+
+
+@login_required(login_url='login')
+@user_passes_test(admin_only, login_url='login')
+def admin_import_products(request):
+    """Import products from uploaded CSV. CSV headers: id,name,slug,category,price,stock,available,description"""
+    if request.method == 'POST' and request.FILES.get('csv_file'):
+        csvfile = request.FILES['csv_file']
+        decoded = csvfile.read().decode('utf-8').splitlines()
+        reader = csv.DictReader(decoded)
+        created = 0
+        updated = 0
+
+        for row in reader:
+            # Basic field extraction
+            pid = row.get('id') or row.get('ID')
+            name = row.get('name') or row.get('Name')
+            slug = row.get('slug') or row.get('Slug')
+            category_name = row.get('category') or row.get('Category')
+            price = row.get('price') or 0
+            try:
+                stock = int(row.get('stock') or 0)
+            except ValueError:
+                stock = 0
+            available = row.get('available') in ('1', 'True', 'true', 'yes', 'Yes')
+            description = row.get('description') or ''
+
+            # Resolve or create category
+            cat = None
+            if category_name:
+                cat, _ = Category.objects.get_or_create(name=category_name, defaults={'slug': slugify(category_name)})
+
+            if pid:
+                try:
+                    prod = Product.objects.get(pk=int(pid))
+                    prod.name = name or prod.name
+                    prod.slug = slug or prod.slug
+                    if cat:
+                        prod.category = cat
+                    prod.price = price or prod.price
+                    prod.stock = stock
+                    prod.available = available
+                    prod.description = description
+                    prod.save()
+                    updated += 1
+                    continue
+                except Product.DoesNotExist:
+                    pid = None
+
+            # Create new product
+            if name:
+                p = Product.objects.create(
+                    name=name,
+                    slug=slug or generate_unique_slug(Product, name),
+                    category=cat,
+                    price=price or 0,
+                    stock=stock,
+                    description=description,
+                    available=available
+                )
+                created += 1
+
+        messages.success(request, f"Import complete: {created} created, {updated} updated.")
+    else:
+        messages.error(request, "No CSV file uploaded.")
+
+    return redirect('admin_products')
 
 # ------------------ ADMIN MEDIA / GALLERY ------------------
 

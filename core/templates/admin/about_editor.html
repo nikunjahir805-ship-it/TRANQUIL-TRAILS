@@ -8,39 +8,194 @@
 <style>
     /* Admin Editor Styles */
     .editor-container {
-        display: grid; grid-template-columns: 1fr 2fr; gap: 40px;
-        opacity: 0; transform: translateY(20px); animation: fadeInUp 0.8s ease forwards;
-    }
-    .preview-pane {
-        background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        position: sticky; top: 100px; height: fit-content;
-    }
-    .form-pane {
-        background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        display: grid; 
+        grid-template-columns: 1fr 2fr; 
+        gap: 40px;
+        opacity: 0; 
+        transform: translateY(20px); 
+        animation: fadeInUp 0.8s ease forwards;
     }
     
-    .section-title { font-family: 'Playfair Display'; font-size: 1.5rem; margin-bottom: 20px; color: #8B5E3C; border-bottom: 2px solid #f4f1ea; padding-bottom: 10px; }
+    .preview-pane {
+        background: white; 
+        padding: 30px; 
+        border-radius: 12px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        position: sticky; 
+        top: 100px; 
+        height: fit-content;
+    }
+    
+    .form-pane {
+        background: white; 
+        padding: 40px; 
+        border-radius: 12px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+    
+    .section-title { 
+        font-family: 'Playfair Display'; 
+        font-size: 1.5rem; 
+        margin-bottom: 20px; 
+        color: #8B5E3C; 
+        border-bottom: 2px solid #f4f1ea; 
+        padding-bottom: 10px; 
+    }
     
     .form-group { margin-bottom: 20px; }
-    .form-group label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; color: #555; }
-    .form-control { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Poppins'; transition: 0.3s; }
-    .form-control:focus { border-color: #8B5E3C; outline: none; box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.1); }
     
-    textarea.form-control { min-height: 120px; resize: vertical; }
+    .form-group label { 
+        display: block; 
+        font-weight: 600; 
+        font-size: 0.9rem; 
+        margin-bottom: 8px; 
+        color: #555; 
+    }
+    
+    .form-control { 
+        width: 100%; 
+        padding: 12px; 
+        border: 1px solid #ddd; 
+        border-radius: 8px; 
+        font-family: 'Poppins'; 
+        transition: 0.3s; 
+    }
+    
+    .form-control:focus { 
+        border-color: #8B5E3C; 
+        outline: none; 
+        box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.1); 
+    }
+    
+    textarea.form-control { 
+        min-height: 120px; 
+        resize: vertical; 
+    }
     
     .image-preview {
-        width: 100%; height: 200px; background: #f9f9f9; border: 2px dashed #ddd; border-radius: 8px;
-        display: flex; align-items: center; justify-content: center; margin-top: 10px; overflow: hidden;
+        width: 100%; 
+        height: 200px; 
+        background: #f9f9f9; 
+        border: 2px dashed #ddd; 
+        border-radius: 8px;
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        margin-top: 10px; 
+        overflow: hidden;
     }
-    .image-preview img { width: 100%; height: 100%; object-fit: cover; }
+    
+    .image-preview img { 
+        width: 100%; 
+        height: 100%; 
+        object-fit: cover; 
+    }
     
     .btn-submit {
-        background: #2c2c2c; color: white; padding: 15px 30px; border: none; border-radius: 8px;
-        font-weight: 600; cursor: pointer; width: 100%; font-size: 1rem; transition: 0.3s; margin-top: 20px;
+        background: #2c2c2c; 
+        color: white; 
+        padding: 15px 30px; 
+        border: none; 
+        border-radius: 8px;
+        font-weight: 600; 
+        cursor: pointer; 
+        width: 100%; 
+        font-size: 1rem; 
+        transition: 0.3s; 
+        margin-top: 20px;
     }
-    .btn-submit:hover { background: #8B5E3C; transform: translateY(-2px); }
+    
+    .btn-submit:hover { 
+        background: #8B5E3C; 
+        transform: translateY(-2px); 
+    }
 
-    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInUp { 
+        to { 
+            opacity: 1; 
+            transform: translateY(0); 
+        } 
+    }
+
+    /* ========================================
+       RESPONSIVE BREAKPOINTS
+       ======================================== */
+    
+    /* TABLET (768px - 1024px) */
+    @media (max-width: 1024px) {
+        .editor-container {
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+        
+        .preview-pane {
+            position: relative;
+            top: 0;
+            order: 2;
+        }
+        
+        .form-pane {
+            order: 1;
+            padding: 30px;
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+        }
+    }
+    
+    /* MOBILE (320px - 767px) */
+    @media (max-width: 767px) {
+        .editor-container {
+            gap: 20px;
+        }
+        
+        .preview-pane {
+            padding: 20px;
+        }
+        
+        .form-pane {
+            padding: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            font-size: 0.85rem;
+        }
+        
+        .form-control {
+            padding: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .image-preview {
+            height: 150px;
+        }
+        
+        .btn-submit {
+            padding: 12px 20px;
+            font-size: 0.95rem;
+        }
+    }
+    
+    /* SMALL MOBILE (320px - 480px) */
+    @media (max-width: 480px) {
+        .preview-pane h3 {
+            font-size: 1.1rem;
+        }
+        
+        .preview-pane p {
+            font-size: 0.85rem;
+        }
+        
+        .form-pane {
+            padding: 15px;
+        }
+    }
 </style>
 
 <div class="editor-container">
@@ -160,6 +315,8 @@
     }
     
     // GSAP Entrance
-    gsap.from(".form-pane", { y: 30, opacity: 0, duration: 0.8, ease: "power2.out", delay: 0.2 });
+    if(typeof gsap !== 'undefined') {
+        gsap.from(".form-pane", { y: 30, opacity: 0, duration: 0.8, ease: "power2.out", delay: 0.2 });
+    }
 </script>
 {% endblock %}
