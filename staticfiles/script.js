@@ -217,7 +217,7 @@ function addNewProduct() {
         newCard.setAttribute('data-img', img);
         newCard.innerHTML = `<div class="pro-image-wrapper"><img src="${img}"></div><div class="pro-info"><h4>${name}</h4><p class="price">$${price}</p><div class="pro-btn-group"><button class="add-to-cart-btn">Add to Cart</button><button class="buy-now-btn">Buy Now</button></div></div>`;
         slider.prepend(newCard); 
-        alert("Product Added!");
+        showToast("Product Added!", "success");
     }
 }
 
@@ -240,7 +240,7 @@ document.querySelector('.checkout-btn').addEventListener('click', () => {
     const isAdmin = localStorage.getItem('isAdmin'); // Checking if user is logged in
     
     if (cart.length === 0) {
-        alert("Your bag is empty!");
+        showToast("Your bag is empty!", "warning");
         return;
     }
 
@@ -249,7 +249,7 @@ document.querySelector('.checkout-btn').addEventListener('click', () => {
         window.location.href = 'payment.html';
     } else {
         // If not logged in, go to login and save a "redirect" flag
-        alert("Please log in to complete your purchase.");
+        showToast("Please log in to complete your purchase.", "info");
         localStorage.setItem('redirectAfterLogin', 'payment.html');
         window.location.href = 'login.html';
     }

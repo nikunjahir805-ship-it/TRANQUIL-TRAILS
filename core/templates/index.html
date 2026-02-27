@@ -11,6 +11,151 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+        /* --- FLOATING PARTICLES BACKGROUND --- */
+        .particles-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
+            background: transparent;
+        }
+
+        /* Individual Particle Styles */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+            will-change: transform, opacity;
+            width: 80px;
+            height: 80px;
+        }
+
+        /* Star Particles */
+        /* .particle-star {
+            background: radial-gradient(circle, rgba(104, 113, 190, 0.377) 0%, rgba(119, 25, 25, 0.08) 50%, transparent 100%);
+            box-shadow: 0 0 40px rgba(139, 94, 60, 0.2), 0 0 60px rgba(94, 15, 184, 0.39);
+            animation: floatStar 18s ease-in-out infinite;
+        } */
+
+        /* Circle Particles */
+        /* .particle-circle {
+            background: radial-gradient(circle, rgba(244, 239, 230, 0.2) 0%, rgba(244, 239, 230, 0.05) 60%, transparent 100%);
+            box-shadow: 0 0 50px rgba(244, 239, 230, 0.15);
+            animation: floatCircle 22s ease-in-out infinite;
+        } */
+
+        /* Glow Particles */
+        /* .particle-glow {
+            background: radial-gradient(circle, rgba(212, 163, 115, 0.22) 0%, rgba(212, 163, 115, 0.06) 50%, transparent 100%);
+            box-shadow: 0 0 60px rgba(212, 163, 115, 0.18), 0 0 90px rgba(212, 163, 115, 0.08);
+            animation: floatGlow 20s ease-in-out infinite;
+        } */
+
+        /* Floating Upward Animation - Stars */
+        @keyframes floatStar {
+            0% {
+                transform: translate(0, 0) scale(0.8);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            50% {
+                opacity: 0.8;
+                transform: translate(var(--drift-x, 20px), -40vh) scale(1);
+            }
+            90% {
+                opacity: 0.4;
+            }
+            100% {
+                transform: translate(var(--drift-x, 40px), -100vh) scale(0.6);
+                opacity: 0;
+            }
+        }
+
+        /* Floating Upward Animation - Circles */
+        @keyframes floatCircle {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 0;
+            }
+            15% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 0.7;
+                transform: translate(var(--drift-x, -30px), -50vh) scale(1.2);
+            }
+            85% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translate(var(--drift-x, -60px), -100vh) scale(0.8);
+                opacity: 0;
+            }
+        }
+
+        /* Floating Upward Animation - Glow */
+        @keyframes floatGlow {
+            0% {
+                transform: translate(0, 0) scale(0.9) rotate(0deg);
+                opacity: 0;
+            }
+            12% {
+                opacity: 0.4;
+            }
+            50% {
+                opacity: 0.6;
+                transform: translate(var(--drift-x, 15px), -45vh) scale(1.1) rotate(180deg);
+            }
+            88% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translate(var(--drift-x, 30px), -100vh) scale(0.7) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Pulse Glow Effect */
+        @keyframes pulseGlow {
+            0%, 100% {
+                box-shadow: 0 0 40px rgba(139, 94, 60, 0.15);
+            }
+            50% {
+                box-shadow: 0 0 60px rgba(139, 94, 60, 0.3), 0 0 80px rgba(139, 94, 60, 0.15);
+            }
+        }
+
+        /* Apply pulse to some particles randomly */
+        .particle-star:nth-child(3n),
+        .particle-glow:nth-child(5n) {
+            animation: floatStar 18s ease-in-out infinite, pulseGlow 5s ease-in-out infinite;
+        }
+
+        /* Responsive - Reduce particles on mobile */
+        @media (max-width: 768px) {
+            .particle {
+                display: none;
+            }
+            
+            .particle:nth-child(-n+10) {
+                display: block;
+            }
+        }
+
+        /* Performance optimization - Reduce motion for users who prefer it */
+        @media (prefers-reduced-motion: reduce) {
+            .particles-background {
+                display: none;
+            }
+        }
+
         /* --- NEW STYLES FOR STORY SLIDER --- */
         .story-slider-container {
             flex: 1;
@@ -53,6 +198,9 @@
     </style>
 </head>
 <body>
+    
+    <!-- Floating Particles Background -->
+    <div class="particles-background" id="particlesBackground"></div>
       
     <nav>
         <a href="{% url 'home' %}" class="logo-container">
@@ -312,45 +460,35 @@
         </div>
 
         <div class="reviews-grid">
-            <div class="review-card" data-index="0">
+            {% for review in reviews %}
+            <div class="review-card" data-index="{{ forloop.counter0 }}">
                 <div class="quote-icon">
                     <i class="fas fa-quote-left"></i>
                 </div>
-                <div class="stars">★★★★★</div>
-                <p>"The teak chair I ordered is absolutely stunning. You can feel the soul in the craftsmanship."</p>
+                <div class="stars">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= review.rating %}
+                            <i class="fas fa-star"></i>
+                        {% else %}
+                            <i class="far fa-star" style="color:#ddd;"></i>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <p>"{{ review.comment }}"</p>
                 <div class="reviewer">
                     <div class="reviewer-avatar">
-                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
+                        {% if review.customer.profile_pic %}
+                            <img src="{{ review.customer.profile_pic.url }}" alt="User">
+                        {% else %}
+                            <img src="https://via.placeholder.com/50" alt="User">
+                        {% endif %}
                     </div>
-                    <div><h4>Elena R.</h4><span>New York, USA</span></div>
+                    <div><h4>{{ review.customer.full_name }}</h4><span>{{ review.created_at|date:"M d, Y" }}</span></div>
                 </div>
             </div>
-            <div class="review-card" data-index="1">
-                <div class="quote-icon">
-                    <i class="fas fa-quote-left"></i>
-                </div>
-                <div class="stars">★★★★★</div>
-                <p>"Incredible quality and fast shipping. I love knowing my purchase helps artisans in Ahmedabad."</p>
-                <div class="reviewer">
-                    <div class="reviewer-avatar">
-                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
-                    </div>
-                    <div><h4>David K.</h4><span>London, UK</span></div>
-                </div>
-            </div>
-            <div class="review-card" data-index="2">
-                <div class="quote-icon">
-                    <i class="fas fa-quote-left"></i>
-                </div>
-                <div class="stars">★★★★★</div>
-                <p>"Tranquil Trails is a gem. The handwoven shawl is softer than I imagined."</p>
-                <div class="reviewer">
-                    <div class="reviewer-avatar">
-                        <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="User">
-                    </div>
-                    <div><h4>Sarah M.</h4><span>Toronto, Canada</span></div>
-                </div>
-            </div>
+            {% empty %}
+            <p style="grid-column:1/-1; text-align:center; color:#999;">No reviews yet.</p>
+            {% endfor %}
         </div>
     </section>
 
@@ -409,8 +547,8 @@
         
         .review-card:hover { 
             transform: translateY(-15px) scale(1.02);
-            box-shadow: 0 25px 60px rgba(139, 94, 60, 0.15);
-            border-color: rgba(139, 94, 60, 0.3);
+            box-shadow: 0 25px 60px rgba(255, 51, 0, 0.15);
+            border-color: rgba(35, 19, 182, 0.3);
         }
         
         /* Quote Icon */
@@ -419,12 +557,12 @@
             top: 25px;
             right: 25px;
             font-size: 3rem;
-            color: rgba(139, 94, 60, 0.08);
+            color: rgba(0, 255, 106, 0.08);
             transition: all 0.4s ease;
         }
         
         .review-card:hover .quote-icon {
-            color: rgba(139, 94, 60, 0.15);
+            color: rgba(81, 60, 139, 0.15);
             transform: scale(1.1) rotate(-5deg);
         }
         
@@ -599,40 +737,80 @@
         <div class="footer-container">
             <div class="footer-section about">
                 <h3 class="footer-logo">TRANQUIL TRAILS</h3>
-                <p>Bringing the soul of artisanal craftsmanship into modern homes.</p>
+                <p>Bringing the soul of artisanal craftsmanship into modern homes. Every piece tells a story of tradition, sustainability, and mindful living.</p>
+                <div class="social-icons">
+                    <a href="#" aria-label="Instagram">IG</a>
+                    <a href="#" aria-label="Facebook">FB</a>
+                    <a href="#" aria-label="Pinterest">PIN</a>
+                </div>
             </div>
+
             <div class="footer-section links">
                 <h4>Shop</h4>
                 <ul>
                     <li><a href="{% url 'shop' %}">All Products</a></li>
                     <li><a href="{% url 'gallery' %}">Gallery</a></li>
+                    <li><a href="{% url 'offers' %}">Exclusive Offers</a></li>
+                    <li><a href="{% url 'about' %}">Our Story</a></li>
                 </ul>
             </div>
+
+            <div class="footer-section links">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="{% url 'contact' %}">Contact Us</a></li>
+                    <li><a href="#">Shipping Policy</a></li>
+                    <li><a href="#">Returns & Exchanges</a></li>
+                    <li><a href="#">FAQs</a></li>
+                </ul>
+            </div>
+
             <div class="footer-section newsletter">
                 <h4>Join the Journey</h4>
-                <form class="subscribe-form"><input type="email" placeholder="Email"><button type="submit">Join</button></form>
+                <p>Subscribe for early access to new collections and artisan stories.</p>
+                <form class="subscribe-form">
+                    <input type="email" placeholder="Your email address" required>
+                    <button type="submit">Join</button>
+                </form>
             </div>
         </div>
-        
+
         <div class="footer-bottom">
             <p>&copy; 2026 TRANQUIL TRAILS. All Rights Reserved.</p>
-            <div class="payment-icons">
-                <i class="fab fa-cc-visa"></i>
-                <i class="fab fa-cc-mastercard"></i>
-                <i class="fab fa-cc-amex"></i>
-                <i class="fab fa-google-pay"></i>
-                <i class="fas fa-rupee-sign"></i>
+            <div class="footer-legal">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
             </div>
         </div>
     </footer>
 
     <style>
-        .footer-bottom { border-top: 1px solid #333; padding-top: 25px; margin-top: 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
-        .payment-icons { display: flex; gap: 15px; font-size: 1.5rem; color: #888; }
-        .payment-icons i:hover { color: white; transition: 0.3s; }
-        @media (max-width: 600px) { .footer-bottom { justify-content: center; text-align: center; } }
+        .main-footer { background-color: #1a1a1a; color: #bbb; padding: 80px 8% 30px; font-family: 'Poppins', sans-serif; }
+        .footer-container { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr; gap: 40px; max-width: 1200px; margin: 0 auto; }
+        .footer-section h4 { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 25px; color: #c5a880; letter-spacing: 1px; }
+        .footer-logo { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: white; letter-spacing: 2px; margin-bottom: 20px; }
+        .footer-section p { font-size: 0.9rem; line-height: 1.8; color: #999; }
+        .footer-section ul { list-style: none; padding: 0; }
+        .footer-section ul li { margin-bottom: 12px; }
+        .footer-section ul li a { color: #888; text-decoration: none; transition: color 0.3s, transform 0.3s; font-size: 0.9rem; }
+        .footer-section ul li a:hover { color: #c5a880; transform: translateX(5px); }
+        .social-icons { display: flex; gap: 15px; margin-top: 20px; }
+        .social-icons a { color: white; text-decoration: none; font-size: 0.8rem; width: 35px; height: 35px; border: 1px solid #333; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: 0.3s; }
+        .social-icons a:hover { background: #c5a880; border-color: #c5a880; color: #1a1a1a; }
+        .subscribe-form { display: flex; margin-top: 20px; height: 45px; }
+        .subscribe-form input { padding: 10px 15px; border: 1px solid #333; background: #222; color: white; width: 70%; outline: none; font-family: 'Poppins'; }
+        .subscribe-form button { padding: 0 20px; background-color: #c5a880; border: none; cursor: pointer; color: #1a1a1a; font-weight: 600; transition: 0.3s; }
+        .subscribe-form button:hover { background-color: #8B5E3C; color: white; }
+        .footer-bottom { border-top: 1px solid #2a2a2a; margin-top: 60px; padding-top: 30px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #666; }
+        .footer-legal a { margin-left: 20px; color: #666; text-decoration: none; transition: 0.3s; }
+        .footer-legal a:hover { color: #c5a880; }
+        @media (max-width: 992px) { .footer-container { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .footer-container { grid-template-columns: 1fr; } .footer-bottom { flex-direction: column; gap: 15px; text-align: center; } }
     </style>
 
+    <script>
+        window.djangoUser = "{{ user.username|default:'guest' }}";
+    </script>
     <script src="{% static 'script.js' %}"></script>
     <script src="{% static 'js/cart.js' %}"></script>
     
@@ -712,6 +890,125 @@
                         card.style.transform = '';
                     });
                 });
+            }
+        })();
+    </script>
+
+    <script>
+        // --- FLOATING PARTICLES BACKGROUND ANIMATION ---
+        (function() {
+            const particlesContainer = document.getElementById('particlesBackground');
+            
+            if (!particlesContainer) return;
+            
+            // Configuration - ALL PARTICLES SAME SIZE (80px circles)
+            const config = {
+                particleCount: 30,
+                types: ['star', 'circle', 'glow'],
+                delays: { min: 0, max: 10 }
+            };
+            
+            // Utility: Random number between min and max
+            function random(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+            
+            // Utility: Random integer
+            function randomInt(min, max) {
+                return Math.floor(random(min, max));
+            }
+            
+            // Create a single particle
+            function createParticle() {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random type (determines color/gradient only)
+                const type = config.types[randomInt(0, config.types.length)];
+                particle.classList.add(`particle-${type}`);
+                
+                // Random starting position (anywhere on screen width, bottom of viewport)
+                const startX = random(0, window.innerWidth);
+                const startY = window.innerHeight + random(0, 100);
+                particle.style.left = `${startX}px`;
+                particle.style.top = `${startY}px`;
+                
+                // Random horizontal drift
+                const driftX = random(-50, 50);
+                particle.style.setProperty('--drift-x', `${driftX}px`);
+                
+                // Random animation delay for staggered effect
+                const delay = random(config.delays.min, config.delays.max);
+                particle.style.animationDelay = `${delay}s`;
+                
+                // Random animation duration variation
+                const durationVariation = random(0.8, 1.2);
+                const baseDuration = type === 'star' ? 18 : type === 'circle' ? 22 : 20;
+                particle.style.animationDuration = `${baseDuration * durationVariation}s`;
+                
+                return particle;
+            }
+            
+            // Initialize particles
+            function initParticles() {
+                const fragment = document.createDocumentFragment();
+                
+                for (let i = 0; i < config.particleCount; i++) {
+                    const particle = createParticle();
+                    fragment.appendChild(particle);
+                }
+                
+                particlesContainer.appendChild(fragment);
+            }
+            
+            // Regenerate particle when animation ends (infinite loop with variety)
+            function regenerateParticle(particle) {
+                particle.addEventListener('animationiteration', () => {
+                    // Randomize position again for variety
+                    const startX = random(0, window.innerWidth);
+                    particle.style.left = `${startX}px`;
+                    
+                    const driftX = random(-50, 50);
+                    particle.style.setProperty('--drift-x', `${driftX}px`);
+                });
+            }
+            
+            // Handle window resize
+            function handleResize() {
+                const particles = particlesContainer.querySelectorAll('.particle');
+                particles.forEach(particle => {
+                    const currentLeft = parseFloat(particle.style.left);
+                    if (currentLeft > window.innerWidth) {
+                        particle.style.left = `${random(0, window.innerWidth)}px`;
+                    }
+                });
+            }
+            
+            // Initialize on page load
+            function init() {
+                initParticles();
+                
+                const particles = particlesContainer.querySelectorAll('.particle');
+                particles.forEach(regenerateParticle);
+                
+                // Debounced resize handler
+                let resizeTimeout;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimeout);
+                    resizeTimeout = setTimeout(handleResize, 250);
+                });
+            }
+            
+            // Check if user prefers reduced motion
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            
+            if (!prefersReducedMotion) {
+                // Start when DOM is ready
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', init);
+                } else {
+                    init();
+                }
             }
         })();
     </script>

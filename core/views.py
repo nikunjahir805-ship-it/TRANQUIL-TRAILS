@@ -49,10 +49,14 @@ def home(request):
     wood_products = Product.objects.filter(category__name='Wood')[:5]
     categories = Category.objects.all()[:4]
 
+    # load latest three reviews (could filter by is_liked or rating)
+    reviews = Review.objects.all().select_related('customer').order_by('-created_at')[:3]
+
     return render(request, 'index.html', {
         'gallery_slider': gallery_slider,
         'wood_products': wood_products,
-        'categories': categories
+        'categories': categories,
+        'reviews': reviews,
     })
 
 def shop(request):
@@ -101,7 +105,9 @@ def about(request):
     return render(request, 'about.html')
 
 def contact(request): 
-    return render(request, 'contact.html')
+    # pass available products for review form
+    products = Product.objects.filter(available=True)
+    return render(request, 'contact.html', {'products': products})
 
 # ------------------ AUTH ------------------
 
@@ -730,6 +736,44 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
 from .models import ContactMessage
+
+@require_POST
+def review_submit(request):
+    try:
+        name = request.POST.get('name', '').strip()
+        email = request.POST.get('email', '').strip()
+        product_id = request.POST.get('product')
+        rating = request.POST.get('rating', '5')
+        comment = request.POST.get('comment', '').strip()
+
+        if not name or not email or not product_id or not comment:
+            return JsonResponse({'success': False, 'error': 'All review fields are required'}, status=400)
+        if '@' not in email or '.' not in email:
+            return JsonResponse({'success': False, 'error': 'Invalid email format'}, status=400)
+
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Product not found'}, status=400)
+
+        customer, created = Customer.objects.get_or_create(
+            email=email,
+            defaults={'full_name': name}
+        )
+        try:
+            rating_val = int(rating)
+        except (TypeError, ValueError):
+            rating_val = 5
+
+        Review.objects.create(
+            customer=customer,
+            product=product,
+            rating=rating_val,
+            comment=comment
+        )
+        return JsonResponse({'success': True, 'message': 'Review submitted successfully'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 @require_POST
 def contact_submit(request):

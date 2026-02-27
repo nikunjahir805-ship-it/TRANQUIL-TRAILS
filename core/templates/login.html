@@ -145,6 +145,42 @@
     </div>
 
     <script>
+        // --- TOAST NOTIFICATION SYSTEM ---
+        function showToast(message, type = 'info', duration = 3500) {
+            if (!document.getElementById('toast-container')) {
+                const container = document.createElement('div');
+                container.id = 'toast-container';
+                container.className = 'toast-container';
+                container.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;pointer-events:none;';
+                document.body.appendChild(container);
+            }
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.style.cssText = 'background:white;color:#2c2c2c;padding:16px 24px;border-radius:8px;box-shadow:0 8px 25px rgba(0,0,0,0.15);margin-bottom:12px;display:flex;align-items:center;gap:12px;min-width:300px;max-width:400px;animation:slideInRight 0.3s ease-out;pointer-events:auto;border-left:4px solid #8B5E3C;';
+            const icons = {success: '✓', error: '✕', warning: '⚠', info: 'ℹ'};
+            toast.innerHTML = `<div style="font-size:1.25rem;flex-shrink:0;font-weight:bold;">${icons[type]}</div><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease-in forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // Add CSS for animations
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes slideInRight {
+                from { transform: translateX(400px); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(400px); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
         // --- 1. CSRF Token Helper ---
         function getCookie(name) {
             let cookieValue = null;
@@ -213,14 +249,14 @@
                     localStorage.setItem('isAdmin', 'false');
                     window.location.href = "{% url 'home' %}";
                 } else {
-                    alert("Error: " + data.error);
+                    showToast("Signup Error: " + data.error, "error");
                     btn.innerText = originalText;
                     btn.disabled = false;
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert("Connection error.");
+                showToast("Connection error. Please check and try again.", "error");
                 btn.innerText = originalText;
                 btn.disabled = false;
             });
@@ -254,14 +290,14 @@
                         window.location.href = "{% url 'home' %}";
                     }
                 } else {
-                    alert("Login Failed: " + data.error);
+                    showToast("Login Failed: Invalid email or password", "error");
                     btn.innerText = originalText;
                     btn.disabled = false;
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert("Connection error.");
+                showToast("Connection error. Please check and try again.", "error");
                 btn.innerText = originalText;
                 btn.disabled = false;
             });

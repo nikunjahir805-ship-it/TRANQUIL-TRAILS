@@ -24,6 +24,7 @@ urlpatterns = [
 
     # Contact Submit + Admin contact
     path('contact/submit/', views.contact_submit, name='contact_submit'),
+    path('contact/review/submit/', views.review_submit, name='review_submit'),
     path('admin/contact-messages/', views.admin_contact_messages, name='admin_contact_messages'),
     path('admin/contact-message/<int:message_id>/mark-read/', views.mark_message_read, name='mark_message_read'),
     path('admin/contact-message/<int:message_id>/delete/', views.delete_contact_message, name='delete_contact_message'),

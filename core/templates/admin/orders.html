@@ -219,7 +219,7 @@
     // 5. EXPORT LOGIC
     function exportCSV() {
         gsap.to(".fas.fa-file-export", { rotation: 360, duration: 1 });
-        setTimeout(() => alert("Your artisan order report is downloading..."), 500);
+        setTimeout(() => showToast("Your artisan order report is downloading...", "success"), 500);
     }
 </script>
 {% endblock %}

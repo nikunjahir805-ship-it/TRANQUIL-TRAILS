@@ -75,6 +75,9 @@
     </footer>
 
     <script src="{% static 'script.js' %}"></script>
+    <script>
+        window.djangoUser = "{{ user.username|default:'guest' }}";
+    </script>
     <script src="{% static 'js/cart.js' %}"></script>
 </body>
 </html>

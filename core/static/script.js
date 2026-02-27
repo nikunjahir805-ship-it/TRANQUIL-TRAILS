@@ -3,6 +3,30 @@
  * Handles Navigation, Cart, Slider, and Checkout Logic
  */
 
+// --- TOAST NOTIFICATION SYSTEM ---
+function initToastContainer() {
+    if (!document.getElementById('toast-container')) {
+        const container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+}
+
+function showToast(message, type = 'info', duration = 3500) {
+    initToastContainer();
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `<div class="toast-icon"></div><span>${message}</span>`;
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.classList.add('hide');
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
 // Ensure this is at the top level of script.js
 function addToCart(id, name, price, img) {
     console.log("Adding to cart:", name); // Debug line
@@ -25,6 +49,30 @@ function addToCart(id, name, price, img) {
 // Get the current user from the HTML (or default to 'guest')
 const currentUser = window.djangoUser || 'guest';
 const cartKey = `cart_${currentUser}`; 
+
+// If a user just logged in, migrate any guest cart into their user cart (safe, idempotent)
+if (currentUser !== 'guest') {
+    try {
+        const guestKey = 'cart_guest';
+        const guestRaw = localStorage.getItem(guestKey);
+        if (guestRaw) {
+            const guestCart = JSON.parse(guestRaw) || [];
+            const userRaw = localStorage.getItem(cartKey);
+            const userCart = JSON.parse(userRaw) || [];
+
+            // Merge guest items into user cart without duplicating by name
+            guestCart.forEach(gc => {
+                const exists = userCart.some(uc => uc.name === gc.name);
+                if (!exists) userCart.push(gc);
+            });
+
+            localStorage.setItem(cartKey, JSON.stringify(userCart));
+            localStorage.removeItem(guestKey);
+        }
+    } catch (e) {
+        console.error('Cart merge error:', e);
+    }
+}
 
 // Load cart specific to this user
 let cart = JSON.parse(localStorage.getItem(cartKey)) || [];
@@ -242,16 +290,16 @@ const checkoutBtn = document.querySelector('.checkout-btn');
 if(checkoutBtn) {
     checkoutBtn.addEventListener('click', () => {
         if (cart.length === 0) {
-            alert("Your bag is empty!");
+            showToast("Your bag is empty!", "warning");
             return;
         }
 
         // Check if user is logged in (using window.djangoUser from HTML)
         if (currentUser === 'guest') {
-            alert("Please log in to complete your purchase.");
+            showToast("Please log in to complete your purchase.", "info");
             window.location.href = '/login/';
         } else {
-            alert("Proceeding to payment...");
+            showToast("Proceeding to payment...", "success");
             // window.location.href = '/payment/'; 
         }
     });

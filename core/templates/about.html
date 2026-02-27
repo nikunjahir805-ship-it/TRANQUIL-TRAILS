@@ -378,14 +378,14 @@
             font-family: 'Playfair Display', serif;
             font-size: 1.2rem;
             margin-bottom: 25px;
-            color: var(--primary);
+            color: #c5a880;
             letter-spacing: 1px;
         }
 
         .footer-logo {
             font-family: 'Playfair Display', serif;
             font-size: 1.5rem;
-            color: var(--white);
+            color: white;
             letter-spacing: 2px;
             margin-bottom: 20px;
         }
@@ -408,13 +408,13 @@
         .footer-section ul li a {
             color: #888;
             text-decoration: none;
-            transition: color 0.3s, padding-left 0.3s;
+            transition: color 0.3s, transform 0.3s;
             font-size: 0.9rem;
         }
 
         .footer-section ul li a:hover {
-            color: var(--primary);
-            padding-left: 5px;
+            color: #c5a880;
+            transform: translateX(5px);
         }
 
         .social-icons {
@@ -438,8 +438,9 @@
         }
 
         .social-icons a:hover {
-            background: var(--primary);
-            border-color: var(--primary);
+            background: #c5a880;
+            border-color: #c5a880;
+            color: #1a1a1a;
         }
 
         .subscribe-form {
@@ -460,16 +461,17 @@
 
         .subscribe-form button {
             padding: 0 20px;
-            background-color: var(--primary);
+            background-color: #c5a880;
             border: none;
             cursor: pointer;
-            color: white;
+            color: #1a1a1a;
             font-weight: 600;
             transition: 0.3s;
         }
 
         .subscribe-form button:hover {
-            background-color: #6f4a2e;
+            background-color: #8B5E3C;
+            color: white;
         }
 
         .footer-bottom {
@@ -491,7 +493,24 @@
         }
 
         .footer-legal a:hover {
-            color: var(--primary);
+            color: #c5a880;
+        }
+
+        @media (max-width: 992px) {
+            .footer-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .footer-container {
+                grid-template-columns: 1fr;
+            }
+            .footer-bottom {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
         }
 
         /* --- CART SIDEBAR & DROPDOWN CSS --- */
@@ -816,19 +835,19 @@
                 <h3 class="footer-logo">TRANQUIL TRAILS</h3>
                 <p>Bringing the soul of artisanal craftsmanship into modern homes. Every piece tells a story of tradition, sustainability, and mindful living.</p>
                 <div class="social-icons">
-                    <a href="" aria-label="Instagram">IG</a>
-                    <a href="#" aria-label=""><img src="{% static 'instagram.png' %}" style="width: 20px;"></a>
+                    <a href="#" aria-label="Instagram">IG</a>
                     <a href="#" aria-label="Facebook">FB</a>
+                    <a href="#" aria-label="Pinterest">PIN</a>
                 </div>
             </div>
 
             <div class="footer-section links">
                 <h4>Shop</h4>
                 <ul>
-                    <li><a href="#">New Arrivals</a></li>
-                    <li><a href="#">Best Sellers</a></li>
-                    <li><a href="#">Sustainable Wood</a></li>
-                    <li><a href="#">Ceramics</a></li>
+                    <li><a href="{% url 'shop' %}">All Products</a></li>
+                    <li><a href="{% url 'gallery' %}">Gallery</a></li>
+                    <li><a href="{% url 'offers' %}">Exclusive Offers</a></li>
+                    <li><a href="{% url 'about' %}">Our Story</a></li>
                 </ul>
             </div>
 
@@ -859,6 +878,18 @@
                 <a href="#">Terms of Service</a>
             </div>
         </div>
+    </footer>
+                </form>
+            </div>
+        </div>
+
+        <!-- <div class="footer-bottom">
+            <p>&copy; 2026 TRANQUIL TRAILS. All Rights Reserved.</p>
+            <div class="footer-legal">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+            </div>
+        </div> -->
     </footer>
 
     <script>
