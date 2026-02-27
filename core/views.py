@@ -163,12 +163,22 @@ def admin_dashboard(request):
     ).aggregate(total=Sum(F('quantity') * F('product__price')))['total'] or 0
 
     recent_orders = Order.objects.filter(complete=True).order_by('-date_ordered')[:5]
+    
+    # Stock Statistics
+    total_products = Product.objects.count()
+    low_stock_count = Product.objects.filter(stock__gt=0, stock__lte=10).count()
+    out_of_stock_count = Product.objects.filter(stock=0).count()
+    total_stock = Product.objects.aggregate(total=Sum('stock'))['total'] or 0
 
     return render(request, 'admin/dashboard.html', {
         'total_orders': total_orders,
         'pending_count': pending_count,
         'total_revenue': total_revenue,
         'recent_orders': recent_orders,
+        'total_products': total_products,
+        'low_stock_count': low_stock_count,
+        'out_of_stock_count': out_of_stock_count,
+        'total_stock': total_stock,
     })
 
 @login_required(login_url='login')
@@ -231,11 +241,14 @@ def admin_products(request):
 
 @login_required(login_url='login')
 @user_passes_test(admin_only, login_url='login')
+@login_required(login_url='login')
+@user_passes_test(admin_only, login_url='login')
 def admin_add_product(request):
     if request.method == 'POST':
         name = request.POST.get('name')
         category_id = request.POST.get('category')
         price = request.POST.get('price')
+        stock = request.POST.get('stock', 0)
         description = request.POST.get('description')
         image = request.FILES.get('image')
         
@@ -246,9 +259,9 @@ def admin_add_product(request):
             slug=generate_unique_slug(Product, name),
             category=category,
             price=price,
+            stock=int(stock),
             description=description,
             image=image,
-            stock=0,
             available=True
         )
         

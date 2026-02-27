@@ -126,9 +126,9 @@
                 </td>
 
                 <td style="text-align: right;">
-                    <button class="action-btn" title="Edit Details">
+                    <a href="{% url 'admin_edit_product' p.id %}" class="action-btn" title="Edit Details & View All" style="text-decoration: none;">
                         <i class="fas fa-pen"></i>
-                    </button>
+                    </a>
                     
                     <form action="{% url 'admin_delete_product' p.id %}" method="POST" onsubmit="return confirm('Are you sure you want to delete {{ p.name }}?');" style="display: inline;">
                         {% csrf_token %}

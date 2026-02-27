@@ -126,11 +126,29 @@
 
     <div class="stat-card">
         <div class="stat-info">
-            <h3>Site Visitors</h3>
-            <div class="value">45k</div>
-            <div class="trend-up"><i class="fas fa-arrow-up"></i> 18% Traffic Spike</div>
+            <h3>Total Stock</h3>
+            <div class="value">{{ total_stock }}</div>
+            <div class="trend-up"><i class="fas fa-arrow-up"></i> {{ total_products }} Products</div>
         </div>
-        <div class="stat-icon bg-light-green"><i class="fas fa-users"></i></div>
+        <div class="stat-icon bg-light-accent"><i class="fas fa-boxes"></i></div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Low Stock</h3>
+            <div class="value">{{ low_stock_count }}</div>
+            <div class="trend-down"><i class="fas fa-exclamation-triangle"></i> Need Replenishment</div>
+        </div>
+        <div class="stat-icon bg-light-orange"><i class="fas fa-box-open"></i></div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Out of Stock</h3>
+            <div class="value">{{ out_of_stock_count }}</div>
+            <div class="trend-down"><i class="fas fa-times"></i> Items Unavailable</div>
+        </div>
+        <div class="stat-icon" style="background: rgba(244, 67, 54, 0.1); color: #f44336;"><i class="fas fa-ban"></i></div>
     </div>
 </div>
 

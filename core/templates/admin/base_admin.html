@@ -300,7 +300,7 @@
         </div>
 
         <div class="nav-scroller">
-            <div class="nav-category">Main Menu</div>
+            <div class="nav-category">Dashboard</div>
             <div class="nav-item">
                 <a href="{% url 'admin_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
                     <i class="fas fa-th-large"></i> <span>Overview</span>
@@ -312,7 +312,8 @@
                 </a>
             </div>
 
-            <div class="nav-category">Catalog</div>
+            
+            <div class="nav-category">Catalog Management</div>
             <div class="nav-item">
                 <a href="{% url 'admin_products' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_products' %}active{% endif %}">
                     <i class="fas fa-box-open"></i> <span>Products</span>
@@ -335,21 +336,15 @@
                 </a>
             </div>
 
-            <div class="nav-category">Sales & Social</div>
+
+            <div class="nav-category">Order Management</div>
             <div class="nav-item">
                 <a href="{% url 'admin_orders' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_orders' %}active{% endif %}">
                     <i class="fas fa-shopping-cart"></i> <span>Orders</span>
                     <span class="badge bg-accent">12</span>
                 </a>
             </div>
-            <div class="nav-item">
-                <a href="{% url 'admin_reviews' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_reviews' %}active{% endif %}">
-                    <i class="fas fa-star"></i> <span>Reviews</span>
-                </a>
-            </div>
-
-            <div class="nav-category">Marketing</div>
-            <div class="nav-item">
+             <div class="nav-item">
                 <a href="{% url 'admin_discounts' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_discounts' %}active{% endif %}">
                     <i class="fas fa-ticket-alt"></i> <span>Coupons</span>
                 </a>
@@ -360,7 +355,22 @@
                 </a>
             </div>
 
-            <div class="nav-category">Media</div>
+
+            <div class="nav-category">Customers</div>
+           <div class="nav-item">
+                <a href="{% url 'admin_reviews' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_reviews' %}active{% endif %}">
+                    <i class="fas fa-star"></i> <span>Reviews</span>
+                </a>
+            </div>
+                       <div class="nav-item">
+                <a href="{% url 'admin_contact_messages' %}" 
+                class="nav-link {% if request.resolver_match.url_name == 'admin_contact_messages' %}active{% endif %}">
+                    <i class="fas fa-envelope"></i> <span>Contact Messages</span>
+                </a>
+            </div>
+
+
+            <div class="nav-category">Content</div>
             <div class="nav-item">
                 <a href="{% url 'museum_manager' %}" class="nav-link {% if request.resolver_match.url_name == 'museum_manager' %}active{% endif %}">
                     <i class="fas fa-university"></i> <span>Museum Manager</span>
@@ -371,26 +381,19 @@
                     <i class="fas fa-images"></i> <span>Library</span>
                 </a>
             </div>
-
-            <div class="nav-category">System</div>
-            <div class="nav-item">
-                <a href="{% url 'admin_settings' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_settings' %}active{% endif %}">
-                    <i class="fas fa-cog"></i> <span>Settings</span>
-                </a>
-
-            </div>
-           <div class="nav-item">
+             <div class="nav-item">
                 <a href="{% url 'admin_about_editor' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_about_editor' %}active{% endif %}">
                     <i class="fas fa-pen-nib"></i> <span>Edit About Page</span>
                 </a>
             </div>
-                        <div class="nav-item">
-                <a href="{% url 'admin_contact_messages' %}" 
-                class="nav-link {% if request.resolver_match.url_name == 'admin_contact_messages' %}active{% endif %}">
-                    <i class="fas fa-envelope"></i> <span>Contact Messages</span>
+
+
+            <div class="nav-category">Settings</div>
+            <div class="nav-item">
+                <a href="{% url 'admin_settings' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_settings' %}active{% endif %}">
+                    <i class="fas fa-cog"></i> <span>Settings</span>
                 </a>
             </div>
-
             <div class="nav-item">
                 <a href="{% url 'home' %}" class="nav-link logout">
                     <i class="fas fa-sign-out-alt"></i> <span>Exit Store</span>
