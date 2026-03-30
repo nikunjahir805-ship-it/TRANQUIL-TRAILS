@@ -388,6 +388,23 @@
         .cat-card:hover img { transform: scale(1.1); }
         .cat-card:hover .cat-overlay { transform: translateY(0); }
         .cat-card:hover .btn-text { opacity: 1; transform: translateY(0); }
+
+        /* RESPONSIVE IMPROVEMENTS: prevent overflow on tablet/mobile */
+        @media (max-width: 1024px) {
+            .category-grid { flex-wrap: wrap; justify-content: center; }
+            .cat-card { width: calc(50% - 20px); max-width: 420px; }
+        }
+
+        @media (max-width: 767px) {
+            .category-grid { gap: 16px; }
+            .cat-card { width: 100%; max-width: 520px; height: 300px; }
+        }
+
+        @media (max-width: 480px) {
+            .cat-card { height: 260px; }
+            .cat-overlay { padding: 22px; }
+            .cat-overlay h3 { font-size: 1.5rem; }
+        }
     </style>
 
     <section class="wood-section">
@@ -424,14 +441,14 @@
         </div>
     </section>
 
-    <section style="background: #2c2c2c; color: white; padding: 80px 5%; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 50px;">
-        
-        <div style="flex: 1; min-width: 300px; max-width: 600px;">
+    <section class="story-section" style="background: #2c2c2c; color: white; padding: 80px 5%; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 50px;">
+         
+        <div class="story-content" style="flex: 1; min-width: 300px; max-width: 600px;">
             <h2 style="font-family: 'Playfair Display'; font-size: 2.5rem; margin-bottom: 20px;">Preserving the Art of the Hand</h2>
             <p style="font-family: 'Poppins'; line-height: 1.8; color: #ccc; margin-bottom: 30px;">
                 Every piece at Tranquil Trails tells a story of generations. By supporting us, you are directly supporting artisan communities in Ahmedabad and keeping ancient crafts alive in a modern world.
             </p>
-            <div style="background: rgba(255,255,255,0.1); padding: 5px; border-radius: 50px; display: flex; max-width: 400px;">
+            <div class="story-subscribe" style="background: rgba(255,255,255,0.1); padding: 5px; border-radius: 50px; display: flex; max-width: 400px;">
                 <input type="email" placeholder="Your email address" style="flex: 1; background: none; border: none; padding: 15px 20px; color: white; outline: none;">
                 <button style="background: #8B5E3C; color: white; border: none; padding: 12px 30px; border-radius: 50px; cursor: pointer; font-weight: bold;">Subscribe</button>
             </div>
@@ -605,7 +622,7 @@
             animation: float 3s ease-in-out infinite;
         }
         
-        .reviewer-avatar::before {
+        /* .reviewer-avatar::before {
             content: '';
             position: absolute;
             inset: -3px;
@@ -614,7 +631,7 @@
             opacity: 0;
             transition: opacity 0.4s ease;
             z-index: -1;
-        }
+        } */
         
         .review-card:hover .reviewer-avatar::before {
             opacity: 1;
@@ -808,6 +825,142 @@
         @media (max-width: 600px) { .footer-container { grid-template-columns: 1fr; } .footer-bottom { flex-direction: column; gap: 15px; text-align: center; } }
     </style>
 
+    <style>
+        /* ============================================================
+           RESPONSIVE IMPROVEMENTS
+           - Desktop/Laptop UI unchanged
+           - Only CSS overrides for mobile + tablet breakpoints
+           ============================================================ */
+
+        /* Tablet (821px–1024px) */
+        @media (min-width: 821px) and (max-width: 1024px) {
+            /* RESPONSIVE IMPROVEMENT: keep navigation from overflowing */
+            nav { padding: 15px 5%; }
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                height: 100vh;
+                width: 70%;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                justify-content: center;
+                gap: 40px;
+                padding: 40px;
+                transition: 0.4s;
+                z-index: 999;
+            }
+            .nav-links.active { right: 0; }
+            .hamburger { display: flex; }
+
+            /* RESPONSIVE IMPROVEMENT: hero imagery scales on tablets */
+            .hero-text h1 { font-size: 3.6rem; }
+            .hero-image-container { min-height: 480px; }
+            .layer-1 { width: 320px; height: 420px; }
+            .layer-2 { width: 300px; height: 400px; }
+            .layer-3 { width: 240px; height: 330px; }
+        }
+
+        /* Tablet (768px–1024px) */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            /* RESPONSIVE IMPROVEMENT: 3D carousel fits tablet widths */
+            .slider-container { height: 520px; }
+            .slide { width: 320px; height: 440px; }
+            .slide.active { transform: translateX(0) scale(1.12); }
+            .slide.next1 { transform: translateX(260px) scale(0.88); }
+            .slide.prev1 { transform: translateX(-260px) scale(0.88); }
+            .slide.next2 { transform: translateX(460px) scale(0.7); }
+            .slide.prev2 { transform: translateX(-460px) scale(0.7); }
+            .nav-arrow { width: 54px; height: 54px; }
+        }
+
+        /* Large Mobile (481px–767px) */
+        @media (min-width: 481px) and (max-width: 767px) {
+            /* RESPONSIVE IMPROVEMENT: 3D carousel fits large mobile widths */
+            .slider-container { height: 440px; }
+            .slide { width: 280px; height: 380px; }
+            .slide.active { transform: translateX(0) scale(1.08); }
+            .slide.next1 { transform: translateX(220px) scale(0.85); }
+            .slide.prev1 { transform: translateX(-220px) scale(0.85); }
+            .slide.next2 { transform: translateX(380px) scale(0.65); }
+            .slide.prev2 { transform: translateX(-380px) scale(0.65); }
+            .nav-arrow { width: 48px; height: 48px; }
+
+            /* RESPONSIVE IMPROVEMENT: buttons don't overflow narrow slides */
+            .add-to-cart-btn { max-width: calc(100% - 40px); text-align: center; }
+        }
+
+        /* Mobile (431px–480px) */
+        @media (min-width: 431px) and (max-width: 480px) {
+            /* RESPONSIVE IMPROVEMENT: match small-carousel sizing just above 430px */
+            .slider-container { height: 400px; }
+            .slide { width: 240px; height: 340px; }
+            .slide.active { transform: translateX(0) scale(1.06); }
+            .slide.next1 { transform: translateX(180px) scale(0.82); }
+            .slide.prev1 { transform: translateX(-180px) scale(0.82); }
+            .slide.next2 { transform: translateX(300px) scale(0.62); }
+            .slide.prev2 { transform: translateX(-300px) scale(0.62); }
+            .nav-arrow { width: 44px; height: 44px; font-size: 1.25rem; }
+
+            .add-to-cart-btn { max-width: calc(100% - 40px); text-align: center; }
+        }
+
+        /* Mobile (max 767px) */
+        @media (max-width: 767px) {
+            /* RESPONSIVE IMPROVEMENT: story section stacks cleanly */
+            .story-section {
+                padding: 60px 5% !important; /* overrides inline */
+                gap: 30px !important;        /* overrides inline */
+                flex-direction: column;
+            }
+            .story-section .story-content {
+                min-width: 0 !important;     /* overrides inline */
+                max-width: 100% !important;  /* overrides inline */
+                width: 100%;
+            }
+            .story-slider-container {
+                min-width: 0;
+                max-width: 100%;
+                width: 100%;
+                height: 300px;
+            }
+            .story-subscribe { max-width: 100% !important; }
+        }
+
+        /* Small Mobile (max 480px) */
+        @media (max-width: 480px) {
+            /* RESPONSIVE IMPROVEMENT: compact hero image stack */
+            .hero-image-container { min-height: 380px; }
+            .layer-1 { width: 220px; height: 280px; }
+            .layer-2 { width: 200px; height: 260px; }
+            .layer-3 { width: 170px; height: 230px; border-width: 6px; }
+
+            /* RESPONSIVE IMPROVEMENT: carousel UI fits narrow screens */
+            .nav-arrow { width: 44px; height: 44px; font-size: 1.25rem; }
+            .add-to-cart-btn { max-width: calc(100% - 40px); text-align: center; }
+
+            /* RESPONSIVE IMPROVEMENT: prevent subscribe button/input overflow */
+            .story-subscribe {
+                flex-direction: column !important; /* overrides inline */
+                border-radius: 20px !important;    /* overrides inline */
+            }
+            .story-subscribe input {
+                width: 100% !important;            /* overrides inline */
+                padding: 14px 16px !important;     /* overrides inline */
+            }
+            .story-subscribe button {
+                width: 100% !important;            /* overrides inline */
+                padding: 14px 16px !important;     /* overrides inline */
+            }
+
+            /* RESPONSIVE IMPROVEMENT: footer newsletter stacks on very small screens */
+            .subscribe-form { flex-direction: column; height: auto; }
+            .subscribe-form input { width: 100%; }
+            .subscribe-form button { width: 100%; padding: 12px 20px; }
+        }
+    </style>
+     
     <script>
         window.djangoUser = "{{ user.username|default:'guest' }}";
     </script>
