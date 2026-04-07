@@ -236,6 +236,7 @@
                                 Hi, {{ user.first_name|default:user.username }}
                             </div>
                             <a href="#">My Orders</a>
+                            <a href="{% url 'wishlist' %}">Wishlist <span class="cart-count-pill" data-wishlist-count>0</span></a>
                             <a href="#" onclick="logoutUser()" class="logout-btn">Logout</a>
                         </div>
                     </div>
@@ -263,9 +264,8 @@
         <div class="cart-body"><ul id="cart-items-list"></ul></div>
         <div class="cart-footer">
             <div class="cart-total-row"><span>SubTotal</span><span class="total-amount">₹<span id="total-price">0</span></span></div>
-                    <a href="{% url 'checkout' %}" class="checkout-btn" style="text-decoration:none; display:block; text-align:center;">
-                Proceed to Secure Checkout
-            </a>
+            <a href="{% url 'cart' %}" class="checkout-btn" style="text-decoration:none; display:block; text-align:center;">Go to Full Cart</a>
+            <a href="{% url 'checkout' %}" class="ghost-link-btn" style="margin-top:12px; width:100%; text-align:center;">Proceed to Secure Checkout</a>
             <button class="clear-cart-link" onclick="clearCart()">Clear All Items</button>
         </div>
     </div>
@@ -336,6 +336,14 @@
                      data-img="{{ item.image.url }}">
                     
                     <img src="{{ item.image.url }}" alt="{{ item.title }}">
+                    <button class="wishlist-btn wishlist-toggle"
+                            style="position:absolute; top:18px; right:18px; width:46px; height:46px; border-radius:50%; z-index:3;"
+                            data-id="{{ item.id }}"
+                            data-name="{{ item.title }}"
+                            data-price="{{ item.price }}"
+                            data-img="{{ item.image.url }}">
+                        <i class="fas fa-heart"></i>
+                    </button>
                     <button class="add-to-cart-btn"
                             data-id="{{ item.id }}"
                             data-name="{{ item.title }}"
@@ -419,6 +427,14 @@
                 {% for product in wood_products %}
                 <div class="wood-card" data-name="{{ product.name }}" data-price="{{ product.price }}" data-img="{{ product.image.url }}">
                     <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                    <button class="wishlist-btn wishlist-toggle"
+                            style="position:absolute; top:18px; right:18px; width:46px; height:46px; border-radius:50%; z-index:25;"
+                            data-id="{{ product.id }}"
+                            data-name="{{ product.name }}"
+                            data-price="{{ product.price }}"
+                            data-img="{{ product.image.url }}">
+                        <i class="fas fa-heart"></i>
+                    </button>
                     <div class="wood-overlay">
                         <h3>{{ product.name }}</h3>
                         <p class="wood-price">₹{{ product.price }}</p>

@@ -290,6 +290,7 @@
                                 Hi, {{ user.first_name|default:user.username }}
                             </div>
                             <a href="#">My Orders</a>
+                            <a href="{% url 'wishlist' %}">Wishlist <span class="cart-count-pill" data-wishlist-count>0</span></a>
                             <a href="#" onclick="logoutUser()" style="color:#d32f2f;">Logout</a>
                         </div>
                     </div>
@@ -300,7 +301,7 @@
             {% endif %}
             
             <li id="cartNavItem">
-                <a href="#" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a>
+                <a href="{% url 'cart' %}" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a>
             </li>
         </ul>
     </nav>
@@ -313,7 +314,7 @@
         <div class="cart-body"><ul id="cart-items-list"></ul></div>
         <div class="cart-footer">
             <div class="cart-total-row"><span>Total</span><span>₹<span id="total-price">0</span></span></div>
-            <button class="checkout-btn" style="width: 100%;" onclick="showToast('Checkout feature - Please proceed from cart', 'info')">Checkout Now</button>
+            <a href="{% url 'cart' %}" class="checkout-btn" style="width: 100%; text-align:center; text-decoration:none;">View Cart</a>
             <button class="clear-cart-link" onclick="clearCart()">Clear All Items</button>
         </div>
     </div>
@@ -369,13 +370,24 @@
 
                 <p class="price">₹{{ product.price }}</p>
                 
-                <button class="add-btn"
-                        data-id="{{ product.id }}"
-                        data-name="{{ product.name }}"
-                        data-price="{{ product.price }}"
-                        data-img="{{ product.image.url }}">
-                    Add to Cart
-                </button>
+                <div style="display:flex; gap:10px;">
+                    <button class="add-btn"
+                            data-id="{{ product.id }}"
+                            data-name="{{ product.name }}"
+                            data-price="{{ product.price }}"
+                            data-img="{% if product.image %}{{ product.image.url }}{% endif %}">
+                        Add to Cart
+                    </button>
+                    <button class="wishlist-btn"
+                            style="min-width:110px; border-radius:6px;"
+                            data-id="{{ product.id }}"
+                            data-name="{{ product.name }}"
+                            data-price="{{ product.price }}"
+                            data-img="{% if product.image %}{{ product.image.url }}{% endif %}">
+                        <i class="fas fa-heart"></i>
+                        <span class="wishlist-btn-label" style="margin-left:6px;">Wishlist</span>
+                    </button>
+                </div>
             </div>
             {% empty %}
                 <p style="text-align:center; grid-column:1/-1; color:#777;">No products available at the moment.</p>

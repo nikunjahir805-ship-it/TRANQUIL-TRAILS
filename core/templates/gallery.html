@@ -444,6 +444,7 @@
                                 Hi, {{ user.first_name|default:user.username }}
                             </div>
                             <a href="#">My Orders</a>
+                            <a href="{% url 'wishlist' %}">Wishlist <span class="cart-count-pill" data-wishlist-count>0</span></a>
                             <a href="#" onclick="logoutUser()" class="logout-btn">Logout</a>
                         </div>
                     </div>
@@ -467,7 +468,8 @@
         <div class="cart-body"><ul id="cart-items-list"></ul></div>
         <div class="cart-footer">
             <div class="cart-total-row"><span>Total</span><span>$<span id="total-price">0</span></span></div>
-            <button class="checkout-btn" style="width: 100%;">Checkout Now</button>
+            <a href="{% url 'cart' %}" class="checkout-btn" style="width: 100%; text-align:center; text-decoration:none;">Go to Full Cart</a>
+            <a href="{% url 'checkout' %}" class="ghost-link-btn" style="margin-top:12px; width:100%; text-align:center;">Checkout Now</a>
             <button class="clear-cart-link" onclick="clearCart()">Clear All Items</button>
         </div>
     </div>

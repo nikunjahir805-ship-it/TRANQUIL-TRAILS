@@ -824,7 +824,21 @@ def admin_blog(request):
 # ------------------ CART & PAYMENT ------------------
 
 def cart_page(request):
-    return render(request, 'cart.html')
+    site_info, _ = SiteSetting.objects.get_or_create(id=1)
+    featured_products = Product.objects.filter(available=True).select_related('category')[:4]
+    return render(request, 'cart.html', {
+        'site_info': site_info,
+        'featured_products': featured_products,
+    })
+
+
+def wishlist_page(request):
+    site_info, _ = SiteSetting.objects.get_or_create(id=1)
+    featured_products = Product.objects.filter(available=True).select_related('category')[:6]
+    return render(request, 'wishlist.html', {
+        'site_info': site_info,
+        'featured_products': featured_products,
+    })
 
 client = razorpay.Client(
     auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)

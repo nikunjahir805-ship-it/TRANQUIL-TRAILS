@@ -147,7 +147,7 @@
             <li><a href="{% url 'contact' %}">Contact Us</a></li> 
             
             <li id="cartNavItem">
-                <a href="#" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a>
+                <a href="{% url 'cart' %}" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a>
             </li>
 
             {% if user.is_authenticated %}
@@ -161,6 +161,8 @@
                         
                         <div class="profile-dropdown" id="profileDropdown" style="display: none; position: absolute; right: 0; background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-radius: 8px; width: 150px; z-index: 100;">
                             <div style="padding: 10px 16px; border-bottom: 1px solid #eee; font-size: 0.8rem;">Hi, {{ user.username }}</div>
+                            <a href="#" style="display: block; padding: 10px 16px; color: #333;">My Orders</a>
+                            <a href="{% url 'wishlist' %}" style="display: block; padding: 10px 16px; color: #333;">Wishlist <span class="cart-count-pill" data-wishlist-count>0</span></a>
                             {% if user.is_staff %}
                                 <a href="{% url 'admin_dashboard' %}" style="display: block; padding: 10px 16px; color: #d32f2f; font-weight: bold;">Admin Panel</a>
                             {% endif %}
@@ -187,7 +189,7 @@
                 <span>Total</span>
                 <span>₹<span id="total-price">0</span></span>
             </div>
-            <button class="checkout-btn" style="width: 100%;">Checkout Now</button>
+            <a href="{% url 'cart' %}" class="checkout-btn" style="width: 100%; text-align:center; text-decoration:none;">View Cart</a>
             <button class="clear-cart-link" onclick="clearCart()">Clear All Items</button>
         </div>
     </div>
@@ -209,14 +211,24 @@
                 {{ product.description }}
             </p>
 
-            <button class="buy-now-btn" 
-                    id="buyBtn"
+            <div style="display:flex; gap:14px; flex-wrap:wrap;">
+                <button class="buy-now-btn"
                     data-id="{{ product.id }}"
                     data-name="{{ product.name }}"
                     data-price="{{ product.price }}"
                     {% if product.image %}data-img="{{ product.image.url }}"{% endif %}>
-                Add to Cart
-            </button>
+                    Add to Cart
+                </button>
+                <button class="wishlist-btn wishlist-cta"
+                        style="padding:18px 26px; border-radius:6px; font-size:1rem; font-weight:600;"
+                        data-id="{{ product.id }}"
+                        data-name="{{ product.name }}"
+                        data-price="{{ product.price }}"
+                        {% if product.image %}data-img="{{ product.image.url }}"{% endif %}>
+                    <i class="fas fa-heart"></i>
+                    <span class="wishlist-btn-label" style="margin-left:8px;">Wishlist</span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -239,44 +251,12 @@
         </div>
     </footer>
 
+    <script>
+        window.djangoUser = "{{ user.username|default:'guest' }}";
+    </script>
     <script src="{% static 'script.js' %}"></script>
     
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const buyBtn = document.getElementById('buyBtn');
-            const avatarBtn = document.getElementById('userAvatarBtn');
-            const dropdown = document.getElementById('profileDropdown');
-
-            // Dropdown Toggle Logic
-            if(avatarBtn && dropdown) {
-                avatarBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const isVisible = dropdown.style.display === 'block';
-                    dropdown.style.display = isVisible ? 'none' : 'block';
-                });
-                document.addEventListener('click', () => dropdown.style.display = 'none');
-            }
-
-            if(buyBtn) {
-                buyBtn.addEventListener('click', function() {
-                    const productData = {
-                        id: this.dataset.id,
-                        name: this.dataset.name,
-                        price: parseFloat(this.dataset.price),
-                        img: this.dataset.img || '',
-                        quantity: 1
-                    };
-                    
-                    if(typeof addToCart === "function") {
-                        addToCart(productData.id, productData.name, productData.price, productData.img);
-                        // Open sidebar after adding
-                        const sidebar = document.getElementById('cartSidebar');
-                        if(sidebar) sidebar.classList.add('active');
-                    }
-                });
-            }
-        });
-
         function logoutUser() {
             fetch('/api/logout/').then(res => res.json()).then(data => {
                 if(data.success) window.location.href = "{% url 'home' %}";

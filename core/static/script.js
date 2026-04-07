@@ -1,9 +1,52 @@
 /**
- * TRANQUIL TRAILS - MASTER SCRIPT
- * Handles Navigation, Cart, Slider, and Checkout Logic
+ * TRANQUIL TRAILS - SHARED STOREFRONT SCRIPT
+ * Navigation, cart, wishlist, slider, and page rendering.
  */
 
-// --- TOAST NOTIFICATION SYSTEM ---
+const currentUser = window.djangoUser || 'guest';
+const cartKey = `cart_${currentUser}`;
+const wishlistKey = `wishlist_${currentUser}`;
+const staticPlaceholder = '/static/placeholder.jpg';
+
+function parseStorage(key) {
+    try {
+        return JSON.parse(localStorage.getItem(key)) || [];
+    } catch (error) {
+        console.error(`Unable to read ${key}`, error);
+        return [];
+    }
+}
+
+function writeStorage(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+}
+
+if (currentUser !== 'guest') {
+    const guestCart = parseStorage('cart_guest');
+    const guestWishlist = parseStorage('wishlist_guest');
+    const mergedCart = parseStorage(cartKey);
+    const mergedWishlist = parseStorage(wishlistKey);
+
+    guestCart.forEach((guestItem) => {
+        const item = mergedCart.find((entry) => entry.id === guestItem.id || entry.name === guestItem.name);
+        if (item) item.quantity += guestItem.quantity || 1;
+        else mergedCart.push(guestItem);
+    });
+
+    guestWishlist.forEach((guestItem) => {
+        const exists = mergedWishlist.some((entry) => entry.id === guestItem.id || entry.name === guestItem.name);
+        if (!exists) mergedWishlist.push(guestItem);
+    });
+
+    writeStorage(cartKey, mergedCart);
+    writeStorage(wishlistKey, mergedWishlist);
+    localStorage.removeItem('cart_guest');
+    localStorage.removeItem('wishlist_guest');
+}
+
+let cart = parseStorage(cartKey);
+let wishlist = parseStorage(wishlistKey);
+
 function initToastContainer() {
     if (!document.getElementById('toast-container')) {
         const container = document.createElement('div');
@@ -13,404 +56,532 @@ function initToastContainer() {
     }
 }
 
-function showToast(message, type = 'info', duration = 3500) {
+function showToast(message, type = 'info', duration = 2500) {
     initToastContainer();
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    toast.innerHTML = `<div class="toast-icon"></div><span>${message}</span>`;
+    toast.innerHTML = `<span>${message}</span>`;
     container.appendChild(toast);
-    
+
     setTimeout(() => {
         toast.classList.add('hide');
-        setTimeout(() => toast.remove(), 300);
+        setTimeout(() => toast.remove(), 280);
     }, duration);
 }
 
-// Ensure this is at the top level of script.js
+function normalizeImagePath(path) {
+    if (!path) return staticPlaceholder;
+    if (path.startsWith('http') || path.startsWith('/media/') || path.startsWith('/static/')) return path;
+    return `/media/${path.replace(/^\/+/, '')}`;
+}
+
+function sanitizeName(name) {
+    return String(name).replace(/'/g, "\\'");
+}
+
 function addToCart(id, name, price, img) {
-    console.log("Adding to cart:", name); // Debug line
-    
     const numericPrice = parseFloat(price) || 0;
-    const existingIndex = cart.findIndex(item => item.name === name);
-    
-    if (existingIndex > -1) {
-        cart[existingIndex].quantity += 1;
+    const existingItem = cart.find((item) => item.id === id || item.name === name);
+
+    if (existingItem) {
+        existingItem.quantity += 1;
     } else {
-        cart.push({ id, name, price: numericPrice, img, quantity: 1 });
+        cart.push({
+            id,
+            name,
+            price: numericPrice,
+            img: normalizeImagePath(img),
+            quantity: 1,
+        });
     }
-    
-    saveAndUpdate();
+
+    persistCart();
     openCartSidebar();
+    showToast(`${name} added to cart`, 'success');
 }
 
-// ... rest of your code ...
-// --- 1. User & Cart Setup ---
-// Get the current user from the HTML (or default to 'guest')
-const currentUser = window.djangoUser || 'guest';
-const cartKey = `cart_${currentUser}`; 
+function updateQuantity(name, change) {
+    const item = cart.find((entry) => entry.name === name);
+    if (!item) return;
 
-// If a user just logged in, migrate any guest cart into their user cart (safe, idempotent)
-if (currentUser !== 'guest') {
-    try {
-        const guestKey = 'cart_guest';
-        const guestRaw = localStorage.getItem(guestKey);
-        if (guestRaw) {
-            const guestCart = JSON.parse(guestRaw) || [];
-            const userRaw = localStorage.getItem(cartKey);
-            const userCart = JSON.parse(userRaw) || [];
+    item.quantity += change;
+    if (item.quantity <= 0) {
+        cart = cart.filter((entry) => entry.name !== name);
+    }
 
-            // Merge guest items into user cart without duplicating by name
-            guestCart.forEach(gc => {
-                const exists = userCart.some(uc => uc.name === gc.name);
-                if (!exists) userCart.push(gc);
-            });
+    persistCart();
+}
 
-            localStorage.setItem(cartKey, JSON.stringify(userCart));
-            localStorage.removeItem(guestKey);
-        }
-    } catch (e) {
-        console.error('Cart merge error:', e);
+function removeFromCart(name) {
+    cart = cart.filter((item) => item.name !== name);
+    persistCart();
+    showToast(`${name} removed from cart`, 'warning');
+}
+
+function clearCart() {
+    if (!cart.length) return;
+    if (confirm('Empty your cart?')) {
+        cart = [];
+        persistCart();
+        showToast('Cart cleared', 'warning');
     }
 }
 
-// Load cart specific to this user
-let cart = JSON.parse(localStorage.getItem(cartKey)) || [];
-const staticBasePath = "/static/"; 
+function getCartMetrics() {
+    const subtotal = cart.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0);
+    const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+    return { subtotal, itemCount };
+}
 
-// --- 2. Navigation & Hamburger Menu ---
-const hamburger = document.getElementById('hamburger');
-const navLinks = document.getElementById('navLinks');
+function renderCartSidebar() {
+    const list = document.getElementById('cart-items-list');
+    const totalEl = document.getElementById('total-price');
+    const countEl = document.getElementById('cart-count');
+    const { subtotal, itemCount } = getCartMetrics();
 
-if(hamburger) {
+    if (countEl) countEl.textContent = itemCount;
+    if (totalEl) totalEl.textContent = subtotal.toFixed(2);
+    if (!list) return;
+
+    list.innerHTML = '';
+
+    if (!cart.length) {
+        list.innerHTML = `
+            <li class="cart-item cart-empty-state">
+                <div class="cart-item-info">
+                    <h4>Your bag is waiting</h4>
+                    <p>Add handcrafted pieces and they will appear here.</p>
+                </div>
+            </li>
+        `;
+        return;
+    }
+
+    cart.forEach((item) => {
+        const safeName = sanitizeName(item.name);
+        const li = document.createElement('li');
+        li.className = 'cart-item';
+        li.innerHTML = `
+            <img src="${normalizeImagePath(item.img)}" alt="${item.name}" onerror="this.src='${staticPlaceholder}'">
+            <div class="cart-item-info">
+                <h4>${item.name}</h4>
+                <p class="item-price">Rs. ${(parseFloat(item.price) || 0).toFixed(2)}</p>
+                <div class="qty-controls">
+                    <button class="qty-btn" onclick="updateQuantity('${safeName}', -1)">-</button>
+                    <span class="qty-val">${item.quantity}</span>
+                    <button class="qty-btn" onclick="updateQuantity('${safeName}', 1)">+</button>
+                </div>
+            </div>
+            <button class="remove-item" onclick="removeFromCart('${safeName}')">&times;</button>
+        `;
+        list.appendChild(li);
+    });
+}
+
+function renderCartPage() {
+    const page = document.getElementById('cart-page-root');
+    if (!page) return;
+
+    const taxRate = parseFloat(page.dataset.taxRate || '0');
+    const shippingRate = parseFloat(page.dataset.shippingRate || '0');
+    const { subtotal, itemCount } = getCartMetrics();
+    const shipping = itemCount ? shippingRate : 0;
+    const tax = subtotal * (taxRate / 100);
+    const grandTotal = subtotal + shipping + tax;
+
+    const itemsMarkup = cart.length ? cart.map((item) => {
+        const safeName = sanitizeName(item.name);
+        const unitPrice = parseFloat(item.price) || 0;
+        const lineTotal = unitPrice * item.quantity;
+
+        return `
+            <article class="cart-line-item">
+                <div class="cart-line-media">
+                    <img src="${normalizeImagePath(item.img)}" alt="${item.name}" onerror="this.src='${staticPlaceholder}'">
+                </div>
+                <div class="cart-line-content">
+                    <div class="cart-line-top">
+                        <div>
+                            <span class="cart-line-label">Artisan Product</span>
+                            <h3>${item.name}</h3>
+                            <p>Carefully selected for the Tranquil Trails collection.</p>
+                        </div>
+                        <button class="cart-line-remove" onclick="removeFromCart('${safeName}')">Remove</button>
+                    </div>
+                    <div class="cart-line-meta">
+                        <div>
+                            <span>Price</span>
+                            <strong>Rs. ${unitPrice.toFixed(2)}</strong>
+                        </div>
+                        <div>
+                            <span>Quantity</span>
+                            <div class="cart-line-qty">
+                                <button onclick="updateQuantity('${safeName}', -1)">-</button>
+                                <span>${item.quantity}</span>
+                                <button onclick="updateQuantity('${safeName}', 1)">+</button>
+                            </div>
+                        </div>
+                        <div>
+                            <span>Total</span>
+                            <strong>Rs. ${lineTotal.toFixed(2)}</strong>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        `;
+    }).join('') : `
+        <div class="cart-page-empty">
+            <div class="cart-page-empty-copy">
+                <span class="eyebrow">Your cart is empty</span>
+                <h2>Bring home something beautiful.</h2>
+                <p>Browse the collection and add handcrafted pieces to see your full cart summary here.</p>
+                <a href="/shop/" class="primary-link-btn">Continue Shopping</a>
+            </div>
+        </div>
+    `;
+
+    page.innerHTML = `
+        <div class="cart-main-grid">
+            <section class="cart-main-panel">
+                <div class="cart-panel-header">
+                    <div>
+                        <span class="eyebrow">Bag Summary</span>
+                        <h2>${itemCount} item${itemCount === 1 ? '' : 's'} ready for checkout</h2>
+                    </div>
+                    <button class="ghost-link-btn" onclick="clearCart()">Clear Cart</button>
+                </div>
+                <div class="cart-lines-wrap">${itemsMarkup}</div>
+            </section>
+            <aside class="cart-summary-panel">
+                <div class="summary-card">
+                    <span class="eyebrow">Order Summary</span>
+                    <h3>Checkout details</h3>
+                    <div class="summary-row"><span>Subtotal</span><strong>Rs. ${subtotal.toFixed(2)}</strong></div>
+                    <div class="summary-row"><span>Shipping</span><strong>Rs. ${shipping.toFixed(2)}</strong></div>
+                    <div class="summary-row"><span>Tax</span><strong>Rs. ${tax.toFixed(2)}</strong></div>
+                    <div class="summary-row total"><span>Total</span><strong>Rs. ${grandTotal.toFixed(2)}</strong></div>
+                    <a href="/checkout/" class="summary-btn${itemCount ? '' : ' disabled'}">Proceed to Checkout</a>
+                    <p class="summary-note">Secure packaging, artisan-safe handling, and delivery support included.</p>
+                </div>
+                <div class="summary-card support-card">
+                    <span class="eyebrow">Store Support</span>
+                    <h3>Need help before you order?</h3>
+                    <p>Talk with our team for gift selection, bulk orders, or product questions.</p>
+                    <ul class="support-list">
+                        <li><strong>Phone:</strong> ${page.dataset.phone || 'Support available'}</li>
+                        <li><strong>Email:</strong> ${page.dataset.email || 'hello@tranquiltrails.com'}</li>
+                        <li><strong>Store:</strong> ${page.dataset.store || 'Tranquil Trails'}</li>
+                    </ul>
+                </div>
+            </aside>
+        </div>
+    `;
+}
+
+function persistCart() {
+    writeStorage(cartKey, cart);
+    renderCartSidebar();
+    renderCartPage();
+}
+
+function addToWishlist(id, name, price, img) {
+    const exists = wishlist.some((item) => item.id === id || item.name === name);
+    if (exists) {
+        showToast(`${name} is already in wishlist`, 'info');
+        return;
+    }
+
+    wishlist.push({
+        id,
+        name,
+        price: parseFloat(price) || 0,
+        img: normalizeImagePath(img),
+    });
+
+    persistWishlist();
+    showToast(`${name} saved to wishlist`, 'success');
+}
+
+function removeFromWishlist(name) {
+    wishlist = wishlist.filter((item) => item.name !== name);
+    persistWishlist();
+    showToast(`${name} removed from wishlist`, 'warning');
+}
+
+function clearWishlist() {
+    if (!wishlist.length) return;
+    if (confirm('Clear your wishlist?')) {
+        wishlist = [];
+        persistWishlist();
+        showToast('Wishlist cleared', 'warning');
+    }
+}
+
+function moveWishlistToCart(name) {
+    const item = wishlist.find((entry) => entry.name === name);
+    if (!item) return;
+    addToCart(item.id, item.name, item.price, item.img);
+    wishlist = wishlist.filter((entry) => entry.name !== name);
+    persistWishlist();
+}
+
+function renderWishlistCount() {
+    const badges = document.querySelectorAll('[data-wishlist-count]');
+    badges.forEach((badge) => {
+        badge.textContent = wishlist.length;
+    });
+}
+
+function renderWishlistPage() {
+    const page = document.getElementById('wishlist-page-root');
+    if (!page) return;
+
+    if (!wishlist.length) {
+        page.innerHTML = `
+            <section class="wishlist-empty-state">
+                <div class="wishlist-empty-visual">
+                    <span></span><span></span><span></span>
+                </div>
+                <div class="wishlist-empty-copy">
+                    <span class="eyebrow">Wishlist is empty</span>
+                    <h2>Save the pieces you love.</h2>
+                    <p>Tap the heart on any product and build your own curated collection with a smooth, real-store experience.</p>
+                    <a href="/shop/" class="primary-link-btn">Explore Products</a>
+                </div>
+            </section>
+        `;
+        return;
+    }
+
+    page.innerHTML = `
+        <section class="wishlist-hero-panel">
+            <div>
+                <span class="eyebrow">Curated for later</span>
+                <h2>${wishlist.length} saved favorite${wishlist.length === 1 ? '' : 's'}</h2>
+                <p>Keep your favorite handcrafted pieces in one beautiful place and move them to cart any time.</p>
+            </div>
+            <button class="ghost-link-btn" onclick="clearWishlist()">Clear Wishlist</button>
+        </section>
+        <section class="wishlist-grid">
+            ${wishlist.map((item, index) => {
+                const safeName = sanitizeName(item.name);
+                return `
+                    <article class="wishlist-card" style="animation-delay:${index * 120}ms">
+                        <div class="wishlist-image-wrap">
+                            <img src="${normalizeImagePath(item.img)}" alt="${item.name}" onerror="this.src='${staticPlaceholder}'">
+                            <button class="wishlist-heart active" onclick="removeFromWishlist('${safeName}')">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="wishlist-card-body">
+                            <span class="wishlist-chip">Handcrafted Pick</span>
+                            <h3>${item.name}</h3>
+                            <p>Saved for your next calm, intentional purchase.</p>
+                            <div class="wishlist-card-footer">
+                                <strong>Rs. ${(parseFloat(item.price) || 0).toFixed(2)}</strong>
+                                <div class="wishlist-actions">
+                                    <button class="wishlist-secondary-btn" onclick="removeFromWishlist('${safeName}')">Remove</button>
+                                    <button class="wishlist-primary-btn" onclick="moveWishlistToCart('${safeName}')">Move to Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }).join('')}
+        </section>
+    `;
+}
+
+function persistWishlist() {
+    writeStorage(wishlistKey, wishlist);
+    renderWishlistCount();
+    renderWishlistPage();
+    updateWishlistButtons();
+}
+
+function updateWishlistButtons() {
+    document.querySelectorAll('.wishlist-btn, .wishlist-toggle, .wishlist-cta').forEach((button) => {
+        const id = button.dataset.id;
+        const name = button.dataset.name;
+        const isSaved = wishlist.some((item) => item.id === id || item.name === name);
+        button.classList.toggle('active', isSaved);
+
+        const label = button.querySelector('.wishlist-btn-label');
+        if (label) label.textContent = isSaved ? 'Saved' : 'Wishlist';
+    });
+}
+
+function openCartSidebar() {
+    const sidebar = document.getElementById('cartSidebar');
+    if (sidebar) sidebar.classList.add('open');
+}
+
+function closeCartSidebar() {
+    const sidebar = document.getElementById('cartSidebar');
+    if (sidebar) sidebar.classList.remove('open');
+}
+
+function initHamburger() {
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('navLinks');
+
+    if (!hamburger || !navLinks) return;
+
     hamburger.addEventListener('click', () => {
         hamburger.classList.toggle('active');
         navLinks.classList.toggle('active');
     });
-}
 
-document.addEventListener('click', (e) => {
-    if (navLinks && hamburger && !navLinks.contains(e.target) && !hamburger.contains(e.target)) {
-        hamburger.classList.remove('active');
-        navLinks.classList.remove('active');
-    }
-});
-
-// --- 3. 3D Carousel Slider Logic ---
-const slides = document.querySelectorAll('.slide');
-const nextBtn = document.getElementById('nextBtn');
-const prevBtn = document.getElementById('prevBtn');
-const sliderWrapper = document.getElementById('sliderWrapper');
-let currentIndex = 0;
-
-function updateSlider() {
-    if(slides.length === 0) return;
-    slides.forEach((slide, index) => {
-        slide.className = 'slide'; 
-        let distance = index - currentIndex;
-        if (distance > slides.length / 2) distance -= slides.length;
-        if (distance < -slides.length / 2) distance += slides.length;
-        
-        if (distance === 0) slide.classList.add('active');
-        else if (distance === 1) slide.classList.add('next1');
-        else if (distance === 2) slide.classList.add('next2');
-        else if (distance === -1) slide.classList.add('prev1');
-        else if (distance === -2) slide.classList.add('prev2');
+    document.addEventListener('click', (event) => {
+        if (!navLinks.contains(event.target) && !hamburger.contains(event.target)) {
+            hamburger.classList.remove('active');
+            navLinks.classList.remove('active');
+        }
     });
 }
 
-if (nextBtn && prevBtn) {
-    nextBtn.addEventListener('click', () => { currentIndex = (currentIndex + 1) % slides.length; updateSlider(); });
-    prevBtn.addEventListener('click', () => { currentIndex = (currentIndex - 1 + slides.length) % slides.length; updateSlider(); });
-}
+function initCartSidebar() {
+    const cartLink = document.getElementById('cart-link');
+    const closeBtn = document.getElementById('closeCart');
 
-// Touch support
-let touchStartX = 0;
-if (sliderWrapper) {
-    sliderWrapper.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
-    sliderWrapper.addEventListener('touchend', (e) => {
-        let touchEndX = e.changedTouches[0].screenX;
-        if (touchEndX < touchStartX - 50) currentIndex = (currentIndex + 1) % slides.length;
-        if (touchEndX > touchStartX + 50) currentIndex = (currentIndex - 1 + slides.length) % slides.length;
-        updateSlider();
-    });
-}
-
-// --- 4. Unified Cart Logic ---
-
-document.addEventListener('click', (e) => {
-    // Robust check for buttons using .closest()
-    const btn = e.target.closest('.add-btn, .add-to-cart-btn, .buy-now-btn');
-    
-    if (btn) {
-        e.preventDefault(); 
-
-        let name, price, img;
-
-        if (btn.dataset.name) {
-            // Data is on the button itself (Shop Page)
-            name = btn.dataset.name;
-            price = parseFloat(btn.dataset.price);
-            img = btn.dataset.img;
-        } else {
-            // Data is on the parent card (Home/Offers Page)
-            const parent = btn.closest('.product-card, .slide, .wood-card, .pro-card');
-            if (!parent) return;
-            name = parent.getAttribute('data-name');
-            price = parseFloat(parent.getAttribute('data-price'));
-            img = parent.getAttribute('data-img');
-        }
-
-        if (name && price) {
-            const product = { name, price, img, quantity: 1 };
-            handleAddToCart(product);
-            
-            // Visual Feedback
-            const originalText = btn.innerText;
-            btn.innerText = "Added!";
-            setTimeout(() => btn.innerText = originalText, 1000);
-
-            if (btn.classList.contains('buy-now-btn')) openCartSidebar();
-        }
+    if (cartLink) {
+        cartLink.addEventListener('click', (event) => {
+            event.preventDefault();
+            openCartSidebar();
+        });
     }
-});
 
-function handleAddToCart(product) {
-    const existingIndex = cart.findIndex(item => item.name === product.name);
-    if (existingIndex > -1) {
-        cart[existingIndex].quantity += 1;
-    } else {
-        cart.push(product);
-    }
-    saveAndUpdate();
-    openCartSidebar();
-}
+    if (closeBtn) closeBtn.addEventListener('click', closeCartSidebar);
 
-function updateQuantity(name, change) {
-    const item = cart.find(i => i.name === name);
-    if (item) {
-        item.quantity += change;
-        if (item.quantity <= 0) cart = cart.filter(i => i.name !== name);
-        saveAndUpdate();
-    }
-}
-
-function removeFromCart(name) {
-    cart = cart.filter(item => item.name !== name);
-    saveAndUpdate();
-}
-
-function clearCart() {
-    if(confirm("Empty your shopping bag?")) {
-        cart = [];
-        saveAndUpdate();
-    }
-}
-
-function saveAndUpdate() {
-    localStorage.setItem(cartKey, JSON.stringify(cart));
-    renderCartUI();
-    
-    const cartIcon = document.getElementById('cart-link');
-    if(cartIcon) {
-        cartIcon.classList.add('cart-shake');
-        setTimeout(() => cartIcon.classList.remove('cart-shake'), 400);
-    }
-}
-
-function renderCartUI() {
-    const list = document.getElementById('cart-items-list');
-    const totalEl = document.getElementById('total-price');
-    const countEl = document.getElementById('cart-count');
-    
-    if (!list) return;
-
-    list.innerHTML = '';
-    let subtotal = 0;
-    let totalItems = 0;
-
-    cart.forEach(item => {
-        subtotal += item.price * item.quantity;
-        totalItems += item.quantity;
-
-        let displayImg = item.img;
-        if (displayImg && !displayImg.startsWith('/static/') && !displayImg.startsWith('http') && !displayImg.startsWith('/media/')) {
-            displayImg = staticBasePath + displayImg;
-        }
-
-        const li = document.createElement('li');
-        li.className = 'cart-item';
-        li.innerHTML = `
-            <img src="${displayImg}" alt="${item.name}">
-            <div class="cart-item-info">
-                <h4>${item.name}</h4>
-                <p class="item-price">$${item.price.toFixed(2)}</p>
-                <div class="qty-controls">
-                    <button class="qty-btn" onclick="updateQuantity('${item.name}', -1)">-</button>
-                    <span class="qty-val">${item.quantity}</span>
-                    <button class="qty-btn" onclick="updateQuantity('${item.name}', 1)">+</button>
-                </div>
-            </div>
-            <button class="remove-item" onclick="removeFromCart('${item.name}')">&times;</button>
-        `;
-        list.appendChild(li);
-    });
-
-    if(totalEl) totalEl.innerText = subtotal.toFixed(2);
-    if(countEl) countEl.innerText = totalItems;
-}
-
-// Sidebar Visibility
-function openCartSidebar() { 
-    const sidebar = document.getElementById('cartSidebar');
-    if(sidebar) sidebar.classList.add('open'); 
-}
-function closeCartSidebar() { 
-    const sidebar = document.getElementById('cartSidebar');
-    if(sidebar) sidebar.classList.remove('open'); 
-}
-
-const cartLink = document.getElementById('cart-link');
-if(cartLink) cartLink.addEventListener('click', (e) => { e.preventDefault(); openCartSidebar(); });
-
-const closeCartBtn = document.getElementById('closeCart');
-if(closeCartBtn) closeCartBtn.addEventListener('click', closeCartSidebar);
-
-// Close sidebar when clicking outside
-document.addEventListener('click', (e) => {
-    const sidebar = document.getElementById('cartSidebar');
-    const cartBtn = document.getElementById('cart-link');
-    if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && !cartBtn.contains(e.target)) {
+    document.addEventListener('click', (event) => {
+        const sidebar = document.getElementById('cartSidebar');
+        if (!sidebar || !sidebar.classList.contains('open')) return;
+        if (sidebar.contains(event.target)) return;
+        if (cartLink && cartLink.contains(event.target)) return;
         closeCartSidebar();
-    }
-});
+    });
+}
 
-// --- 5. Checkout Logic (Updated) ---
-const checkoutBtn = document.querySelector('.checkout-btn');
-if(checkoutBtn) {
-    checkoutBtn.addEventListener('click', () => {
-        if (cart.length === 0) {
-            showToast("Your bag is empty!", "warning");
+function initDropdown() {
+    const avatarBtn = document.getElementById('userAvatarBtn');
+    const dropdown = document.getElementById('profileDropdown');
+    if (!avatarBtn || !dropdown) return;
+
+    avatarBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        dropdown.classList.toggle('show');
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!dropdown.contains(event.target) && !avatarBtn.contains(event.target)) {
+            dropdown.classList.remove('show');
+        }
+    });
+}
+
+function initGlobalStoreButtons() {
+    document.addEventListener('click', (event) => {
+        const addButton = event.target.closest('.add-btn, .add-to-cart-btn, .buy-now-btn, .wishlist-primary-btn-direct');
+        const wishlistButton = event.target.closest('.wishlist-btn, .wishlist-toggle, .wishlist-cta');
+
+        if (wishlistButton) {
+            event.preventDefault();
+            const { id, name, price, img } = wishlistButton.dataset;
+            if (!name) return;
+
+            const alreadySaved = wishlist.some((item) => item.id === id || item.name === name);
+            if (alreadySaved) {
+                removeFromWishlist(name);
+            } else {
+                addToWishlist(id, name, price, img);
+            }
             return;
         }
 
-        // Check if user is logged in (using window.djangoUser from HTML)
-        if (currentUser === 'guest') {
-            showToast("Please log in to complete your purchase.", "info");
-            window.location.href = '/login/';
-        } else {
-            showToast("Proceeding to payment...", "success");
-            // window.location.href = '/payment/'; 
-        }
+        if (!addButton) return;
+        event.preventDefault();
+
+        const source = addButton.dataset.name
+            ? addButton.dataset
+            : addButton.closest('[data-name][data-price]');
+
+        if (!source) return;
+        addToCart(source.id, source.name, source.price, source.img);
     });
 }
 
-// --- 6. Filter Logic (Gallery/Shop) ---
-document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const filterValue = btn.getAttribute('data-filter');
-        const cards = document.querySelectorAll('.pro-card');
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+function initSlider() {
+    const slides = document.querySelectorAll('.slide');
+    const nextBtn = document.getElementById('nextBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const sliderWrapper = document.getElementById('sliderWrapper');
+    let currentIndex = 0;
 
-        cards.forEach(card => {
-            const category = card.getAttribute('data-category');
-            if (filterValue === 'all' || category === filterValue) {
-                card.style.display = "flex";
-                setTimeout(() => card.style.opacity = "1", 10);
-            } else {
-                card.style.opacity = "0";
-                setTimeout(() => card.style.display = "none", 400);
-            }
-        });
-        
-        // Scroll horizontal slider to start
-        const slider = document.getElementById('proSlider');
-        if(slider) slider.scrollTo({ left: 0, behavior: 'smooth' });
-    });
-});
+    function updateSlider() {
+        if (!slides.length) return;
 
-// --- 7. Wood Section Interaction ---
-document.addEventListener("DOMContentLoaded", () => {
-    updateSlider(); // Init 3D slider
-    renderCartUI(); // Init Cart
+        slides.forEach((slide, index) => {
+            slide.className = 'slide';
+            let distance = index - currentIndex;
+            if (distance > slides.length / 2) distance -= slides.length;
+            if (distance < -slides.length / 2) distance += slides.length;
 
-    const woodWrapper = document.getElementById('woodWrapper');
-    const woodCards = document.querySelectorAll('.wood-card');
-
-    if (woodWrapper && woodCards.length > 0) {
-        woodCards.forEach(card => {
-            card.addEventListener('click', (e) => {
-                if(e.target.closest('.add-to-cart-btn')) return;
-
-                const isActive = card.classList.contains('active');
-                woodCards.forEach(c => c.classList.remove('active'));
-                woodWrapper.classList.remove('has-active');
-
-                if (!isActive) {
-                    card.classList.add('active');
-                    woodWrapper.classList.add('has-active');
-                    setTimeout(() => {
-                        card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                    }, 100);
-                }
-            });
-        });
-        
-        // Reset wood section on outside click
-        document.addEventListener('click', (e) => {
-            if (woodWrapper && !woodWrapper.contains(e.target)) {
-                woodCards.forEach(c => c.classList.remove('active'));
-                woodWrapper.classList.remove('has-active');
-            }
+            if (distance === 0) slide.classList.add('active');
+            else if (distance === 1) slide.classList.add('next1');
+            else if (distance === 2) slide.classList.add('next2');
+            else if (distance === -1) slide.classList.add('prev1');
+            else if (distance === -2) slide.classList.add('prev2');
         });
     }
-});
 
-function renderCartUI() {
-    const list = document.getElementById('cart-items-list');
-    const totalEl = document.getElementById('total-price');
-    const countEl = document.getElementById('cart-count');
-    
-    if (!list) return;
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex + 1) % slides.length;
+            updateSlider();
+        });
+    }
 
-    list.innerHTML = '';
-    let subtotal = 0;
-    let totalItems = 0;
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+            updateSlider();
+        });
+    }
 
-    cart.forEach(item => {
-        // --- THE FIX START ---
-        // 1. Ensure item.price is a valid number. Fallback to 0 if undefined.
-        const itemPrice = parseFloat(item.price) || 0;
-        
-        // 2. Calculate totals using the safe price
-        subtotal += itemPrice * item.quantity;
-        totalItems += item.quantity;
-        // --- THE FIX END ---
+    if (sliderWrapper) {
+        let touchStartX = 0;
+        sliderWrapper.addEventListener('touchstart', (event) => {
+            touchStartX = event.changedTouches[0].screenX;
+        });
+        sliderWrapper.addEventListener('touchend', (event) => {
+            const touchEndX = event.changedTouches[0].screenX;
+            if (touchEndX < touchStartX - 50) currentIndex = (currentIndex + 1) % slides.length;
+            if (touchEndX > touchStartX + 50) currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+            updateSlider();
+        });
+    }
 
-        let displayImg = item.img;
-        if (displayImg && !displayImg.startsWith('/static/') && !displayImg.startsWith('http') && !displayImg.startsWith('/media/')) {
-            displayImg = staticBasePath + displayImg;
-        }
-
-        const li = document.createElement('li');
-        li.className = 'cart-item';
-        li.innerHTML = `
-            <img src="${displayImg}" alt="${item.name}" onerror="this.src='/static/placeholder.jpg'">
-            <div class="cart-item-info">
-                <h4>${item.name}</h4>
-                <p class="item-price">$${itemPrice.toFixed(2)}</p> 
-                <div class="qty-controls">
-                    <button class="qty-btn" onclick="updateQuantity('${item.name}', -1)">-</button>
-                    <span class="qty-val">${item.quantity}</span>
-                    <button class="qty-btn" onclick="updateQuantity('${item.name}', 1)">+</button>
-                </div>
-            </div>
-            <button class="remove-item" onclick="removeFromCart('${item.name}')">&times;</button>
-        `;
-        list.appendChild(li);
-    });
-
-    if(totalEl) totalEl.innerText = subtotal.toFixed(2);
-    if(countEl) countEl.innerText = totalItems;
+    updateSlider();
 }
+
+function logoutUser() {
+    fetch('/api/logout/')
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) window.location.href = '/';
+        });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initHamburger();
+    initCartSidebar();
+    initDropdown();
+    initGlobalStoreButtons();
+    initSlider();
+    renderCartSidebar();
+    renderCartPage();
+    renderWishlistCount();
+    renderWishlistPage();
+    updateWishlistButtons();
+});

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cart | {{ site_info.store_name }}</title>
+    <title>Wishlist | {{ site_info.store_name }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'styles.css' %}">
@@ -44,7 +44,7 @@
             <li><a href="{% url 'login' %}">Log In</a></li>
             <li><a href="{% url 'signup' %}" style="background: #8B5E3C; color: white; padding: 10px 25px; border-radius: 50px; font-weight: bold;">Join</a></li>
             {% endif %}
-            <li><a href="{% url 'cart' %}" id="cart-link" style="color:#8B5E3C;">Cart <span class="cart-count-pill" id="cart-count">0</span></a></li>
+            <li><a href="{% url 'cart' %}" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a></li>
         </ul>
     </nav>
 
@@ -67,69 +67,44 @@
         </div>
     </div>
 
-    <main class="cart-page-shell">
-        <section class="cart-hero">
+    <main class="wishlist-site-shell">
+        <section class="wishlist-page-top">
             <div>
-                <span class="eyebrow">Full Cart Experience</span>
-                <h1>Everything in your bag, beautifully organized.</h1>
-                <p>Review product details, update quantity with plus and minus controls, and keep your order connected to real store support from {{ site_info.store_name }}.</p>
+                <span class="eyebrow">Animated Wishlist Website</span>
+                <h1>Save the pieces that feel like home.</h1>
+                <p>A dedicated wishlist page with full-page presentation, smooth card motion, and a real online-store feel for collecting favorite artisan products.</p>
             </div>
-            <div class="cart-hero-stats">
-                <div class="hero-stat-card">
-                    <strong>{{ site_info.store_name }}</strong>
-                    <span>Trusted craft-first destination</span>
-                </div>
-                <div class="hero-stat-card">
-                    <strong>{{ site_info.contact_phone }}</strong>
-                    <span>Direct order assistance</span>
-                </div>
-                <div class="hero-stat-card">
-                    <strong>{{ site_info.tax_rate }}%</strong>
-                    <span>Configured store tax rate</span>
-                </div>
+            <div class="wishlist-top-card">
+                <span class="eyebrow">Store Promise</span>
+                <strong>{{ site_info.store_name }}</strong>
+                <p>Wishlist and cart stay linked for the same user, so favorites are always ready when it is time to buy.</p>
             </div>
         </section>
 
-        <section
-            id="cart-page-root"
-            data-tax-rate="{{ site_info.tax_rate }}"
-            data-shipping-rate="{{ site_info.shipping_flat_rate }}"
-            data-phone="{{ site_info.contact_phone }}"
-            data-email="{{ site_info.admin_email }}"
-            data-store="{{ site_info.store_name }}"
-        ></section>
+        <section class="wishlist-page-stage" id="wishlist-page-root"></section>
 
-        <section class="cart-recommendations">
+        <section class="wishlist-showcase">
             <div class="cart-panel-header">
                 <div>
-                    <span class="eyebrow">You May Also Love</span>
-                    <h2>Recommended artisan pieces</h2>
+                    <span class="eyebrow">Discover More</span>
+                    <h2>Popular products to save next</h2>
                 </div>
-                <a href="{% url 'shop' %}" class="ghost-link-btn">View All Products</a>
+                <a href="{% url 'shop' %}" class="ghost-link-btn">Browse Shop</a>
             </div>
 
-            <div class="recommendation-grid">
+            <div class="wishlist-showcase-grid">
                 {% for product in featured_products %}
-                <article class="recommendation-card">
+                <article class="wishlist-showcase-card">
                     {% if product.image %}
                     <img src="{{ product.image.url }}" alt="{{ product.name }}">
                     {% else %}
                     <img src="{% static 'placeholder.jpg' %}" alt="{{ product.name }}">
                     {% endif %}
-                    <div class="recommendation-card-body">
+                    <div class="wishlist-showcase-body">
                         <span class="wishlist-chip">{{ product.category.name }}</span>
                         <h3>{{ product.name }}</h3>
                         <p>Rs. {{ product.price }}</p>
-                        <div class="recommendation-card-actions">
-                            <button
-                                class="add-btn"
-                                data-id="{{ product.id }}"
-                                data-name="{{ product.name }}"
-                                data-price="{{ product.price }}"
-                                data-img="{% if product.image %}{{ product.image.url }}{% endif %}"
-                            >
-                                Add to Cart
-                            </button>
+                        <div class="wishlist-showcase-actions">
                             <button
                                 class="wishlist-btn"
                                 data-id="{{ product.id }}"
@@ -139,6 +114,15 @@
                             >
                                 <i class="fas fa-heart"></i>
                                 <span class="wishlist-btn-label" style="margin-left:6px;">Wishlist</span>
+                            </button>
+                            <button
+                                class="add-btn"
+                                data-id="{{ product.id }}"
+                                data-name="{{ product.name }}"
+                                data-price="{{ product.price }}"
+                                data-img="{% if product.image %}{{ product.image.url }}{% endif %}"
+                            >
+                                Add to Cart
                             </button>
                         </div>
                     </div>
@@ -152,18 +136,18 @@
         <div class="footer-container">
             <div class="footer-section">
                 <h3 class="footer-logo">{{ site_info.store_name|upper }}</h3>
-                <p>Craft-led shopping with calm design, full product visibility, and direct customer support.</p>
+                <p>Wishlist your favorite craft pieces, revisit them later, and move them into cart in one click.</p>
             </div>
             <div class="footer-section">
-                <h4>Explore</h4>
+                <h4>Quick Links</h4>
                 <ul>
                     <li><a href="{% url 'shop' %}">Shop</a></li>
-                    <li><a href="{% url 'wishlist' %}">Wishlist</a></li>
+                    <li><a href="{% url 'cart' %}">Cart</a></li>
                     <li><a href="{% url 'gallery' %}">Gallery</a></li>
                 </ul>
             </div>
             <div class="footer-section">
-                <h4>Contact</h4>
+                <h4>Support</h4>
                 <ul>
                     <li><a href="mailto:{{ site_info.admin_email }}">{{ site_info.admin_email }}</a></li>
                     <li><a href="tel:{{ site_info.contact_phone }}">{{ site_info.contact_phone }}</a></li>
