@@ -9,7 +9,7 @@
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500;600&display=swap');
 
     /* --- LAYOUT --- */
-    .settings-container {
+    .settings-layout {
         display: grid;
         grid-template-columns: 280px 1fr;
         gap: 30px;
@@ -22,14 +22,14 @@
         height: fit-content; position: sticky; top: 20px;
     }
     
-    .nav-item {
+    .settings-nav-item {
         display: flex; align-items: center; gap: 12px;
         padding: 12px 15px; border-radius: 8px; color: #555;
         text-decoration: none; font-family: 'Poppins'; font-size: 0.9rem;
         transition: 0.2s; margin-bottom: 5px; cursor: pointer;
     }
-    .nav-item:hover, .nav-item.active { background: #f4f1ea; color: #8b5e3c; font-weight: 600; }
-    .nav-item i { width: 20px; text-align: center; }
+    .settings-nav-item:hover, .settings-nav-item.active { background: #f4f1ea; color: #8b5e3c; font-weight: 600; }
+    .settings-nav-item i { width: 20px; text-align: center; }
 
     /* --- FORM CARD --- */
     .settings-card {
@@ -64,18 +64,18 @@
     .switch-label h4 { margin: 0 0 5px; font-family: 'Poppins'; font-size: 0.95rem; }
     .switch-label p { margin: 0; font-size: 0.8rem; color: #888; }
 
-    .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider {
+    .settings-switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+    .settings-switch input { opacity: 0; width: 0; height: 0; }
+    .settings-slider {
         position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
         background-color: #ccc; transition: .4s; border-radius: 34px;
     }
-    .slider:before {
+    .settings-slider:before {
         position: absolute; content: ""; height: 18px; width: 18px;
         left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%;
     }
-    input:checked + .slider { background-color: #8b5e3c; }
-    input:checked + .slider:before { transform: translateX(24px); }
+    .settings-switch input:checked + .settings-slider { background-color: #8b5e3c; }
+    .settings-switch input:checked + .settings-slider:before { transform: translateX(24px); }
 
     /* Action Bar */
     .action-bar {
@@ -90,7 +90,7 @@
     }
     .btn-save:hover { background: #8b5e3c; transform: translateY(-2px); }
 
-    @media (max-width: 900px) { .settings-container { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) { .settings-layout { grid-template-columns: 1fr; } }
 </style>
 
 {% if messages %}
@@ -101,13 +101,13 @@
     {% endfor %}
 {% endif %}
 
-<form method="POST" class="settings-container fade-in-up">
+<form method="POST" class="settings-layout fade-in-up">
     {% csrf_token %}
 
     <div class="settings-nav">
-        <a class="nav-item active" onclick="scrollToSection('general')"><i class="fas fa-sliders-h"></i> General</a>
-        <a class="nav-item" onclick="scrollToSection('finance')"><i class="fas fa-coins"></i> Finance</a>
-        <a class="nav-item" onclick="scrollToSection('system')"><i class="fas fa-server"></i> System</a>
+        <a class="settings-nav-item active" onclick="scrollToSection('general')"><i class="fas fa-sliders-h"></i> General</a>
+        <a class="settings-nav-item" onclick="scrollToSection('finance')"><i class="fas fa-coins"></i> Finance</a>
+        <a class="settings-nav-item" onclick="scrollToSection('system')"><i class="fas fa-server"></i> System</a>
     </div>
 
     <div class="settings-card">
@@ -160,9 +160,9 @@
                     <h4>Maintenance Mode</h4>
                     <p>Activate to hide the store front from visitors while you make updates.</p>
                 </div>
-                <label class="switch">
+                <label class="settings-switch">
                     <input type="checkbox" name="maintenance_mode" {% if settings.maintenance_mode %}checked{% endif %}>
-                    <span class="slider"></span>
+                    <span class="settings-slider"></span>
                 </label>
             </div>
         </div>
@@ -183,7 +183,7 @@
         gsap.to(".fade-in-up", { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" });
         
         // Navigation Logic
-        const navItems = document.querySelectorAll('.nav-item');
+        const navItems = document.querySelectorAll('.settings-nav-item');
         
         navItems.forEach(item => {
             item.addEventListener('click', function() {

@@ -1,0 +1,270 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block page_title %}Order Processing{% endblock %}
+{% block page_desc %}Review new checkouts, confirm orders, and keep customers updated.{% endblock %}
+
+{% block content %}
+<style>
+    .order-toolbar {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 28px;
+        flex-wrap: wrap;
+    }
+
+    .order-search {
+        flex: 1;
+        min-width: 260px;
+        position: relative;
+    }
+
+    .order-search input {
+        width: 100%;
+        padding: 14px 18px 14px 46px;
+        border-radius: 999px;
+        border: 1px solid #e8dfd6;
+        background: #fff;
+        outline: none;
+    }
+
+    .order-search i {
+        position: absolute;
+        top: 50%;
+        left: 18px;
+        transform: translateY(-50%);
+        color: #9b8a7a;
+    }
+
+    .orders-grid {
+        display: grid;
+        gap: 18px;
+    }
+
+    .order-card {
+        background: #fff;
+        border: 1px solid #ece4da;
+        border-left: 5px solid #c8b39d;
+        border-radius: 22px;
+        padding: 22px;
+        box-shadow: 0 10px 30px rgba(76, 53, 28, 0.06);
+    }
+
+    .order-card.status-pending { border-left-color: #f59e0b; }
+    .order-card.status-processing { border-left-color: #2563eb; }
+    .order-card.status-shipped { border-left-color: #0f766e; }
+    .order-card.status-delivered { border-left-color: #15803d; }
+    .order-card.status-cancelled { border-left-color: #dc2626; }
+
+    .order-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+    }
+
+    .order-layout {
+        display: grid;
+        grid-template-columns: 1.6fr 1fr;
+        gap: 18px;
+    }
+
+    .order-panel {
+        border: 1px solid #f1e9df;
+        border-radius: 18px;
+        padding: 16px;
+        background: #fffdfa;
+    }
+
+    .order-meta h3,
+    .order-panel h4 {
+        margin-top: 0;
+        color: #2f241d;
+    }
+
+    .order-meta p,
+    .order-extra p,
+    .line-item span,
+    .empty-copy {
+        margin: 0;
+        color: #6f6257;
+    }
+
+    .status-badge,
+    .payment-badge {
+        display: inline-block;
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        margin-top: 10px;
+    }
+
+    .status-badge.status-pending { background: #fff3d6; color: #a16207; }
+    .status-badge.status-processing { background: #dbeafe; color: #1d4ed8; }
+    .status-badge.status-shipped { background: #d1fae5; color: #0f766e; }
+    .status-badge.status-delivered { background: #dcfce7; color: #15803d; }
+    .status-badge.status-cancelled { background: #fee2e2; color: #b91c1c; }
+
+    .payment-badge {
+        background: #f4efe8;
+        color: #694f39;
+    }
+
+    .line-item,
+    .order-facts div,
+    .status-form {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .line-item {
+        align-items: center;
+        border-bottom: 1px solid #f1e9df;
+        padding-bottom: 12px;
+        margin-bottom: 12px;
+    }
+
+    .line-item:last-child {
+        border-bottom: 0;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .status-form select {
+        flex: 1;
+        min-width: 160px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid #ddcfbf;
+        background: #fff;
+        outline: none;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        border: 0;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: #2f241d;
+        color: #fff;
+    }
+
+    .btn-secondary {
+        background: #eadfce;
+        color: #5b4636;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 70px 20px;
+        background: #fff;
+        border-radius: 24px;
+        border: 1px dashed #dccdbc;
+    }
+
+    @media (max-width: 900px) {
+        .order-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="order-toolbar">
+    <div class="order-search">
+        <i class="fas fa-search"></i>
+        <input type="text" id="orderSearch" placeholder="Search order ID, customer, email, product, or status">
+    </div>
+</div>
+
+<div class="orders-grid" id="ordersGrid">
+    {% for order in orders %}
+    <article class="order-card status-{{ order.status|lower }}" data-search="{{ order.id }} {{ order.customer.full_name|default:'Guest Customer' }} {{ order.customer.email|default:'N/A' }} {{ order.status }} {{ order.payment_method }}">
+        <div class="order-head">
+            <div class="order-meta">
+                <h3>Order #{{ order.id }} by {{ order.customer.full_name|default:'Guest Customer' }}</h3>
+                <p>{{ order.customer.email|default:'No email available' }}</p>
+                <span class="status-badge status-{{ order.status|lower }}">{{ order.status }}</span>
+                <span class="payment-badge">{{ order.get_payment_method_display }}</span>
+            </div>
+            <div class="order-extra">
+                <p><strong>{{ order.date_ordered|date:"M d, Y" }}</strong></p>
+                <p>{{ order.date_ordered|time:"H:i" }}</p>
+                <p style="margin-top: 10px; font-weight: 700; color: #2f241d;">Rs. {{ order.get_cart_total }}</p>
+                <p>{% if order.complete %}Stock reserved and order confirmed{% else %}Waiting for admin confirmation{% endif %}</p>
+            </div>
+        </div>
+
+        <div class="order-layout">
+            <div class="order-panel">
+                <h4>Items in this order</h4>
+                {% for item in order.orderitem_set.all %}
+                <div class="line-item">
+                    <div>
+                        <strong>{{ item.product.name|default:"Removed product" }}</strong>
+                        <span>Qty: {{ item.quantity }}</span>
+                    </div>
+                    <strong>Rs. {{ item.get_total }}</strong>
+                </div>
+                {% empty %}
+                <p class="empty-copy">No items recorded for this order.</p>
+                {% endfor %}
+            </div>
+
+            <div class="order-panel">
+                <h4>Management</h4>
+                <div class="order-facts">
+                    <div><span>Payment</span><span>{{ order.get_payment_method_display }}</span></div>
+                    <div><span>Transaction</span><span>{{ order.transaction_id|default:"Pending" }}</span></div>
+                    <div><span>Items</span><span>{{ order.get_cart_items }}</span></div>
+                    <div><span>Customer</span><span>{{ order.customer.phone|default:"No phone" }}</span></div>
+                </div>
+
+                <form method="post" action="{% url 'admin_update_order_status' order.id %}" class="status-form">
+                    {% csrf_token %}
+                    <select name="status" aria-label="Update order status">
+                        {% for value, label in order.STATUS_CHOICES %}
+                        <option value="{{ value }}" {% if order.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn-primary">Save Status</button>
+                    {% if not order.complete and order.status == 'Pending' %}
+                    <button type="submit" name="status" value="Processing" class="btn-secondary">Confirm Order</button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </article>
+    {% empty %}
+    <div class="empty-state">
+        <i class="fas fa-box-open" style="font-size: 3rem; color: #d6c6b4; margin-bottom: 14px;"></i>
+        <h3 style="margin: 0 0 8px; color: #2f241d;">No orders yet</h3>
+        <p class="empty-copy">New checkout orders will appear here for admin confirmation and fulfillment.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    const orderSearch = document.getElementById('orderSearch');
+    const orderCards = document.querySelectorAll('.order-card');
+
+    if (orderSearch) {
+        orderSearch.addEventListener('input', function () {
+            const query = this.value.toLowerCase().trim();
+            orderCards.forEach((card) => {
+                const haystack = (card.dataset.search || '').toLowerCase();
+                card.style.display = !query || haystack.includes(query) ? '' : 'none';
+            });
+        });
+    }
+</script>
+{% endblock %}

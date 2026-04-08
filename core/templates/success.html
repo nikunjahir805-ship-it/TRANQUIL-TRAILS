@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Placed | {{ site_settings.store_name }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        .success-shell {
+            min-height: 100vh;
+            padding: 80px 5%;
+            background: linear-gradient(180deg, #faf5ee 0%, #f2ece2 100%);
+        }
+        .success-card {
+            max-width: 920px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.88);
+            border-radius: 34px;
+            border: 1px solid rgba(139, 94, 60, 0.14);
+            box-shadow: 0 22px 45px rgba(44, 44, 44, 0.08);
+            padding: 36px;
+        }
+        .success-card h1,
+        .success-card h2 { font-family: 'Playfair Display', serif; }
+        .success-list { display: grid; gap: 14px; margin-top: 24px; }
+        .success-line {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 16px 0;
+            border-bottom: 1px solid #eee3d8;
+        }
+        .success-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 26px; }
+        @media (max-width: 720px) {
+            .success-shell { padding-left: 4%; padding-right: 4%; }
+            .success-card { padding: 24px; border-radius: 24px; }
+            .success-line { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    {% include 'partials/site_nav.html' %}
+    {% include 'partials/cart_sidebar.html' %}
+
+    <main class="success-shell">
+        <section class="success-card">
+            <span class="eyebrow">Order Placed</span>
+            <h1>Your order is in our system.</h1>
+            <p style="color:#6d665e; max-width:680px; margin-top:12px;">Thank you for shopping with {{ site_settings.store_name }}. Your order is now visible in your account, and our admin team will confirm it before fulfillment starts.</p>
+
+            {% if order %}
+            <div class="success-list">
+                <div class="success-line"><span>Order Number</span><strong>#{{ order.id }}</strong></div>
+                <div class="success-line"><span>Customer</span><strong>{{ order.customer.full_name }}</strong></div>
+                <div class="success-line"><span>Payment Method</span><strong>{{ order.get_payment_method_display }}</strong></div>
+                <div class="success-line"><span>Status</span><strong>{{ order.status }}</strong></div>
+                <div class="success-line"><span>Total</span><strong>Rs. {{ order.get_cart_total }}</strong></div>
+            </div>
+
+            <h2 style="margin-top:28px;">Items in this order</h2>
+            <div class="success-list">
+                {% for item in order.orderitem_set.all %}
+                <div class="success-line">
+                    <span>{{ item.product.name }} x{{ item.quantity }}</span>
+                    <strong>Rs. {{ item.get_total }}</strong>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="success-actions">
+                <a href="{% url 'shop' %}" class="primary-link-btn">Continue Shopping</a>
+                <a href="{% url 'my_orders' %}" class="ghost-link-btn">My Orders</a>
+                <a href="{% url 'cart' %}" class="ghost-link-btn">View Cart</a>
+            </div>
+        </section>
+    </main>
+
+    {% include 'partials/site_footer.html' %}
+
+    <script>
+        window.djangoUser = "{{ user.username|default:'guest' }}";
+    </script>
+    <script src="{% static 'script.js' %}"></script>
+</body>
+</html>

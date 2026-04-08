@@ -202,73 +202,8 @@
     <!-- Floating Particles Background -->
     <div class="particles-background" id="particlesBackground"></div>
       
-    <nav>
-        <a href="{% url 'home' %}" class="logo-container">
-            <img src="{% static 'Adobe Express - file.png' %}" alt="Logo" class="logo-img">
-            <span class="logo-text">TRANQUIL TRAILS</span>
-        </a>
-        
-        <button class="hamburger" id="hamburger" aria-label="Toggle menu">
-            <span></span><span></span><span></span>
-        </button>
-
-        <ul class="nav-links" id="navLinks">
-            <li><a href="{% url 'home' %}">Home</a></li>
-            <li><a href="{% url 'shop' %}">Shop</a></li>
-            <li><a href="{% url 'offers' %}">Offers</a></li>
-            <li><a href="{% url 'gallery' %}">Gallery</a></li>
-            <li><a href="{% url 'about' %}">About</a></li>
-            <li><a href="{% url 'contact' %}">Contact</a></li>
-
-            {% if user.is_staff %}
-            <li>
-                <a href="{% url 'admin_dashboard' %}" style="color: #d32f2f; font-weight: bold;">Admin Panel</a>
-            </li>
-            {% endif %}
-
-            {% if user.is_authenticated %}
-                <li>
-                    <div class="nav-user-container">
-                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" class="user-avatar" id="userAvatarBtn">
-                        
-                        <div class="profile-dropdown" id="profileDropdown">
-                            <div style="padding: 10px 16px; font-weight: bold; background: #f9f9f9; font-size: 0.8rem; border-bottom: 1px solid #eee;">
-                                Hi, {{ user.first_name|default:user.username }}
-                            </div>
-                            <a href="#">My Orders</a>
-                            <a href="{% url 'wishlist' %}">Wishlist <span class="cart-count-pill" data-wishlist-count>0</span></a>
-                            <a href="#" onclick="logoutUser()" class="logout-btn">Logout</a>
-                        </div>
-                    </div>
-                </li>
-            {% else %}
-                <li><a href="{% url 'login' %}">Log In</a></li>
-                <li>
-                    <a href="{% url 'signup' %}" style="background: #8B5E3C; color: white; padding: 10px 25px; border-radius: 50px; font-weight: bold; transition: 0.3s;">
-                        Join
-                    </a>
-                </li>
-            {% endif %}
-            
-            <li id="cartNavItem">
-                <a href="#" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a>
-            </li>
-        </ul>
-    </nav>
-
-    <div class="cart-sidebar" id="cartSidebar">
-        <div class="cart-header">
-            <h2 style="font-family: 'Playfair Display';">Your Bag</h2>
-            <button class="close-cart" id="closeCart" aria-label="Close Cart">&times;</button>
-        </div>
-        <div class="cart-body"><ul id="cart-items-list"></ul></div>
-        <div class="cart-footer">
-            <div class="cart-total-row"><span>SubTotal</span><span class="total-amount">₹<span id="total-price">0</span></span></div>
-            <a href="{% url 'cart' %}" class="checkout-btn" style="text-decoration:none; display:block; text-align:center;">Go to Full Cart</a>
-            <a href="{% url 'checkout' %}" class="ghost-link-btn" style="margin-top:12px; width:100%; text-align:center;">Proceed to Secure Checkout</a>
-            <button class="clear-cart-link" onclick="clearCart()">Clear All Items</button>
-        </div>
-    </div>
+    {% include 'partials/site_nav.html' %}
+    {% include 'partials/cart_sidebar.html' %}
 
     <header class="hero">
         <div class="hero-text">
@@ -1010,11 +945,12 @@
         }
     </style>
      
+    {% include 'partials/site_footer.html' %}
+
     <script>
         window.djangoUser = "{{ user.username|default:'guest' }}";
     </script>
     <script src="{% static 'script.js' %}"></script>
-    <script src="{% static 'js/cart.js' %}"></script>
     
     <script>
         // --- 1. DROPDOWN TOGGLE ---

@@ -1,0 +1,48 @@
+{% load static %}
+<nav>
+    <a href="{% url 'home' %}" class="logo-container">
+        <img src="{% static 'Adobe Express - file.png' %}" alt="{{ site_settings.store_name }}" class="logo-img">
+        <span class="logo-text">{{ site_settings.store_name|upper }}</span>
+    </a>
+
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+    </button>
+
+    <ul class="nav-links" id="navLinks">
+        <li><a href="{% url 'home' %}" {% if request.resolver_match.url_name == 'home' %}style="color:#8B5E3C; font-weight:700;"{% endif %}>Home</a></li>
+        <li><a href="{% url 'shop' %}" {% if request.resolver_match.url_name == 'shop' %}style="color:#8B5E3C; font-weight:700;"{% endif %}>Shop</a></li>
+        <li><a href="{% url 'offers' %}" {% if request.resolver_match.url_name == 'offers' %}style="color:#8B5E3C; font-weight:700;"{% endif %}>Offers</a></li>
+        <li><a href="{% url 'gallery' %}" {% if request.resolver_match.url_name == 'gallery' %}style="color:#8B5E3C; font-weight:700;"{% endif %}>Gallery</a></li>
+        <li><a href="{% url 'about' %}" {% if request.resolver_match.url_name == 'about' %}style="color:#8B5E3C; font-weight:700;"{% endif %}>About</a></li>
+        <li><a href="{% url 'contact' %}" {% if request.resolver_match.url_name == 'contact' %}style="color:#8B5E3C; font-weight:700;"{% endif %}>Contact</a></li>
+
+        {% if user.is_staff %}
+        <li><a href="{% url 'admin_dashboard' %}" style="color:#d32f2f; font-weight:700;">Admin Panel</a></li>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+        <li>
+            <div class="nav-user-container">
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" class="user-avatar" id="userAvatarBtn">
+                <div class="profile-dropdown" id="profileDropdown">
+                    <div style="padding: 10px 16px; font-weight: bold; background: #f9f9f9; font-size: 0.8rem; border-bottom: 1px solid #eee;">
+                        Hi, {{ user.first_name|default:user.username }}
+                    </div>
+                    <a href="{% url 'cart' %}">My Cart</a>
+                    <a href="{% url 'my_orders' %}">My Orders</a>
+                    <a href="{% url 'wishlist' %}">Wishlist <span class="cart-count-pill" data-wishlist-count>0</span></a>
+                    <a href="#" onclick="logoutUser(); return false;" class="logout-btn">Logout</a>
+                </div>
+            </div>
+        </li>
+        {% else %}
+        <li><a href="{% url 'login' %}">Log In</a></li>
+        <li><a href="{% url 'signup' %}" style="background: #8B5E3C; color: white; padding: 10px 25px; border-radius: 50px; font-weight: bold;">Join</a></li>
+        {% endif %}
+
+        <li id="cartNavItem">
+            <a href="#" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a>
+        </li>
+    </ul>
+</nav>

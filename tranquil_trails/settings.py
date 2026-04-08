@@ -2,6 +2,7 @@
 Django settings for tranquil_trails project.
 """
 
+import os
 from pathlib import Path
 import os
 
@@ -52,6 +53,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.site_settings',
             ],
         },
     },
@@ -60,10 +62,15 @@ TEMPLATES = [
 WSGI_APPLICATION = 'tranquil_trails.wsgi.application'
 
 # Database
+LOCAL_APPDATA = Path(os.environ.get('LOCALAPPDATA', BASE_DIR))
+DATABASE_DIR = LOCAL_APPDATA / 'TranquilTrails'
+DATABASE_DIR.mkdir(parents=True, exist_ok=True)
+DATABASE_PATH = Path(os.environ.get('DJANGO_DB_PATH', DATABASE_DIR / 'db.sqlite3'))
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': DATABASE_PATH,
     }
 }
 

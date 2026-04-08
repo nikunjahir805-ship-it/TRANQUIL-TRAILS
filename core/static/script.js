@@ -1,8 +1,3 @@
-/**
- * TRANQUIL TRAILS - SHARED STOREFRONT SCRIPT
- * Navigation, cart, wishlist, slider, and page rendering.
- */
-
 const currentUser = window.djangoUser || 'guest';
 const cartKey = `cart_${currentUser}`;
 const wishlistKey = `wishlist_${currentUser}`;
@@ -19,6 +14,17 @@ function parseStorage(key) {
 
 function writeStorage(key, value) {
     localStorage.setItem(key, JSON.stringify(value));
+}
+
+function getCsrfToken() {
+    const csrfField = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfField) return csrfField.value;
+
+    const cookieValue = document.cookie
+        .split('; ')
+        .find((row) => row.startsWith('csrftoken='));
+
+    return cookieValue ? cookieValue.split('=')[1] : '';
 }
 
 if (currentUser !== 'guest') {
@@ -82,7 +88,7 @@ function sanitizeName(name) {
 
 function addToCart(id, name, price, img) {
     const numericPrice = parseFloat(price) || 0;
-    const existingItem = cart.find((item) => item.id === id || item.name === name);
+    const existingItem = cart.find((item) => String(item.id) === String(id) || item.name === name);
 
     if (existingItem) {
         existingItem.quantity += 1;
@@ -283,10 +289,11 @@ function persistCart() {
     writeStorage(cartKey, cart);
     renderCartSidebar();
     renderCartPage();
+    renderCheckoutPage();
 }
 
 function addToWishlist(id, name, price, img) {
-    const exists = wishlist.some((item) => item.id === id || item.name === name);
+    const exists = wishlist.some((item) => String(item.id) === String(id) || item.name === name);
     if (exists) {
         showToast(`${name} is already in wishlist`, 'info');
         return;
@@ -404,7 +411,7 @@ function updateWishlistButtons() {
     document.querySelectorAll('.wishlist-btn, .wishlist-toggle, .wishlist-cta').forEach((button) => {
         const id = button.dataset.id;
         const name = button.dataset.name;
-        const isSaved = wishlist.some((item) => item.id === id || item.name === name);
+        const isSaved = wishlist.some((item) => String(item.id) === String(id) || item.name === name);
         button.classList.toggle('active', isSaved);
 
         const label = button.querySelector('.wishlist-btn-label');
@@ -490,7 +497,7 @@ function initGlobalStoreButtons() {
             const { id, name, price, img } = wishlistButton.dataset;
             if (!name) return;
 
-            const alreadySaved = wishlist.some((item) => item.id === id || item.name === name);
+            const alreadySaved = wishlist.some((item) => String(item.id) === String(id) || item.name === name);
             if (alreadySaved) {
                 removeFromWishlist(name);
             } else {
@@ -603,6 +610,178 @@ function initWoodSection() {
     });
 }
 
+function getCheckoutTotals(root) {
+    const taxRate = parseFloat(root.dataset.taxRate || '0');
+    const shippingRate = parseFloat(root.dataset.shippingRate || '0');
+    const { subtotal, itemCount } = getCartMetrics();
+    const shipping = itemCount ? shippingRate : 0;
+    const tax = subtotal * (taxRate / 100);
+    const total = subtotal + shipping + tax;
+    return { subtotal, shipping, tax, total, itemCount };
+}
+
+function renderCheckoutPage() {
+    const root = document.querySelector('[data-checkout-root]');
+    if (!root) return;
+
+    const itemsContainer = document.getElementById('checkoutItems');
+    const emptyState = document.getElementById('checkoutEmpty');
+    const summary = document.getElementById('checkoutSummary');
+    const submitButton = document.getElementById('checkoutSubmit');
+    const totals = getCheckoutTotals(root);
+
+    document.getElementById('checkoutSubtotal').textContent = `Rs. ${totals.subtotal.toFixed(2)}`;
+    document.getElementById('checkoutShipping').textContent = `Rs. ${totals.shipping.toFixed(2)}`;
+    document.getElementById('checkoutTax').textContent = `Rs. ${totals.tax.toFixed(2)}`;
+    document.getElementById('checkoutTotal').textContent = `Rs. ${totals.total.toFixed(2)}`;
+
+    if (!totals.itemCount) {
+        itemsContainer.innerHTML = '';
+        emptyState.style.display = 'block';
+        summary.style.display = 'none';
+        submitButton.disabled = true;
+        return;
+    }
+
+    emptyState.style.display = 'none';
+    summary.style.display = 'grid';
+    submitButton.disabled = false;
+
+    itemsContainer.innerHTML = cart.map((item) => `
+        <article class="order-line">
+            <img src="${normalizeImagePath(item.img)}" alt="${item.name}" onerror="this.src='${staticPlaceholder}'">
+            <div>
+                <strong>${item.name}</strong>
+                <span class="checkout-muted">Quantity: ${item.quantity}</span>
+            </div>
+            <strong>Rs. ${((parseFloat(item.price) || 0) * item.quantity).toFixed(2)}</strong>
+        </article>
+    `).join('');
+}
+
+function initCheckoutOptions() {
+    const options = document.querySelectorAll('[data-payment-option]');
+    if (!options.length) return;
+
+    options.forEach((option) => {
+        option.addEventListener('click', () => {
+            options.forEach((entry) => entry.classList.remove('active'));
+            option.classList.add('active');
+            const input = option.querySelector('input[type="radio"]');
+            if (input) input.checked = true;
+        });
+    });
+}
+
+function buildCheckoutPayload(form) {
+    const formData = new FormData(form);
+    return {
+        full_name: (formData.get('full_name') || '').trim(),
+        email: (formData.get('email') || '').trim(),
+        phone: (formData.get('phone') || '').trim(),
+        address: (formData.get('address') || '').trim(),
+        city: (formData.get('city') || '').trim(),
+        state: (formData.get('state') || '').trim(),
+        zipcode: (formData.get('zipcode') || '').trim(),
+        payment_method: formData.get('payment_method') || 'COD',
+        items: cart.map((item) => ({ id: item.id, quantity: item.quantity })),
+    };
+}
+
+function handleRazorpayPayment(root, data) {
+    const options = {
+        key: data.razorpay.key,
+        amount: data.razorpay.amount,
+        currency: data.razorpay.currency,
+        name: data.razorpay.name,
+        description: data.razorpay.description,
+        order_id: data.razorpay.order_id,
+        prefill: data.razorpay.prefill,
+        theme: { color: '#8B5E3C' },
+        handler(response) {
+            const verifyForm = new FormData();
+            verifyForm.append('razorpay_payment_id', response.razorpay_payment_id);
+            verifyForm.append('razorpay_order_id', response.razorpay_order_id);
+            verifyForm.append('razorpay_signature', response.razorpay_signature);
+            verifyForm.append('csrfmiddlewaretoken', getCsrfToken());
+
+            fetch(root.dataset.verifyUrl, {
+                method: 'POST',
+                body: verifyForm,
+            })
+                .then((res) => res.json())
+                .then((verifyData) => {
+                    if (verifyData.status === 'success') {
+                        cart = [];
+                        persistCart();
+                        window.location.href = verifyData.redirect_url || root.dataset.successUrl;
+                    } else {
+                        showToast(verifyData.error || 'Payment verification failed.', 'warning');
+                    }
+                })
+                .catch(() => showToast('Unable to verify payment right now.', 'warning'));
+        },
+    };
+
+    const razorpay = new Razorpay(options);
+    razorpay.open();
+}
+
+function initCheckoutSubmit() {
+    const root = document.querySelector('[data-checkout-root]');
+    const form = document.getElementById('checkoutForm');
+    const submitButton = document.getElementById('checkoutSubmit');
+    if (!root || !form || !submitButton) return;
+
+    submitButton.addEventListener('click', () => {
+        if (!cart.length) {
+            showToast('Your cart is empty.', 'warning');
+            return;
+        }
+
+        if (!form.reportValidity()) return;
+
+        const payload = buildCheckoutPayload(form);
+        submitButton.disabled = true;
+        submitButton.textContent = 'Processing...';
+
+        fetch(root.dataset.createUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken(),
+            },
+            body: JSON.stringify(payload),
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (!data.success) {
+                    throw new Error(data.error || 'Unable to start checkout.');
+                }
+
+                if (data.mode === 'cod') {
+                    cart = [];
+                    persistCart();
+                    window.location.href = data.redirect_url || root.dataset.successUrl;
+                    return;
+                }
+
+                if (!root.dataset.razorpayEnabled || root.dataset.razorpayEnabled === 'false') {
+                    throw new Error('Razorpay is not configured yet.');
+                }
+
+                handleRazorpayPayment(root, data);
+            })
+            .catch((error) => {
+                showToast(error.message || 'Checkout failed.', 'warning');
+            })
+            .finally(() => {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Place Order';
+            });
+    });
+}
+
 function logoutUser() {
     fetch('/api/logout/')
         .then((response) => response.json())
@@ -618,9 +797,12 @@ document.addEventListener('DOMContentLoaded', () => {
     initGlobalStoreButtons();
     initSlider();
     initWoodSection();
+    initCheckoutOptions();
+    initCheckoutSubmit();
     renderCartSidebar();
     renderCartPage();
     renderWishlistCount();
     renderWishlistPage();
+    renderCheckoutPage();
     updateWishlistButtons();
 });

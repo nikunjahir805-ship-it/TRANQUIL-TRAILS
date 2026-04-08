@@ -4,381 +4,246 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Checkout | Tranquil Trails</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
+    <title>Checkout | {{ site_settings.store_name }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    
     <style>
-        :root {
-            --primary: #8B5E3C;
-            --primary-dark: #2c2c2c;
-            --bg-color: #F4EFE6;
-            --white: #ffffff;
-            --gray-light: #f9f9f9;
-            --border: #e0e0e0;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body { 
-            font-family: 'Poppins', sans-serif; 
-            background-color: var(--bg-color); 
-            color: var(--primary-dark);
+        .checkout-shell {
+            padding: 70px 5% 90px;
+            background:
+                radial-gradient(circle at top right, rgba(45, 71, 57, 0.14), transparent 24%),
+                radial-gradient(circle at 10% 10%, rgba(139, 94, 60, 0.14), transparent 24%),
+                linear-gradient(180deg, #faf5ee 0%, #f3ede4 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
         }
-        
-        /* --- MAIN CONTAINER --- */
-        .checkout-container {
-            display: grid; 
-            grid-template-columns: 1.3fr 0.9fr; 
-            gap: 40px;
-            max-width: 1100px; 
-            width: 100%; 
-            background: var(--white);
-            padding: 50px; 
-            border-radius: 24px; 
-            box-shadow: 0 20px 60px rgba(0,0,0,0.06);
-            
-            /* Initial state for animation */
-            opacity: 0; 
-            transform: translateY(30px);
-        }
-
-        /* --- LEFT SIDE: FORM --- */
-        .shipping-section h2 { 
-            font-family: 'Playfair Display', serif; 
-            font-size: 1.8rem; 
-            margin-bottom: 30px; 
-            color: var(--primary-dark);
-        }
-
-        .form-grid {
+        .checkout-stage {
+            max-width: 1260px;
+            margin: 0 auto;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+            gap: 28px;
+            align-items: start;
         }
-
-        .input-group { margin-bottom: 20px; }
-        .input-group.full-width { grid-column: span 2; }
-
-        .input-group label { 
-            display: block; 
-            font-size: 0.85rem; 
-            margin-bottom: 8px; 
-            font-weight: 600; 
-            color: #666; 
-            letter-spacing: 0.5px;
+        .checkout-card {
+            background: rgba(255,255,255,0.88);
+            border: 1px solid rgba(139, 94, 60, 0.12);
+            border-radius: 30px;
+            box-shadow: 0 18px 40px rgba(44, 44, 44, 0.06);
+            padding: 30px;
         }
-
-        .input-field { 
-            width: 100%; 
-            padding: 14px 16px; 
-            border: 1px solid var(--border); 
-            border-radius: 10px; 
-            font-family: 'Poppins'; 
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-            background: var(--gray-light);
+        .checkout-card h1,
+        .checkout-card h2,
+        .checkout-card h3 {
+            font-family: 'Playfair Display', serif;
         }
-
-        .input-field:focus { 
-            background: var(--white);
-            border-color: var(--primary); 
-            outline: none; 
-            box-shadow: 0 0 0 4px rgba(139,94,60,0.1); 
+        .checkout-intro { margin-bottom: 22px; }
+        .checkout-intro h1 { font-size: clamp(2.4rem, 5vw, 4rem); line-height: 0.98; margin-bottom: 12px; }
+        .checkout-intro p, .checkout-muted { color: #6d665e; }
+        .checkout-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+            margin-top: 24px;
         }
-
-        /* --- RIGHT SIDE: SUMMARY --- */
-        .order-summary {
-            background: #faf8f5; 
-            padding: 35px; 
-            border-radius: 20px; 
-            border: 1px solid #eee;
-            display: flex; 
-            flex-direction: column;
-            position: relative;
-        }
-
-        .summary-header { 
-            font-family: 'Playfair Display', serif; 
-            font-size: 1.5rem; 
-            margin-bottom: 25px; 
-            border-bottom: 1px dashed #ccc; 
-            padding-bottom: 20px; 
-        }
-        
-        .items-scroll {
-            flex: 1;
-            overflow-y: auto;
-            max-height: 250px;
-            margin-bottom: 20px;
-            padding-right: 10px;
-        }
-        
-        .items-scroll::-webkit-scrollbar { width: 4px; }
-        .items-scroll::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
-
-        .item-row { 
-            display: flex; 
-            justify-content: space-between; 
-            margin-bottom: 15px; 
-            font-size: 0.95rem; 
-        }
-        .item-name { color: #555; font-weight: 500; }
-        .item-price { font-weight: 600; color: var(--primary-dark); }
-        
-        .total-row { 
-            margin-top: auto; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            font-size: 1.5rem; 
-            font-weight: 700; 
-            border-top: 2px solid #eee; 
-            padding-top: 25px; 
-            color: var(--primary);
-        }
-
-        /* --- PAY BUTTON --- */
-        #rzp-button1 {
-            background: var(--primary-dark); 
-            color: white; 
-            border: none; 
+        .checkout-field { display: grid; gap: 8px; }
+        .checkout-field label { font-size: 0.88rem; font-weight: 600; }
+        .checkout-field input,
+        .checkout-field textarea {
             width: 100%;
-            padding: 18px; 
-            border-radius: 50px; 
-            font-size: 1rem; 
+            padding: 14px 16px;
+            border: 1px solid #e4d6c7;
+            border-radius: 18px;
+            background: #fffdf9;
+            font-family: 'Poppins', sans-serif;
+            resize: vertical;
+        }
+        .checkout-field.full { grid-column: 1 / -1; }
+        .checkout-field input:focus,
+        .checkout-field textarea:focus {
+            outline: none;
+            border-color: #8B5E3C;
+            box-shadow: 0 0 0 4px rgba(139, 94, 60, 0.12);
+        }
+        .payment-methods {
+            display: grid;
+            gap: 14px;
+            margin-top: 22px;
+        }
+        .payment-option {
+            border: 1px solid #eadbcc;
+            border-radius: 22px;
+            padding: 18px;
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            cursor: pointer;
+            transition: 0.25s ease;
+            background: #fff;
+        }
+        .payment-option.active {
+            border-color: #8B5E3C;
+            box-shadow: 0 14px 30px rgba(139, 94, 60, 0.12);
+        }
+        .payment-option input { margin-top: 4px; }
+        .order-items { display: grid; gap: 14px; margin-top: 20px; }
+        .order-line {
+            display: grid;
+            grid-template-columns: 72px minmax(0, 1fr) auto;
+            gap: 14px;
+            align-items: center;
+            padding: 12px;
+            border-radius: 20px;
+            background: #fffaf5;
+            border: 1px solid #f0e1d3;
+        }
+        .order-line img {
+            width: 72px;
+            height: 72px;
+            object-fit: cover;
+            border-radius: 16px;
+        }
+        .order-line strong { display: block; margin-bottom: 4px; }
+        .summary-stack { display: grid; gap: 14px; }
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 14px 0;
+            border-bottom: 1px solid #efe2d4;
+        }
+        .summary-line.total {
+            border-bottom: none;
+            font-size: 1.08rem;
+            padding-top: 18px;
+        }
+        .checkout-submit {
+            width: 100%;
+            margin-top: 18px;
+            border: none;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #8B5E3C 0%, #2D4739 100%);
+            color: white;
+            padding: 16px 18px;
+            font-size: 1rem;
             font-weight: 600;
-            letter-spacing: 0.5px;
-            cursor: pointer; 
-            margin-top: 30px; 
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 20px rgba(44, 44, 44, 0.15);
+            cursor: pointer;
         }
-
-        #rzp-button1:hover { 
-            background: var(--primary); 
-            transform: translateY(-3px); 
-            box-shadow: 0 15px 30px rgba(139, 94, 60, 0.3); 
+        .checkout-submit:disabled { opacity: 0.55; cursor: not-allowed; }
+        .checkout-empty {
+            text-align: center;
+            padding: 44px 20px;
+            border: 1px dashed #d7c5b1;
+            border-radius: 24px;
+            background: rgba(255,255,255,0.7);
         }
-
-        /* Security Badges */
-        .secure-badges { 
-            display: flex; 
-            justify-content: center; 
-            gap: 15px; 
-            margin-top: 25px; 
-            opacity: 0.5; 
-            filter: grayscale(100%);
+        @media (max-width: 980px) {
+            .checkout-stage { grid-template-columns: 1fr; }
         }
-        .pm-icon { height: 24px; }
-
-        /* Responsive */
-        @media (max-width: 900px) { 
-            .checkout-container { grid-template-columns: 1fr; padding: 30px; } 
-            .order-summary { margin-top: 20px; }
+        @media (max-width: 720px) {
+            .checkout-shell { padding-left: 4%; padding-right: 4%; }
+            .checkout-card { padding: 22px; border-radius: 24px; }
+            .checkout-form-grid { grid-template-columns: 1fr; }
+            .order-line { grid-template-columns: 64px minmax(0, 1fr); }
+            .order-line > :last-child { grid-column: 2; }
         }
     </style>
 </head>
 <body>
+    {% include 'partials/site_nav.html' %}
+    {% include 'partials/cart_sidebar.html' %}
 
-    <div class="checkout-container" id="mainCard">
-        
-        <div class="shipping-section">
-            <h2>Shipping Details</h2>
-            
-            <div class="form-grid">
-                <div class="input-group">
-                    <label>First Name</label>
-                    <input type="text" class="input-field" value="{{ user.first_name }}" placeholder="John">
-                </div>
-                <div class="input-group">
-                    <label>Last Name</label>
-                    <input type="text" class="input-field" value="{{ user.last_name }}" placeholder="Doe">
-                </div>
-                
-                <div class="input-group full-width">
-                    <label>Email Address</label>
-                    <input type="email" class="input-field" value="{{ user.email }}" placeholder="john@example.com">
+    <main class="checkout-shell">
+        <div class="checkout-stage" data-checkout-root data-tax-rate="{{ tax_rate }}" data-shipping-rate="{{ shipping_rate }}" data-create-url="{% url 'create_checkout_order' %}" data-verify-url="{% url 'verify_payment' %}" data-success-url="{% url 'payment_success' %}" data-razorpay-enabled="{{ razorpay_enabled|yesno:'true,false' }}" data-razorpay-key="{{ razorpay_key_id }}" data-csrf="{{ csrf_token }}">
+            <section class="checkout-card">
+                <div class="checkout-intro">
+                    <span class="eyebrow">Secure Checkout</span>
+                    <h1>Finish your order with calm, clear steps.</h1>
+                    <p>Review your products, add your delivery details, and choose cash on delivery or instant Razorpay payment.</p>
                 </div>
 
-                <div class="input-group full-width">
-                    <label>Phone Number</label>
-                    <input type="tel" class="input-field" placeholder="+91 98765 43210">
+                <form id="checkoutForm">
+                    <div class="checkout-form-grid">
+                        <div class="checkout-field full">
+                            <label for="full_name">Full Name</label>
+                            <input id="full_name" name="full_name" value="{{ customer.full_name }}" required>
+                        </div>
+                        <div class="checkout-field">
+                            <label for="email">Email</label>
+                            <input id="email" name="email" type="email" value="{{ customer.email }}" required>
+                        </div>
+                        <div class="checkout-field">
+                            <label for="phone">Phone Number</label>
+                            <input id="phone" name="phone" value="{{ customer.phone }}" required>
+                        </div>
+                        <div class="checkout-field full">
+                            <label for="address">Address</label>
+                            <textarea id="address" name="address" rows="3" required>{{ customer.address }}</textarea>
+                        </div>
+                        <div class="checkout-field">
+                            <label for="city">City</label>
+                            <input id="city" name="city" required>
+                        </div>
+                        <div class="checkout-field">
+                            <label for="state">State</label>
+                            <input id="state" name="state" required>
+                        </div>
+                        <div class="checkout-field full">
+                            <label for="zipcode">Pincode</label>
+                            <input id="zipcode" name="zipcode" required>
+                        </div>
+                    </div>
+
+                    <div class="payment-methods">
+                        <label class="payment-option active" data-payment-option>
+                            <input type="radio" name="payment_method" value="COD" checked>
+                            <div>
+                                <strong>Cash on Delivery</strong>
+                                <p class="checkout-muted">Place the order now and pay when it arrives.</p>
+                            </div>
+                        </label>
+                        <label class="payment-option" data-payment-option>
+                            <input type="radio" name="payment_method" value="ONLINE">
+                            <div>
+                                <strong>Online Payment</strong>
+                                <p class="checkout-muted">Pay instantly with Razorpay using card, UPI, or netbanking.</p>
+                            </div>
+                        </label>
+                    </div>
+                </form>
+            </section>
+
+            <aside class="checkout-card">
+                <span class="eyebrow">Order Summary</span>
+                <h2>Your artisan order</h2>
+                <p class="checkout-muted">The same items from your cart are ready here for final review.</p>
+
+                <div id="checkoutItems" class="order-items"></div>
+                <div id="checkoutEmpty" class="checkout-empty" style="display:none;">
+                    <h3>Your cart is empty</h3>
+                    <p class="checkout-muted">Add products to your cart before checking out.</p>
+                    <a href="{% url 'shop' %}" class="primary-link-btn" style="margin-top:16px;">Go to Shop</a>
                 </div>
 
-                <div class="input-group full-width">
-                    <label>Street Address</label>
-                    <input type="text" class="input-field" placeholder="123 Artisan Avenue">
+                <div class="summary-stack" id="checkoutSummary">
+                    <div class="summary-line"><span>Subtotal</span><strong id="checkoutSubtotal">Rs. 0.00</strong></div>
+                    <div class="summary-line"><span>Shipping</span><strong id="checkoutShipping">Rs. 0.00</strong></div>
+                    <div class="summary-line"><span>Tax</span><strong id="checkoutTax">Rs. 0.00</strong></div>
+                    <div class="summary-line total"><span>Total</span><strong id="checkoutTotal">Rs. 0.00</strong></div>
                 </div>
 
-                <div class="input-group">
-                    <label>City</label>
-                    <input type="text" class="input-field" placeholder="Mumbai">
-                </div>
-                <div class="input-group">
-                    <label>Pincode</label>
-                    <input type="text" class="input-field" placeholder="400001">
-                </div>
-            </div>
+                <button class="checkout-submit" id="checkoutSubmit">Place Order</button>
+                <p class="checkout-muted" style="margin-top:14px;">Online payment opens Razorpay directly after you choose that method.</p>
+            </aside>
         </div>
+    </main>
 
-        <div class="order-summary">
-            <div class="summary-header">Your Order</div>
-            
-            <div class="items-scroll">
-                {% for item in items %}
-                <div class="item-row">
-                    <span class="item-name">{{ item.product.name }} <span style="font-size:0.8rem; color:#888;">(x{{ item.quantity }})</span></span>
-                    <span class="item-price">₹{{ item.get_total|floatformat:2 }}</span>
-                </div>
-                {% empty %}
-                <p style="color:#888; text-align:center;">Your cart is empty.</p>
-                {% endfor %}
-            </div>
-
-            <div class="total-row">
-                <span>Total Amount</span>
-                <span>₹{{ total|floatformat:2 }}</span>
-            </div>
-
-            <button id="rzp-button1">
-                Pay Now <i class="fas fa-lock" style="margin-left:8px; font-size:0.8rem;"></i>
-            </button>
-
-            <div class="secure-badges">
-                <img src="https://cdn-icons-png.flaticon.com/512/349/349221.png" class="pm-icon" alt="Visa">
-                <img src="https://cdn-icons-png.flaticon.com/512/349/349228.png" class="pm-icon" alt="Mastercard">
-                <img src="https://cdn-icons-png.flaticon.com/512/825/825454.png" class="pm-icon" alt="UPI">
-                <img src="https://cdn-icons-png.flaticon.com/512/349/349230.png" class="pm-icon" alt="Verified">
-            </div>
-            <p style="text-align:center; font-size:0.75rem; color:#999; margin-top:10px;">
-                Secured by Razorpay
-            </p>
-        </div>
-
-    </div>
+    {% include 'partials/site_footer.html' %}
 
     <script>
-        // --- TOAST NOTIFICATION SYSTEM ---
-        function showToast(message, type = 'info', duration = 3500) {
-            if (!document.getElementById('toast-container')) {
-                const container = document.createElement('div');
-                container.id = 'toast-container';
-                container.className = 'toast-container';
-                container.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;pointer-events:none;';
-                document.body.appendChild(container);
-            }
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.style.cssText = 'background:white;color:#2c2c2c;padding:16px 24px;border-radius:8px;box-shadow:0 8px 25px rgba(0,0,0,0.15);margin-bottom:12px;display:flex;align-items:center;gap:12px;min-width:300px;max-width:400px;animation:slideInRight 0.3s ease-out;pointer-events:auto;border-left:4px solid #8B5E3C;';
-            const icons = {success: '✓', error: '✕', warning: '⚠', info: 'ℹ'};
-            toast.innerHTML = `<div style="font-size:1.25rem;flex-shrink:0;font-weight:bold;">${icons[type]}</div><span>${message}</span>`;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.animation = 'slideOutRight 0.3s ease-in forwards';
-                setTimeout(() => toast.remove(), 300);
-            }, duration);
-        }
-
-        // Add CSS for animations
-        const style = document.createElement('style');
-        style.innerHTML = `
-            @keyframes slideInRight {
-                from { transform: translateX(400px); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            @keyframes slideOutRight {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(400px); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // 1. GSAP Entry Animation
-        document.addEventListener("DOMContentLoaded", () => {
-            gsap.to("#mainCard", { 
-                opacity: 1, 
-                y: 0, 
-                duration: 0.8, 
-                ease: "power2.out" 
-            });
-        });
-
-        // 2. Razorpay Configuration
-        // Note: The template variables {{ ... }} are populated by Django
-        var options = {
-            "key": "{{ razorpay_merchant_key }}", // Enter the Key ID generated from the Dashboard
-            "amount": "{{ razorpay_amount }}", // Amount is in currency subunits. Default currency is INR.
-            "currency": "INR",
-            "name": "Tranquil Trails",
-            "description": "Artisan Handcrafted Order",
-            "image": "https://your-logo-url.com/logo.png", // Optional Logo
-            "order_id": "{{ razorpay_order_id }}", // This is the order_id created in the backend
-            
-            "handler": function (response){
-                // This function runs when payment is successful
-                verifyPayment(response);
-            },
-            
-            "prefill": {
-                "name": "{{ user_name }}",
-                "email": "{{ user_email }}",
-                "contact": "{{ user_phone }}"
-            },
-            "theme": {
-                "color": "#8B5E3C" // Matches your primary color
-            },
-            "modal": {
-                "ondismiss": function(){
-                    console.log('Checkout form closed');
-                }
-            }
-        };
-
-        var rzp1 = new Razorpay(options);
-        
-        // 3. Button Click Handler
-        document.getElementById('rzp-button1').onclick = function(e){
-            rzp1.open();
-            e.preventDefault();
-        }
-
-        // 4. Verification Logic (Sends data back to Django)
-        function verifyPayment(response) {
-            var formData = new FormData();
-            formData.append('razorpay_payment_id', response.razorpay_payment_id);
-            formData.append('razorpay_order_id', response.razorpay_order_id);
-            formData.append('razorpay_signature', response.razorpay_signature);
-            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}'); // Necessary for Django security
-
-            // Call the verify-payment URL
-            fetch("{% url 'verify_payment' %}", {
-                method: 'POST',
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === 'success') {
-                    window.location.href = "{% url 'payment_success' %}";
-                } else {
-                    showToast("Payment verification failed. Please contact support.", "error");
-                }
-            })
-            .catch(err => {
-                console.error("Error verifying payment:", err);
-                showToast("Connection error. Please check and try again.", "error");
-            });
-        }
+        window.djangoUser = "{{ user.username|default:'guest' }}";
     </script>
-
+    <script src="{% static 'script.js' %}"></script>
 </body>
 </html>

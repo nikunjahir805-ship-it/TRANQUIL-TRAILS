@@ -43,6 +43,11 @@ class Customer(models.Model):
 
 # --- 4. ORDER MODEL ---
 class Order(models.Model):
+    PAYMENT_METHOD_CHOICES = (
+        ('COD', 'Cash on Delivery'),
+        ('ONLINE', 'Online Payment'),
+    )
+
     STATUS_CHOICES = (
         ('Pending', 'Pending'),
         ('Processing', 'Processing'),
@@ -56,6 +61,9 @@ class Order(models.Model):
     complete = models.BooleanField(default=False)
     transaction_id = models.CharField(max_length=100, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='COD')
+    razorpay_order_id = models.CharField(max_length=120, blank=True, null=True)
+    razorpay_payment_id = models.CharField(max_length=120, blank=True, null=True)
 
     def __str__(self):
         return str(self.id)

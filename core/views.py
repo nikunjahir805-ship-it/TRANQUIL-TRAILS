@@ -16,7 +16,7 @@ import razorpay
 import csv
 
 from .models import (
-    Product, Customer, Category, GalleryItem, Order, OrderItem,
+    Product, Customer, Category, GalleryItem, Order, OrderItem, ShippingAddress,
     Offer, Review, Campaign, SiteSetting
 )
 
@@ -1017,3 +1017,399 @@ def admin_about_editor(request):
         return redirect('admin_about_editor')
 
     return render(request, 'admin/about_editor.html', {'about': about_content})
+
+from decimal import Decimal, InvalidOperation
+from django.views.decorators.http import require_GET, require_POST
+
+
+def get_site_settings():
+    settings_obj, _ = SiteSetting.objects.get_or_create(id=1)
+    return settings_obj
+
+
+def get_customer_for_user(user):
+    customer, _ = Customer.objects.get_or_create(
+        user=user,
+        defaults={
+            'full_name': user.get_full_name() or user.username,
+            'email': user.email or f'{user.username}@example.com',
+        },
+    )
+    changed = False
+    if user.email and customer.email != user.email:
+        customer.email = user.email
+        changed = True
+    full_name = user.get_full_name() or user.username
+    if full_name and customer.full_name != full_name:
+        customer.full_name = full_name
+        changed = True
+    if changed:
+        customer.save()
+    return customer
+
+
+def parse_checkout_items(raw_items):
+    parsed_items = []
+    product_ids = []
+
+    for raw_item in raw_items:
+        product_id = raw_item.get('id')
+        quantity = raw_item.get('quantity', 1)
+
+        try:
+            product_id = int(product_id)
+            quantity = int(quantity)
+        except (TypeError, ValueError):
+            continue
+
+        if quantity <= 0:
+            continue
+
+        product_ids.append(product_id)
+        parsed_items.append({'id': product_id, 'quantity': quantity})
+
+    products = Product.objects.filter(id__in=product_ids, available=True)
+    product_map = {product.id: product for product in products}
+
+    valid_items = []
+    subtotal = Decimal('0.00')
+
+    for item in parsed_items:
+        product = product_map.get(item['id'])
+        if not product:
+            continue
+
+        quantity = min(item['quantity'], max(product.stock, 1)) if product.stock else item['quantity']
+        line_total = product.price * quantity
+        subtotal += line_total
+        valid_items.append({
+            'product': product,
+            'quantity': quantity,
+            'line_total': line_total,
+        })
+
+    return valid_items, subtotal
+
+
+def build_checkout_totals(items, site_info):
+    subtotal = sum((item['line_total'] for item in items), Decimal('0.00'))
+    shipping_rate = Decimal(str(site_info.shipping_flat_rate))
+    tax_rate = Decimal(str(site_info.tax_rate))
+    shipping = shipping_rate if items else Decimal('0.00')
+    tax = (subtotal * tax_rate) / Decimal('100.00')
+    total = subtotal + shipping + tax
+    return {
+        'subtotal': subtotal,
+        'shipping': shipping,
+        'tax': tax,
+        'total': total,
+    }
+
+
+def create_order_records(customer, items, payment_method, totals, shipping_data):
+    order = Order.objects.create(
+        customer=customer,
+        complete=False,
+        payment_method=payment_method,
+        status='Pending',
+    )
+
+    for item in items:
+        OrderItem.objects.create(
+            order=order,
+            product=item['product'],
+            quantity=item['quantity'],
+        )
+
+    ShippingAddress.objects.create(
+        customer=customer,
+        order=order,
+        address=shipping_data['address'],
+        city=shipping_data['city'],
+        state=shipping_data['state'],
+        zipcode=shipping_data['zipcode'],
+    )
+
+    return order
+
+
+def finalize_order(order, payment_id=''):
+    if order.complete:
+        return order
+
+    for order_item in order.orderitem_set.select_related('product'):
+        product = order_item.product
+        if not product:
+            continue
+        if product.stock >= order_item.quantity:
+            product.stock -= order_item.quantity
+        else:
+            product.stock = 0
+        product.available = product.stock > 0
+        product.save(update_fields=['stock', 'available', 'updated_at'])
+
+    order.complete = True
+    order.status = 'Processing'
+    if payment_id:
+        order.razorpay_payment_id = payment_id
+        order.transaction_id = payment_id
+    elif order.payment_method == 'COD':
+        order.transaction_id = f'COD-{order.id}'
+    order.save()
+    return order
+
+
+def restock_order(order):
+    if not order.complete:
+        return order
+
+    for order_item in order.orderitem_set.select_related('product'):
+        product = order_item.product
+        if not product:
+            continue
+        product.stock += order_item.quantity
+        product.available = product.stock > 0
+        product.save(update_fields=['stock', 'available', 'updated_at'])
+
+    order.complete = False
+    order.save(update_fields=['complete'])
+    return order
+
+
+def payment_keys_configured():
+    key_id = getattr(settings, 'RAZORPAY_KEY_ID', '') or ''
+    key_secret = getattr(settings, 'RAZORPAY_KEY_SECRET', '') or ''
+    invalid_markers = {'rzp_test_YOUR_KEY_HERE', 'YOUR_SECRET_HERE', ''}
+    return key_id not in invalid_markers and key_secret not in invalid_markers
+
+
+def cart_page(request):
+    featured_products = Product.objects.filter(available=True).select_related('category')[:4]
+    return render(request, 'cart.html', {
+        'featured_products': featured_products,
+    })
+
+
+
+def wishlist_page(request):
+    featured_products = Product.objects.filter(available=True).select_related('category')[:6]
+    return render(request, 'wishlist.html', {
+        'featured_products': featured_products,
+    })
+
+
+@login_required
+@require_GET
+def checkout(request):
+    customer = get_customer_for_user(request.user)
+    site_info = get_site_settings()
+    return render(request, 'checkout.html', {
+        'customer': customer,
+        'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+        'razorpay_enabled': payment_keys_configured(),
+        'shipping_rate': site_info.shipping_flat_rate,
+        'tax_rate': site_info.tax_rate,
+    })
+
+
+@login_required
+@require_POST
+def create_checkout_order(request):
+    try:
+        payload = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid checkout payload.'}, status=400)
+
+    raw_items = payload.get('items', [])
+    payment_method = (payload.get('payment_method') or 'COD').upper()
+    shipping_data = {
+        'full_name': (payload.get('full_name') or '').strip(),
+        'email': (payload.get('email') or '').strip(),
+        'phone': (payload.get('phone') or '').strip(),
+        'address': (payload.get('address') or '').strip(),
+        'city': (payload.get('city') or '').strip(),
+        'state': (payload.get('state') or '').strip(),
+        'zipcode': (payload.get('zipcode') or '').strip(),
+    }
+
+    required_fields = ['full_name', 'email', 'phone', 'address', 'city', 'state', 'zipcode']
+    missing = [field for field in required_fields if not shipping_data[field]]
+    if missing:
+        return JsonResponse({'success': False, 'error': 'Please complete all checkout fields.'}, status=400)
+
+    if payment_method not in {'COD', 'ONLINE'}:
+        return JsonResponse({'success': False, 'error': 'Invalid payment method.'}, status=400)
+
+    items, subtotal = parse_checkout_items(raw_items)
+    if not items:
+        return JsonResponse({'success': False, 'error': 'Your cart is empty.'}, status=400)
+
+    customer = get_customer_for_user(request.user)
+    customer.full_name = shipping_data['full_name']
+    customer.email = shipping_data['email']
+    customer.phone = shipping_data['phone']
+    customer.address = shipping_data['address']
+    customer.save()
+
+    site_info = get_site_settings()
+    totals = build_checkout_totals(items, site_info)
+    order = create_order_records(customer, items, payment_method, totals, shipping_data)
+    request.session['latest_order_id'] = order.id
+
+    if payment_method == 'COD':
+        return JsonResponse({
+            'success': True,
+            'mode': 'cod',
+            'redirect_url': '/payment-success/',
+        })
+
+    if not payment_keys_configured():
+        order.delete()
+        return JsonResponse({'success': False, 'error': 'Razorpay keys are not configured in Django settings yet.'}, status=400)
+
+    amount_paise = int(totals['total'] * 100)
+    razorpay_order = client.order.create({
+        'amount': amount_paise,
+        'currency': 'INR',
+        'payment_capture': '1',
+    })
+
+    order.razorpay_order_id = razorpay_order['id']
+    order.transaction_id = razorpay_order['id']
+    order.save(update_fields=['razorpay_order_id', 'transaction_id'])
+
+    return JsonResponse({
+        'success': True,
+        'mode': 'online',
+        'razorpay': {
+            'key': settings.RAZORPAY_KEY_ID,
+            'amount': amount_paise,
+            'currency': 'INR',
+            'name': site_info.store_name,
+            'description': f'Order #{order.id}',
+            'order_id': razorpay_order['id'],
+            'prefill': {
+                'name': shipping_data['full_name'],
+                'email': shipping_data['email'],
+                'contact': shipping_data['phone'],
+            },
+        },
+    })
+
+
+@csrf_exempt
+@login_required
+@require_POST
+def verify_payment(request):
+    payload = {
+        'razorpay_payment_id': request.POST.get('razorpay_payment_id'),
+        'razorpay_order_id': request.POST.get('razorpay_order_id'),
+        'razorpay_signature': request.POST.get('razorpay_signature'),
+    }
+
+    if not all(payload.values()):
+        return JsonResponse({'status': 'error', 'error': 'Missing payment verification data.'}, status=400)
+
+    try:
+        client.utility.verify_payment_signature(payload)
+    except Exception:
+        return JsonResponse({'status': 'error', 'error': 'Payment signature verification failed.'}, status=400)
+
+    order = get_object_or_404(Order, razorpay_order_id=payload['razorpay_order_id'])
+    order.razorpay_payment_id = payload['razorpay_payment_id']
+    order.transaction_id = payload['razorpay_payment_id']
+    order.status = 'Pending'
+    order.save(update_fields=['razorpay_payment_id', 'transaction_id', 'status'])
+    request.session['latest_order_id'] = order.id
+    return JsonResponse({'status': 'success', 'redirect_url': '/payment-success/'})
+
+
+@login_required
+def payment_success(request):
+    order_id = request.session.get('latest_order_id')
+    order = None
+    if order_id:
+        order = Order.objects.filter(id=order_id).select_related('customer').prefetch_related('orderitem_set__product').first()
+    return render(request, 'success.html', {'order': order})
+
+
+@login_required
+def my_orders(request):
+    customer = get_customer_for_user(request.user)
+    orders = (
+        Order.objects.filter(customer=customer)
+        .select_related('customer')
+        .prefetch_related('orderitem_set__product', 'shippingaddress_set')
+        .order_by('-date_ordered')
+    )
+    return render(request, 'my_orders.html', {'orders': orders})
+
+
+@login_required(login_url='login')
+@user_passes_test(admin_only, login_url='login')
+def admin_orders(request):
+    orders = (
+        Order.objects.all()
+        .select_related('customer')
+        .prefetch_related('orderitem_set__product', 'shippingaddress_set')
+        .order_by('-date_ordered')
+    )
+    return render(request, 'admin/orders_realtime.html', {'orders': orders})
+
+
+@login_required(login_url='login')
+@user_passes_test(admin_only, login_url='login')
+@require_POST
+def admin_update_order_status(request, order_id):
+    order = get_object_or_404(
+        Order.objects.select_related('customer').prefetch_related('orderitem_set__product'),
+        id=order_id,
+    )
+    new_status = (request.POST.get('status') or '').strip()
+    valid_statuses = {choice[0] for choice in Order.STATUS_CHOICES}
+    fulfilled_statuses = {'Processing', 'Shipped', 'Delivered'}
+
+    if new_status not in valid_statuses:
+        messages.error(request, 'Invalid order status selected.')
+        return redirect('admin_orders')
+
+    if new_status in fulfilled_statuses and not order.complete:
+        finalize_order(order, order.razorpay_payment_id or '')
+
+    if new_status == 'Cancelled' and order.complete:
+        restock_order(order)
+
+    order.status = new_status
+    order.save(update_fields=['status'])
+    messages.success(request, f'Order #{order.id} updated to {new_status}.')
+    return redirect('admin_orders')
+
+
+@login_required(login_url='login')
+@user_passes_test(admin_only, login_url='login')
+def admin_settings(request):
+    settings_obj, _ = SiteSetting.objects.get_or_create(id=1)
+
+    if request.method == 'POST':
+        settings_obj.store_name = request.POST.get('store_name', settings_obj.store_name)
+        settings_obj.admin_email = request.POST.get('admin_email', settings_obj.admin_email)
+        settings_obj.contact_phone = request.POST.get('contact_phone', settings_obj.contact_phone)
+        settings_obj.currency = request.POST.get('currency', settings_obj.currency)
+
+        try:
+            settings_obj.tax_rate = Decimal(request.POST.get('tax_rate', settings_obj.tax_rate))
+        except (TypeError, InvalidOperation):
+            pass
+
+        try:
+            settings_obj.shipping_flat_rate = Decimal(request.POST.get('shipping_flat_rate', settings_obj.shipping_flat_rate))
+        except (TypeError, InvalidOperation):
+            pass
+
+        settings_obj.maintenance_mode = request.POST.get('maintenance_mode') == 'on'
+        settings_obj.save()
+
+        messages.success(request, 'Settings updated successfully!')
+        return redirect('admin_settings')
+
+    return render(request, 'admin/settings.html', {'settings': settings_obj})

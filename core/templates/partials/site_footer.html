@@ -1,0 +1,48 @@
+{% now "Y" as current_year %}
+<footer class="main-footer">
+    <div class="footer-container">
+        <div class="footer-section about">
+            <h3 class="footer-logo">{{ site_settings.store_name|upper }}</h3>
+            <p>Handcrafted pieces, calm design, and a storefront that stays connected to real customer support.</p>
+            <div class="social-icons">
+                <a href="mailto:{{ site_settings.admin_email }}" aria-label="Email">@</a>
+                <a href="tel:{{ site_settings.contact_phone }}" aria-label="Phone">PH</a>
+                <a href="{% url 'contact' %}" aria-label="Contact">CT</a>
+            </div>
+        </div>
+
+        <div class="footer-section links">
+            <h4>Explore</h4>
+            <ul>
+                <li><a href="{% url 'shop' %}">Shop</a></li>
+                <li><a href="{% url 'gallery' %}">Gallery</a></li>
+                <li><a href="{% url 'offers' %}">Offers</a></li>
+                <li><a href="{% url 'wishlist' %}">Wishlist</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section links">
+            <h4>Support</h4>
+            <ul>
+                <li><a href="{% url 'about' %}">About Us</a></li>
+                <li><a href="{% url 'contact' %}">Contact Us</a></li>
+                <li><a href="mailto:{{ site_settings.admin_email }}">{{ site_settings.admin_email }}</a></li>
+                <li><a href="tel:{{ site_settings.contact_phone }}">{{ site_settings.contact_phone }}</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section newsletter">
+            <h4>Store Details</h4>
+            <p>Currency: {{ site_settings.currency }}<br>Tax Rate: {{ site_settings.tax_rate }}%<br>Shipping: Rs. {{ site_settings.shipping_flat_rate }}</p>
+            <a href="{% url 'checkout' %}" class="primary-link-btn" style="margin-top:16px;">Start Checkout</a>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>&copy; {{ current_year }} {{ site_settings.store_name }}. All rights reserved.</p>
+        <div class="footer-legal">
+            <a href="{% url 'about' %}">Privacy</a>
+            <a href="{% url 'contact' %}">Support</a>
+        </div>
+    </div>
+</footer>

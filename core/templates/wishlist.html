@@ -4,68 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wishlist | {{ site_info.store_name }}</title>
+    <title>Wishlist | {{ site_settings.store_name }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
 <body>
-    <nav>
-        <a href="{% url 'home' %}" class="logo-container">
-            <img src="{% static 'Adobe Express - file.png' %}" alt="Logo" class="logo-img">
-            <span class="logo-text">{{ site_info.store_name|upper }}</span>
-        </a>
-
-        <button class="hamburger" id="hamburger" aria-label="Toggle menu">
-            <span></span><span></span><span></span>
-        </button>
-
-        <ul class="nav-links" id="navLinks">
-            <li><a href="{% url 'home' %}">Home</a></li>
-            <li><a href="{% url 'shop' %}">Shop</a></li>
-            <li><a href="{% url 'gallery' %}">Gallery</a></li>
-            <li><a href="{% url 'about' %}">About</a></li>
-            <li><a href="{% url 'contact' %}">Contact</a></li>
-            {% if user.is_authenticated %}
-            <li>
-                <div class="nav-user-container">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" class="user-avatar" id="userAvatarBtn">
-                    <div class="profile-dropdown" id="profileDropdown">
-                        <div style="padding: 10px 16px; font-weight: bold; background: #f9f9f9; font-size: 0.8rem; border-bottom: 1px solid #eee;">
-                            Hi, {{ user.first_name|default:user.username }}
-                        </div>
-                        <a href="#">My Orders</a>
-                        <a href="{% url 'wishlist' %}">Wishlist <span class="cart-count-pill" data-wishlist-count>0</span></a>
-                        <a href="#" onclick="logoutUser()" class="logout-btn">Logout</a>
-                    </div>
-                </div>
-            </li>
-            {% else %}
-            <li><a href="{% url 'login' %}">Log In</a></li>
-            <li><a href="{% url 'signup' %}" style="background: #8B5E3C; color: white; padding: 10px 25px; border-radius: 50px; font-weight: bold;">Join</a></li>
-            {% endif %}
-            <li><a href="{% url 'cart' %}" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a></li>
-        </ul>
-    </nav>
-
-    <div class="cart-sidebar" id="cartSidebar">
-        <div class="cart-header">
-            <h2 style="font-family:'Playfair Display', serif;">Your Bag</h2>
-            <button class="close-cart" id="closeCart">&times;</button>
-        </div>
-        <div class="cart-body">
-            <ul id="cart-items-list"></ul>
-        </div>
-        <div class="cart-footer">
-            <div class="cart-total-row">
-                <span>Total</span>
-                <span>Rs. <span id="total-price">0</span></span>
-            </div>
-            <a href="{% url 'cart' %}" class="checkout-btn" style="text-align:center; text-decoration:none;">Go to Full Cart</a>
-            <a href="{% url 'checkout' %}" class="ghost-link-btn" style="width:100%; margin-top:12px; text-align:center;">Checkout Now</a>
-            <button class="clear-cart-link" onclick="clearCart()">Clear All Items</button>
-        </div>
-    </div>
+    {% include 'partials/site_nav.html' %}
+    {% include 'partials/cart_sidebar.html' %}
 
     <main class="wishlist-site-shell">
         <section class="wishlist-page-top">
@@ -76,7 +22,7 @@
             </div>
             <div class="wishlist-top-card">
                 <span class="eyebrow">Store Promise</span>
-                <strong>{{ site_info.store_name }}</strong>
+                <strong>{{ site_settings.store_name }}</strong>
                 <p>Wishlist and cart stay linked for the same user, so favorites are always ready when it is time to buy.</p>
             </div>
         </section>
@@ -132,32 +78,7 @@
         </section>
     </main>
 
-    <footer class="main-footer">
-        <div class="footer-container">
-            <div class="footer-section">
-                <h3 class="footer-logo">{{ site_info.store_name|upper }}</h3>
-                <p>Wishlist your favorite craft pieces, revisit them later, and move them into cart in one click.</p>
-            </div>
-            <div class="footer-section">
-                <h4>Quick Links</h4>
-                <ul>
-                    <li><a href="{% url 'shop' %}">Shop</a></li>
-                    <li><a href="{% url 'cart' %}">Cart</a></li>
-                    <li><a href="{% url 'gallery' %}">Gallery</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h4>Support</h4>
-                <ul>
-                    <li><a href="mailto:{{ site_info.admin_email }}">{{ site_info.admin_email }}</a></li>
-                    <li><a href="tel:{{ site_info.contact_phone }}">{{ site_info.contact_phone }}</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2026 {{ site_info.store_name }}. All rights reserved.</p>
-        </div>
-    </footer>
+    {% include 'partials/site_footer.html' %}
 
     <script>
         window.djangoUser = "{{ user.username|default:'guest' }}";

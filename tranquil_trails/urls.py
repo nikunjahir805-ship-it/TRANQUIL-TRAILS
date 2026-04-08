@@ -42,8 +42,10 @@ urlpatterns = [
     path('cart/', views.cart_page, name='cart'),
     path('wishlist/', views.wishlist_page, name='wishlist'),
     path('checkout/', views.checkout, name='checkout'),
+    path('checkout/create-order/', views.create_checkout_order, name='create_checkout_order'),
     path('verify-payment/', views.verify_payment, name='verify_payment'),
     path('payment-success/', views.payment_success, name='payment_success'),
+    path('my-orders/', views.my_orders, name='my_orders'),
 
     # ===== CUSTOM ADMIN PANEL =====
 
@@ -83,6 +85,7 @@ urlpatterns = [
     # Orders
     path('admin-orders/', views.admin_orders, name='admin_orders'),
     path('admin/orders/', views.admin_orders, name='admin_orders'),
+    path('admin/orders/<int:order_id>/status/', views.admin_update_order_status, name='admin_update_order_status'),
 
     # Reviews
     path('admin-reviews/', views.admin_reviews, name='admin_reviews'),
