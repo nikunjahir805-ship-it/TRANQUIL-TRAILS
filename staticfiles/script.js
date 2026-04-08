@@ -466,17 +466,48 @@ function initCartSidebar() {
 function initDropdown() {
     const avatarBtn = document.getElementById('userAvatarBtn');
     const dropdown = document.getElementById('profileDropdown');
+    const container = avatarBtn ? avatarBtn.closest('.nav-user-container') : null;
     if (!avatarBtn || !dropdown) return;
+
+    let closeTimer = null;
+    const openDropdown = () => dropdown.classList.add('show');
+    const closeDropdown = () => {
+        if (closeTimer) {
+            clearTimeout(closeTimer);
+            closeTimer = null;
+        }
+        dropdown.classList.remove('show');
+    };
+    const scheduleClose = () => {
+        if (closeTimer) clearTimeout(closeTimer);
+        closeTimer = setTimeout(() => {
+            dropdown.classList.remove('show');
+            closeTimer = null;
+        }, 140);
+    };
 
     avatarBtn.addEventListener('click', (event) => {
         event.stopPropagation();
         dropdown.classList.toggle('show');
     });
 
+    if (container) {
+        container.addEventListener('mouseenter', openDropdown);
+        container.addEventListener('mouseleave', scheduleClose);
+        container.addEventListener('focusin', openDropdown);
+    }
+
+    dropdown.addEventListener('mouseenter', openDropdown);
+    dropdown.addEventListener('mouseleave', scheduleClose);
+
     document.addEventListener('click', (event) => {
         if (!dropdown.contains(event.target) && !avatarBtn.contains(event.target)) {
-            dropdown.classList.remove('show');
+            closeDropdown();
         }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeDropdown();
     });
 }
 

@@ -120,7 +120,5 @@ urlpatterns = [
     path('admin-dashboard/about-editor/', views.admin_about_editor, name='admin_about_editor'),
 ]
 
-
-# Serve media files in development
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Simple media serving so uploaded/committed media files still work on Render.
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

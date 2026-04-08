@@ -2,22 +2,41 @@
 Django settings for tranquil_trails project.
 """
 
+import importlib.util
 import os
 from pathlib import Path
-import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+def env_bool(name, default=False):
+    value = os.environ.get(name, str(default))
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def env_list(name, default=""):
+    value = os.environ.get(name, default)
+    return [item.strip() for item in value.split(",") if item.strip()]
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-3_caq&118lu1)$o#!&2mw$l=!+5$5k0-=goz=1%2pin^ntd36x'
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'django-insecure-3_caq&118lu1)$o#!&2mw$l=!+5$5k0-=goz=1%2pin^ntd36x',
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env_bool('DEBUG', True)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env_list('ALLOWED_HOSTS', '127.0.0.1,localhost,.onrender.com')
+CSRF_TRUSTED_ORIGINS = env_list(
+    'CSRF_TRUSTED_ORIGINS',
+    'http://127.0.0.1:8000,http://localhost:8000,https://*.onrender.com',
+)
 
 # Application definition
+
+HAS_WHITENOISE = importlib.util.find_spec('whitenoise') is not None
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -41,6 +60,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+if HAS_WHITENOISE:
+    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+
 ROOT_URLCONF = 'tranquil_trails.urls'
 
 TEMPLATES = [
@@ -62,11 +84,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'tranquil_trails.wsgi.application'
 
 # Database
-LOCAL_APPDATA = Path(os.environ.get('LOCALAPPDATA', BASE_DIR))
-DATABASE_DIR = LOCAL_APPDATA / 'TranquilTrails'
-DATABASE_DIR.mkdir(parents=True, exist_ok=True)
-DATABASE_PATH = Path(os.environ.get('DJANGO_DB_PATH', DATABASE_DIR / 'db.sqlite3'))
-
+DATABASE_PATH = Path(os.environ.get('DJANGO_DB_PATH', BASE_DIR / 'db.sqlite3'))
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -96,32 +114,41 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# --- STATIC FILES ---
+# Static files
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = BASE_DIR / 'staticfiles_build'
 
-# --- MEDIA FILES (Crucial for Images) ---
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': (
+            'whitenoise.storage.CompressedStaticFilesStorage'
+            if HAS_WHITENOISE
+            else 'django.contrib.staticfiles.storage.StaticFilesStorage'
+        ),
+    },
+}
+
+# Media files
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = Path(os.environ.get('DJANGO_MEDIA_ROOT', BASE_DIR / 'media'))
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# settings.py
-
-# ... existing settings ...
-# In settings.py
-
-# ... bottom of file ...
-
 # Razorpay Settings
-RAZORPAY_KEY_ID = 'rzp_test_YOUR_KEY_HERE'     # Replace with your Test Key ID
-RAZORPAY_KEY_SECRET = 'YOUR_SECRET_HERE'       # Replace with your Test Key Secret
+RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', 'rzp_test_YOUR_KEY_HERE')
+RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', 'YOUR_SECRET_HERE')
 
-# settings.py
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = env_bool('SECURE_SSL_REDIRECT', True)
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # Redirect to the 'login' path name when @login_required blocks a user
 LOGIN_URL = 'login'
 
-LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'admin_dashboard'
 LOGOUT_REDIRECT_URL = 'login'

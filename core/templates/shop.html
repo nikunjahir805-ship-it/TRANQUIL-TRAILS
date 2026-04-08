@@ -340,86 +340,12 @@
         </div>
     </section>
 
-    <footer class="main-footer">
-        <div class="footer-container">
-            <div class="footer-section about">
-                <h3 class="footer-logo">TRANQUIL TRAILS</h3>
-                <p>Bringing the soul of artisanal craftsmanship into modern homes. Every piece tells a story of tradition, sustainability, and mindful living.</p>
-                <div class="social-icons">
-                    <a href="#" aria-label="Instagram">IG</a>
-                    <a href="#" aria-label="Facebook">FB</a>
-                    <a href="#" aria-label="Pinterest">PIN</a>
-                </div>
-            </div>
-
-            <div class="footer-section links">
-                <h4>Shop</h4>
-                <ul>
-                    <li><a href="{% url 'shop' %}">All Products</a></li>
-                    <li><a href="{% url 'gallery' %}">Gallery</a></li>
-                    <li><a href="{% url 'offers' %}">Exclusive Offers</a></li>
-                    <li><a href="{% url 'about' %}">Our Story</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-section links">
-                <h4>Support</h4>
-                <ul>
-                    <li><a href="{% url 'contact' %}">Contact Us</a></li>
-                    <li><a href="#">Shipping Policy</a></li>
-                    <li><a href="#">Returns & Exchanges</a></li>
-                    <li><a href="#">FAQs</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-section newsletter">
-                <h4>Join the Journey</h4>
-                <p>Subscribe for early access to new collections and artisan stories.</p>
-                <form class="subscribe-form">
-                    <input type="email" placeholder="Your email address" required>
-                    <button type="submit">Join</button>
-                </form>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <p>&copy; 2026 TRANQUIL TRAILS. All Rights Reserved.</p>
-            <div class="footer-legal">
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms of Service</a>
-            </div>
-        </div>
-    </footer>
-
     {% include 'partials/site_footer.html' %}
 
     <script>
         window.djangoUser = "{{ user.username|default:'guest' }}";
 
-        // 1. DROPDOWN LOGIC
-        const userAvatarBtn = document.getElementById('userAvatarBtn');
-        const profileDropdown = document.getElementById('profileDropdown');
-        if (userAvatarBtn) {
-            userAvatarBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                profileDropdown.classList.toggle('show');
-            });
-            document.addEventListener('click', (e) => {
-                if (!userAvatarBtn.contains(e.target)) profileDropdown.classList.remove('show');
-            });
-        }
-
-        // 2. LOGOUT LOGIC
-        function logoutUser() {
-            fetch('/api/logout/').then(res => res.json()).then(data => {
-                if(data.success) {
-                    localStorage.removeItem('isAdmin');
-                    window.location.href = "{% url 'home' %}";
-                }
-            });
-        }
-
-        // 3. ANIMATIONS
+        // ANIMATIONS
         document.addEventListener("DOMContentLoaded", () => {
             gsap.to(".shop-header", { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" });
             gsap.to(".category-filters", { opacity: 1, y: 0, duration: 0.8, delay: 0.2, ease: "power2.out" });

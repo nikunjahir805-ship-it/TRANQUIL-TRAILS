@@ -734,57 +734,6 @@
         }
     </style>
 
-    <footer class="main-footer">
-        <div class="footer-container">
-            <div class="footer-section about">
-                <h3 class="footer-logo">TRANQUIL TRAILS</h3>
-                <p>Bringing the soul of artisanal craftsmanship into modern homes. Every piece tells a story of tradition, sustainability, and mindful living.</p>
-                <div class="social-icons">
-                    <a href="#" aria-label="Instagram">IG</a>
-                    <a href="#" aria-label="Facebook">FB</a>
-                    <a href="#" aria-label="Pinterest">PIN</a>
-                </div>
-            </div>
-
-            <div class="footer-section links">
-                <h4>Shop</h4>
-                <ul>
-                    <li><a href="{% url 'shop' %}">All Products</a></li>
-                    <li><a href="{% url 'gallery' %}">Gallery</a></li>
-                    <li><a href="{% url 'offers' %}">Exclusive Offers</a></li>
-                    <li><a href="{% url 'about' %}">Our Story</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-section links">
-                <h4>Support</h4>
-                <ul>
-                    <li><a href="{% url 'contact' %}">Contact Us</a></li>
-                    <li><a href="#">Shipping Policy</a></li>
-                    <li><a href="#">Returns & Exchanges</a></li>
-                    <li><a href="#">FAQs</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-section newsletter">
-                <h4>Join the Journey</h4>
-                <p>Subscribe for early access to new collections and artisan stories.</p>
-                <form class="subscribe-form">
-                    <input type="email" placeholder="Your email address" required>
-                    <button type="submit">Join</button>
-                </form>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <p>&copy; 2026 TRANQUIL TRAILS. All Rights Reserved.</p>
-            <div class="footer-legal">
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms of Service</a>
-            </div>
-        </div>
-    </footer>
-
     <style>
         .main-footer { background-color: #1a1a1a; color: #bbb; padding: 80px 8% 30px; font-family: 'Poppins', sans-serif; }
         .footer-container { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr; gap: 40px; max-width: 1200px; margin: 0 auto; }
@@ -953,37 +902,7 @@
     <script src="{% static 'script.js' %}"></script>
     
     <script>
-        // --- 1. DROPDOWN TOGGLE ---
-        const userAvatarBtn = document.getElementById('userAvatarBtn');
-        const profileDropdown = document.getElementById('profileDropdown');
-
-        if (userAvatarBtn) {
-            userAvatarBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                profileDropdown.classList.toggle('show');
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!userAvatarBtn.contains(e.target)) {
-                    profileDropdown.classList.remove('show');
-                }
-            });
-        }
-
-        // --- 2. BACKEND LOGOUT LOGIC ---
-        function logoutUser() {
-            fetch('/api/logout/')
-            .then(res => res.json())
-            .then(data => {
-                if(data.success) {
-                    localStorage.removeItem('isAdmin');
-                    localStorage.removeItem('cart'); 
-                    window.location.href = "{% url 'home' %}";
-                }
-            });
-        }
-
-        // --- 3. TESTIMONIALS SCROLL ANIMATION ---
+        // --- TESTIMONIALS SCROLL ANIMATION ---
         (function() {
             const observerOptions = {
                 threshold: 0.2,

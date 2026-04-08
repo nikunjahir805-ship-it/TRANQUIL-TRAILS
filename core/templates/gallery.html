@@ -684,28 +684,6 @@
             });
         });
 
-        // --- 3. DROPDOWN & LOGOUT ---
-        const userAvatarBtn = document.getElementById('userAvatarBtn');
-        const profileDropdown = document.getElementById('profileDropdown');
-
-        if (userAvatarBtn) {
-            userAvatarBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                profileDropdown.classList.toggle('show');
-            });
-            document.addEventListener('click', (e) => {
-                if (!userAvatarBtn.contains(e.target)) profileDropdown.classList.remove('show');
-            });
-        }
-
-        function logoutUser() {
-            fetch('/api/logout/').then(res => res.json()).then(data => {
-                if(data.success) {
-                    localStorage.removeItem('isAdmin');
-                    window.location.href = "{% url 'home' %}";
-                }
-            });
-        }
     </script>
 </body>
 </html>

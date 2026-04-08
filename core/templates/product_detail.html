@@ -177,12 +177,5 @@
     </script>
     <script src="{% static 'script.js' %}"></script>
     
-    <script>
-        function logoutUser() {
-            fetch('/api/logout/').then(res => res.json()).then(data => {
-                if(data.success) window.location.href = "{% url 'home' %}";
-            });
-        }
-    </script>
 </body>
 </html>
