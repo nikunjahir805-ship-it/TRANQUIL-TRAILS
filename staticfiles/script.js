@@ -565,6 +565,44 @@ function initSlider() {
     updateSlider();
 }
 
+function initWoodSection() {
+    const woodWrapper = document.getElementById('woodWrapper');
+    const woodCards = document.querySelectorAll('.wood-card');
+
+    if (!woodWrapper || !woodCards.length) return;
+
+    woodCards.forEach((card) => {
+        card.addEventListener('click', (event) => {
+            if (event.target.closest('.add-to-cart-btn, .wishlist-btn, .wishlist-toggle')) return;
+
+            const isActive = card.classList.contains('active');
+
+            woodCards.forEach((entry) => entry.classList.remove('active'));
+            woodWrapper.classList.remove('has-active');
+
+            if (!isActive) {
+                card.classList.add('active');
+                woodWrapper.classList.add('has-active');
+
+                setTimeout(() => {
+                    card.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest',
+                        inline: 'center',
+                    });
+                }, 120);
+            }
+        });
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!woodWrapper.contains(event.target)) {
+            woodCards.forEach((entry) => entry.classList.remove('active'));
+            woodWrapper.classList.remove('has-active');
+        }
+    });
+}
+
 function logoutUser() {
     fetch('/api/logout/')
         .then((response) => response.json())
@@ -579,6 +617,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initDropdown();
     initGlobalStoreButtons();
     initSlider();
+    initWoodSection();
     renderCartSidebar();
     renderCartPage();
     renderWishlistCount();
