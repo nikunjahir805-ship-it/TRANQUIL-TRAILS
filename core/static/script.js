@@ -490,7 +490,7 @@ function initDropdown() {
         closeTimer = setTimeout(() => {
             dropdown.classList.remove('show');
             closeTimer = null;
-        }, 140);
+        }, 320);
     };
 
     avatarBtn.addEventListener('click', (event) => {

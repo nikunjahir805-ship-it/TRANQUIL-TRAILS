@@ -75,8 +75,10 @@ def product_detail(request, pk):
     })
 
 def gallery(request):
+    gallery_categories = [choice[0] for choice in GalleryItem.CATEGORY_CHOICES]
     return render(request, 'gallery.html', {
-        'items': GalleryItem.objects.all().order_by('-created_at')
+        'items': GalleryItem.objects.all().order_by('-created_at'),
+        'gallery_categories': gallery_categories,
     })
 
 def gallery_detail(request, pk):
@@ -85,22 +87,7 @@ def gallery_detail(request, pk):
     })
 
 def offers(request):
-    offers_queryset = Offer.objects.filter(active=True)
-    
-    offers_data = []
-    for o in offers_queryset:
-        offers_data.append({
-            'id': o.id,
-            'title': o.title,
-            'description': o.description,
-            'discount_text': o.discount_text,
-            'code': o.code,
-            'category': o.category,
-            'color': o.color,
-            'icon_class': o.icon_class
-        })
-    
-    return render(request, 'offers.html', {'offers_data': offers_data})
+    return redirect('home')
 
 def about(request): 
     return render(request, 'about.html')

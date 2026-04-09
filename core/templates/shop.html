@@ -29,6 +29,56 @@
         .shop-header h1 { font-family: 'Playfair Display'; font-size: 3.5rem; color: #2d2d2d; margin-bottom: 10px; }
         .shop-header p { color: #666; font-size: 1.1rem; }
 
+        .shop-stage {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 28px;
+            align-items: start;
+        }
+        .shop-filter-panel {
+            background: #fff;
+            border: 1px solid #ecdfcf;
+            border-radius: 16px;
+            box-shadow: 0 12px 28px rgba(62, 41, 22, 0.08);
+            padding: 20px;
+            position: sticky;
+            top: 110px;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        .shop-filter-panel h3 {
+            margin: 0 0 8px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            color: #2c2c2c;
+        }
+        .shop-filter-panel p {
+            margin: 0 0 14px;
+            color: #74695f;
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+        .shop-category-dropdown {
+            width: 100%;
+            border: 1px solid #d8c6b1;
+            border-radius: 12px;
+            background: #fff;
+            color: #2d2d2d;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 12px 14px;
+            outline: none;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+        .shop-category-dropdown:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.12);
+        }
+        .shop-main-content {
+            min-width: 0;
+        }
+
         .category-filters { text-align: center; margin-bottom: 50px; opacity: 0; transform: translateY(10px); }
         .filter-btn {
             background: transparent;
@@ -248,6 +298,13 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
         @media (max-width: 768px) {
+            .shop-stage {
+                grid-template-columns: 1fr;
+                gap: 18px;
+            }
+            .shop-filter-panel {
+                position: static;
+            }
             .search-bar-container {
                 max-width: 90%;
             }
@@ -270,12 +327,24 @@
             <p>Curated Handcrafted Pieces for Your Home</p>
         </div>
 
+        <div class="shop-stage">
+            <aside class="shop-filter-panel">
+                <h3>Shop Filters</h3>
+                <p>Choose a category from this dropdown to quickly focus on matching products.</p>
+                <select id="shopCategoryDropdown" class="shop-category-dropdown" aria-label="Filter products by category">
+                    <option value="all">All Categories</option>
+                    {% for category in categories %}
+                    <option value="{{ category.name }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </aside>
+
+            <div class="shop-main-content">
         <div class="category-filters">
-            <button class="filter-btn active" onclick="filterProducts('all')">All</button>
-            <button class="filter-btn" onclick="filterProducts('Ceramics')">Ceramics</button>
-            <button class="filter-btn" onclick="filterProducts('Wood')">Wood</button>
-            <button class="filter-btn" onclick="filterProducts('Textiles')">Textiles</button>
-            <button class="filter-btn" onclick="filterProducts('Other')">Other</button>
+            <button class="filter-btn active" data-category="all" onclick="filterProducts('all', this)">All</button>
+            {% for category in categories %}
+            <button class="filter-btn" data-category="{{ category.name }}" onclick="filterProducts('{{ category.name|escapejs }}', this)">{{ category.name }}</button>
+            {% endfor %}
         </div>
 
         <div class="search-bar-container">
@@ -338,6 +407,8 @@
                 <p style="text-align:center; grid-column:1/-1; color:#777;">No products available at the moment.</p>
             {% endfor %}
         </div>
+            </div>
+        </div>
     </section>
 
     {% include 'partials/site_footer.html' %}
@@ -348,6 +419,7 @@
         // ANIMATIONS
         document.addEventListener("DOMContentLoaded", () => {
             gsap.to(".shop-header", { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" });
+            gsap.to(".shop-filter-panel", { opacity: 1, y: 0, duration: 0.7, delay: 0.1, ease: "power2.out" });
             gsap.to(".category-filters", { opacity: 1, y: 0, duration: 0.8, delay: 0.2, ease: "power2.out" });
             gsap.to(".search-bar-container", { 
                 opacity: 1, 
@@ -356,7 +428,12 @@
                 delay: 0.4, 
                 ease: "power2.out" 
             });
-            animateGrid();
+            const requestedCategory = getCategoryFromURL();
+            if (requestedCategory) {
+                filterProducts(requestedCategory);
+            } else {
+                animateGrid();
+            }
         });
 
         function animateGrid() {
@@ -368,19 +445,77 @@
 
         // 4. FILTER LOGIC
         let currentCategory = 'all';
+        const CATEGORY_ALIASES = {
+            all: 'all',
+            wood: 'wood',
+            wooden: 'wood',
+            woodwork: 'wood',
+            ceramic: 'ceramics',
+            ceramics: 'ceramics',
+            textile: 'textiles',
+            textiles: 'textiles',
+            other: 'other'
+        };
 
-        function filterProducts(category) {
+        function normalizeCategory(category) {
+            const raw = (category || '').toString().trim().toLowerCase();
+            return CATEGORY_ALIASES[raw] || raw;
+        }
+
+        function categoryMatches(productCategory, selectedCategory) {
+            const normalizedSelected = normalizeCategory(selectedCategory);
+            if (normalizedSelected === 'all') return true;
+
+            const normalizedProduct = normalizeCategory(productCategory);
+            return normalizedProduct === normalizedSelected ||
+                   normalizedProduct.includes(normalizedSelected) ||
+                   normalizedSelected.includes(normalizedProduct);
+        }
+
+        function setActiveFilterButton(category, sourceBtn = null) {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+
+            if (sourceBtn) {
+                sourceBtn.classList.add('active');
+                if (categoryDropdown) {
+                    categoryDropdown.value = sourceBtn.getAttribute('data-category') || 'all';
+                }
+                return;
+            }
+
+            const matchedBtn = Array.from(filterButtons).find(btn =>
+                categoryMatches(btn.getAttribute('data-category'), category)
+            );
+
+            if (matchedBtn) {
+                matchedBtn.classList.add('active');
+                if (categoryDropdown) {
+                    categoryDropdown.value = matchedBtn.getAttribute('data-category') || 'all';
+                }
+                return;
+            }
+
+            const allBtn = Array.from(filterButtons).find(btn => btn.getAttribute('data-category') === 'all');
+            if (allBtn) allBtn.classList.add('active');
+            if (categoryDropdown) categoryDropdown.value = 'all';
+        }
+
+        function getCategoryFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            return (params.get('category') || '').trim();
+        }
+
+        function filterProducts(category, sourceBtn = null) {
             currentCategory = category;
-            
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            if (event) event.target.classList.add('active');
+            setActiveFilterButton(category, sourceBtn);
 
             const cards = document.querySelectorAll('.product-card');
 
             cards.forEach(card => {
                 const productCat = card.getAttribute('data-category');
                 
-                if (category === 'all' || productCat === category) {
+                if (categoryMatches(productCat, category)) {
                     card.style.display = 'flex';
                     card.classList.remove('hidden');
                 } else {
@@ -403,6 +538,13 @@
         const clearSearchBtn = document.getElementById('clearSearch');
         const productCards = document.querySelectorAll('.product-card');
         const shopGrid = document.getElementById('shopGrid');
+        const categoryDropdown = document.getElementById('shopCategoryDropdown');
+
+        if (categoryDropdown) {
+            categoryDropdown.addEventListener('change', function() {
+                filterProducts(this.value);
+            });
+        }
 
         // Search input event
         searchInput.addEventListener('input', function(e) {
@@ -455,7 +597,7 @@
                 const productCategory = card.getAttribute('data-category');
                 
                 // Check both category filter AND search term
-                const matchesCategory = currentCategory === 'all' || productCategory === currentCategory;
+                const matchesCategory = categoryMatches(productCategory, currentCategory);
                 const matchesSearch = !searchTerm || productName.includes(searchTerm);
                 
                 if (matchesCategory && matchesSearch) {

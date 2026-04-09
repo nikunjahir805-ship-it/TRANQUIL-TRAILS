@@ -305,7 +305,7 @@
 
         <div class="category-grid">
             {% for cat in categories %}
-            <a href="{% url 'shop' %}" class="cat-card">
+            <a href="{% url 'shop' %}?category={{ cat.name|urlencode }}" class="cat-card">
                 {% if cat.image %}
                     <img src="{{ cat.image.url }}" alt="{{ cat.name }}">
                 {% else %}

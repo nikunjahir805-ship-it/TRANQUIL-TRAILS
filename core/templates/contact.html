@@ -454,7 +454,6 @@
         <ul class="nav-links" id="navLinks">
             <li><a href="{% url 'home' %}">Home</a></li>
             <li><a href="{% url 'shop' %}">Shop</a></li>
-            <li><a href="{% url 'offers' %}">Offers</a></li>
             <li><a href="{% url 'gallery' %}">Gallery</a></li>
             <li><a href="{% url 'about' %}">About</a></li>
             <li><a href="{% url 'contact' %}" style="color: #8B5E3C; font-weight: bold;">Contact</a></li>
@@ -495,19 +494,7 @@
         </ul>
     </nav>
 
-    <div class="cart-sidebar" id="cartSidebar">
-        <div class="cart-header">
-            <h2 style="font-family: 'Playfair Display';">Your Bag</h2>
-            <button class="close-cart" id="closeCart">&times;</button>
-        </div>
-        <div class="cart-body"><ul id="cart-items-list"></ul></div>
-        <div class="cart-footer">
-            <div class="cart-total-row"><span>Total</span><span>₹<span id="total-price">0</span></span></div>
-            <a href="{% url 'cart' %}" class="checkout-btn" style="text-decoration:none; display:block; text-align:center; width:100%;">Go to Full Cart</a>
-            <a href="{% url 'checkout' %}" class="ghost-link-btn" style="margin-top:12px; width:100%; text-align:center;">Checkout Now</a>
-            <button class="clear-cart-link" onclick="clearCart()">Clear All Items</button>
-        </div>
-    </div>
+    {% include 'partials/cart_sidebar.html' %}
 
     <!-- Success Message Overlay -->
     <div class="overlay" id="successOverlay"></div>
@@ -636,7 +623,6 @@
                 <ul>
                     <li><a href="{% url 'shop' %}">All Products</a></li>
                     <li><a href="{% url 'gallery' %}">Gallery</a></li>
-                    <li><a href="{% url 'offers' %}">Exclusive Offers</a></li>
                     <li><a href="{% url 'about' %}">Our Story</a></li>
                 </ul>
             </div>
@@ -670,6 +656,9 @@
         </div>
     </footer>
 
+    <script>
+        window.djangoUser = "{{ user.username|default:'guest' }}";
+    </script>
     <script src="{% static 'script.js' %}"></script>
     <script src="{% static 'js/cart.js' %}"></script>
 
@@ -808,3 +797,4 @@
     </script>
 </body>
 </html>
+
