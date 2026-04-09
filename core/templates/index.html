@@ -450,10 +450,11 @@
                 <div class="reviewer">
                     <div class="reviewer-avatar">
                         {% if review.customer.profile_pic %}
-                            <img src="{{ review.customer.profile_pic.url }}" alt="User">
+                            <img src="{{ review.customer.profile_pic.url }}" alt="User" class="reviewer-photo">
                         {% else %}
-                            <img src="https://via.placeholder.com/50" alt="User">
+                            <img src="" alt="User" class="reviewer-photo reviewer-photo-fallback js-random-avatar" data-avatar-name="{{ review.customer.full_name|default:'Guest User' }}">
                         {% endif %}
+                        <span class="reviewer-avatar-icon"><i class="fas fa-user"></i></span>
                     </div>
                     <div><h4>{{ review.customer.full_name }}</h4><span>{{ review.created_at|date:"M d, Y" }}</span></div>
                 </div>
@@ -515,20 +516,19 @@
         }
         
         .review-card { 
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(12px);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 14px 40px rgba(0,0,0,0.35);
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: rgba(24, 24, 24, 0.74);
+            backdrop-filter: blur(8px);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.32);
+            transition: transform 0.32s ease, box-shadow 0.32s ease, border-color 0.32s ease;
             position: relative;
             overflow: hidden;
             opacity: 0;
             transform: translateY(50px) scale(0.95);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.14);
         }
         
-        /* Glassmorphic gradient overlay */
         .review-card::before {
             content: '';
             position: absolute;
@@ -536,57 +536,47 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.03) 100%);
-            opacity: 0;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.01) 100%);
+            opacity: 1;
             transition: opacity 0.4s ease;
             pointer-events: none;
         }
         
-        .review-card:hover::before {
-            opacity: 1;
-        }
-        
         .review-card:hover { 
-            transform: translateY(-15px) scale(1.02);
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.46);
-            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-8px);
+            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.42);
+            border-color: rgba(212, 163, 115, 0.58);
         }
         
-        /* Quote Icon */
         .quote-icon {
             position: absolute;
-            top: 25px;
-            right: 25px;
-            font-size: 3rem;
-            color: rgba(255, 255, 255, 0.12);
-            transition: all 0.4s ease;
+            top: 20px;
+            right: 20px;
+            font-size: 2.4rem;
+            color: rgba(255, 255, 255, 0.16);
+            transition: transform 0.3s ease, color 0.3s ease;
         }
         
         .review-card:hover .quote-icon {
-            color: rgba(255, 255, 255, 0.22);
-            transform: scale(1.1) rotate(-5deg);
+            color: rgba(212, 163, 115, 0.5);
+            transform: scale(1.05);
         }
         
         .stars { 
             color: #f4c150; 
-            font-size: 1.2rem; 
-            margin-bottom: 20px; 
-            letter-spacing: 3px;
+            font-size: 1rem; 
+            margin-bottom: 14px; 
+            letter-spacing: 2px;
             display: inline-block;
-            animation: starGlow 2s ease-in-out infinite;
-        }
-        
-        @keyframes starGlow {
-            0%, 100% { text-shadow: 0 0 5px rgba(244, 193, 80, 0.3); }
-            50% { text-shadow: 0 0 15px rgba(244, 193, 80, 0.6), 0 0 25px rgba(244, 193, 80, 0.4); }
+            text-shadow: 0 0 8px rgba(244, 193, 80, 0.2);
         }
         
         .review-card p { 
             font-family: 'Poppins'; 
-            color: rgba(255, 255, 255, 0.88); 
-            line-height: 1.8; 
-            font-size: 1rem; 
-            margin-bottom: 30px; 
+            color: rgba(255, 255, 255, 0.92); 
+            line-height: 1.75; 
+            font-size: 0.98rem; 
+            margin-bottom: 24px; 
             font-style: italic;
             position: relative;
             z-index: 1;
@@ -600,55 +590,54 @@
             z-index: 1;
         }
         
-        /* Floating Avatar Effect */
         .reviewer-avatar {
             position: relative;
-            animation: float 3s ease-in-out infinite;
-        }
-        
-        /* .reviewer-avatar::before {
-            content: '';
-            position: absolute;
-            inset: -3px;
-            background: linear-gradient(135deg, #8B5E3C, #D4A373);
+            width: 54px;
+            height: 54px;
             border-radius: 50%;
-            opacity: 0;
-            transition: opacity 0.4s ease;
-            z-index: -1;
-        } */
-        
-        .review-card:hover .reviewer-avatar::before {
-            opacity: 1;
-            animation: spin 3s linear infinite;
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(139, 94, 60, 0.7), rgba(212, 163, 115, 0.78));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
         
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-        
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        .reviewer img { 
-            width: 50px; 
-            height: 50px; 
-            border-radius: 50%; 
+        .reviewer-photo { 
+            width: 100%;
+            height: 100%;
             object-fit: cover;
-            border: 2px solid white;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
+            display: block;
+            transition: transform 0.25s ease;
         }
         
-        .review-card:hover .reviewer img {
-            transform: scale(1.1);
+        .reviewer-avatar-icon {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 1rem;
+            background: linear-gradient(135deg, rgba(139, 94, 60, 0.82), rgba(212, 163, 115, 0.86));
+        }
+        
+        .reviewer-avatar.show-icon .reviewer-photo {
+            display: none;
+        }
+
+        .reviewer-avatar.show-icon .reviewer-avatar-icon {
+            display: flex;
+        }
+        
+        .review-card:hover .reviewer-photo {
+            transform: scale(1.06);
         }
         
         .reviewer h4 { 
             font-family: 'Playfair Display'; 
-            font-size: 1.1rem; 
+            font-size: 1.05rem; 
             color: #ffffff; 
             margin: 0;
             transition: color 0.3s ease;
@@ -704,7 +693,7 @@
             .review-card,
             .testimonial-header,
             .stars,
-            .reviewer-avatar,
+            .reviewer-photo,
             .quote-icon {
                 animation: none !important;
                 transition: none !important;
@@ -726,6 +715,11 @@
                 padding: 30px;
             }
             
+            .reviewer-avatar {
+                width: 48px;
+                height: 48px;
+            }
+
             .quote-icon {
                 font-size: 2rem;
                 top: 15px;
@@ -948,6 +942,46 @@
                     });
                 });
             }
+
+            const randomAvatarPool = [
+                'https://i.pravatar.cc/120?img=12',
+                'https://i.pravatar.cc/120?img=23',
+                'https://i.pravatar.cc/120?img=35',
+                'https://i.pravatar.cc/120?img=41',
+                'https://i.pravatar.cc/120?img=54',
+                'https://i.pravatar.cc/120?img=66'
+            ];
+
+            function showAvatarIcon(imgEl) {
+                const avatar = imgEl.closest('.reviewer-avatar');
+                if (avatar) {
+                    avatar.classList.add('show-icon');
+                }
+            }
+
+            function setRandomFallbackAvatar(imgEl) {
+                const randomUrl = randomAvatarPool[Math.floor(Math.random() * randomAvatarPool.length)];
+                imgEl.src = randomUrl;
+                imgEl.dataset.randomAvatarApplied = 'true';
+                imgEl.onload = () => {
+                    const avatar = imgEl.closest('.reviewer-avatar');
+                    if (avatar) avatar.classList.remove('show-icon');
+                };
+            }
+
+            document.querySelectorAll('.reviewer-photo').forEach((imgEl) => {
+                imgEl.onerror = () => {
+                    if (imgEl.dataset.randomAvatarApplied === 'true') {
+                        showAvatarIcon(imgEl);
+                        return;
+                    }
+                    setRandomFallbackAvatar(imgEl);
+                };
+
+                if (imgEl.classList.contains('js-random-avatar') || !imgEl.getAttribute('src')) {
+                    setRandomFallbackAvatar(imgEl);
+                }
+            });
         })();
     </script>
 
