@@ -29,63 +29,41 @@
         .shop-header h1 { font-family: 'Playfair Display'; font-size: 3.5rem; color: #2d2d2d; margin-bottom: 10px; }
         .shop-header p { color: #666; font-size: 1.1rem; }
 
-        .shop-stage {
+        .shop-controls {
             display: grid;
-            grid-template-columns: 260px 1fr;
-            gap: 28px;
-            align-items: start;
-        }
-        .shop-filter-panel {
-            background: #fff;
-            border: 1px solid #ecdfcf;
-            border-radius: 16px;
-            box-shadow: 0 12px 28px rgba(62, 41, 22, 0.08);
-            padding: 20px;
-            position: sticky;
-            top: 110px;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 26px;
             opacity: 0;
-            transform: translateY(10px);
-        }
-        .shop-filter-panel h3 {
-            margin: 0 0 8px;
-            font-family: 'Playfair Display', serif;
-            font-size: 1.4rem;
-            color: #2c2c2c;
-        }
-        .shop-filter-panel p {
-            margin: 0 0 14px;
-            color: #74695f;
-            font-size: 0.9rem;
-            line-height: 1.45;
+            transform: translateY(12px);
         }
         .shop-category-dropdown {
             width: 100%;
             border: 1px solid #d8c6b1;
-            border-radius: 12px;
+            border-radius: 50px;
             background: #fff;
             color: #2d2d2d;
             font-family: 'Poppins', sans-serif;
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-weight: 500;
-            padding: 12px 14px;
+            padding: 0 20px;
+            min-height: 58px;
             outline: none;
-            transition: border-color 0.25s, box-shadow 0.25s;
+            box-shadow: 0 8px 25px rgba(139, 94, 60, 0.1);
+            transition: border-color 0.25s, box-shadow 0.25s, transform 0.2s;
         }
         .shop-category-dropdown:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.12);
-        }
-        .shop-main-content {
-            min-width: 0;
+            box-shadow: 0 12px 35px rgba(139, 94, 60, 0.18);
+            transform: translateY(-2px);
         }
 
-        .category-filters { text-align: center; margin-bottom: 50px; opacity: 0; transform: translateY(10px); }
+        .category-filters { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 30px; opacity: 0; transform: translateY(10px); }
         .filter-btn {
             background: transparent;
             border: 1px solid var(--primary);
             color: var(--primary);
             padding: 8px 25px;
-            margin: 0 5px;
             border-radius: 30px;
             cursor: pointer;
             transition: 0.3s;
@@ -97,10 +75,8 @@
 
         /* --- SEARCH BAR STYLES --- */
         .search-bar-container {
-            max-width: 600px;
-            margin: 0 auto 40px;
-            opacity: 0;
-            transform: translateY(20px);
+            max-width: 100%;
+            margin: 0;
         }
 
         .search-wrapper {
@@ -212,7 +188,7 @@
         /* --- PRODUCT GRID --- */
         .product-grid { 
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 30px;
             max-width: 1200px; 
             margin: 0 auto; 
@@ -297,18 +273,23 @@
         .profile-dropdown a:hover { background-color: #f4f1ea; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        @media (max-width: 768px) {
-            .shop-stage {
-                grid-template-columns: 1fr;
-                gap: 18px;
+        @media (max-width: 1100px) {
+            .product-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
-            .shop-filter-panel {
-                position: static;
+        }
+        @media (max-width: 768px) {
+            .shop-controls {
+                grid-template-columns: 1fr;
+                gap: 14px;
             }
             .search-bar-container {
-                max-width: 90%;
+                max-width: 100%;
             }
-            
+            .product-grid {
+                grid-template-columns: 1fr;
+                gap: 22px;
+            }
             .search-input {
                 font-size: 0.95rem;
                 padding: 14px 50px 14px 50px;
@@ -327,40 +308,35 @@
             <p>Curated Handcrafted Pieces for Your Home</p>
         </div>
 
-        <div class="shop-stage">
-            <aside class="shop-filter-panel">
-                <h3>Shop Filters</h3>
-                <p>Choose a category from this dropdown to quickly focus on matching products.</p>
-                <select id="shopCategoryDropdown" class="shop-category-dropdown" aria-label="Filter products by category">
-                    <option value="all">All Categories</option>
-                    {% for category in categories %}
-                    <option value="{{ category.name }}">{{ category.name }}</option>
-                    {% endfor %}
-                </select>
-            </aside>
+        <div class="shop-controls">
+            <div class="search-bar-container">
+                <div class="search-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input 
+                        type="text" 
+                        id="productSearch" 
+                        class="search-input" 
+                        placeholder="Search for handcrafted treasures..."
+                        autocomplete="off"
+                    >
+                    <button class="clear-search" id="clearSearch" style="display: none;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <select id="shopCategoryDropdown" class="shop-category-dropdown" aria-label="Filter products by category">
+                <option value="all">All Categories</option>
+                {% for category in categories %}
+                <option value="{{ category.name }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-            <div class="shop-main-content">
         <div class="category-filters">
             <button class="filter-btn active" data-category="all" onclick="filterProducts('all', this)">All</button>
             {% for category in categories %}
             <button class="filter-btn" data-category="{{ category.name }}" onclick="filterProducts('{{ category.name|escapejs }}', this)">{{ category.name }}</button>
             {% endfor %}
-        </div>
-
-        <div class="search-bar-container">
-            <div class="search-wrapper">
-                <i class="fas fa-search search-icon"></i>
-                <input 
-                    type="text" 
-                    id="productSearch" 
-                    class="search-input" 
-                    placeholder="Search for handcrafted treasures..."
-                    autocomplete="off"
-                >
-                <button class="clear-search" id="clearSearch" style="display: none;">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
         </div>
 
         <div class="product-grid" id="shopGrid">
@@ -407,8 +383,6 @@
                 <p style="text-align:center; grid-column:1/-1; color:#777;">No products available at the moment.</p>
             {% endfor %}
         </div>
-            </div>
-        </div>
     </section>
 
     {% include 'partials/site_footer.html' %}
@@ -419,13 +393,13 @@
         // ANIMATIONS
         document.addEventListener("DOMContentLoaded", () => {
             gsap.to(".shop-header", { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" });
-            gsap.to(".shop-filter-panel", { opacity: 1, y: 0, duration: 0.7, delay: 0.1, ease: "power2.out" });
-            gsap.to(".category-filters", { opacity: 1, y: 0, duration: 0.8, delay: 0.2, ease: "power2.out" });
-            gsap.to(".search-bar-container", { 
+            gsap.to(".shop-controls", { opacity: 1, y: 0, duration: 0.7, delay: 0.1, ease: "power2.out" });
+            gsap.to(".category-filters", { opacity: 1, y: 0, duration: 0.8, delay: 0.25, ease: "power2.out" });
+            gsap.to(".search-wrapper, .shop-category-dropdown", { 
                 opacity: 1, 
                 y: 0, 
                 duration: 0.8, 
-                delay: 0.4, 
+                delay: 0.35, 
                 ease: "power2.out" 
             });
             const requestedCategory = getCategoryFromURL();
