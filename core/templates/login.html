@@ -19,9 +19,9 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
 
-        .login-container { display: flex; height: 100vh; width: 100%; }
+        .login-container { display: flex; min-height: 100vh; width: 100%; }
 
         /* --- LEFT SIDE VISUAL --- */
         .login-visual {
@@ -303,5 +303,6 @@
             });
         });
     </script>
+    {% include 'partials/site_footer.html' %}
 </body>
 </html>

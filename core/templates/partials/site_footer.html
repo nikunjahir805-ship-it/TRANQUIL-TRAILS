@@ -1,47 +1,342 @@
-{% now "Y" as current_year %}
-<footer class="main-footer">
-    <div class="footer-container">
-        <div class="footer-section about">
-            <h3 class="footer-logo">{{ site_settings.store_name|upper }}</h3>
-            <p>Handcrafted pieces, calm design, and a storefront that stays connected to real customer support.</p>
-            <div class="social-icons">
-                <a href="mailto:{{ site_settings.admin_email }}" aria-label="Email">@</a>
-                <a href="tel:{{ site_settings.contact_phone }}" aria-label="Phone">PH</a>
-                <a href="{% url 'contact' %}" aria-label="Contact">CT</a>
+<style>
+    .tt-footer {
+        position: relative;
+        padding: 0 5% 28px;
+        background:
+            radial-gradient(circle at top left, rgba(212, 163, 115, 0.18), transparent 34%),
+            radial-gradient(circle at top right, rgba(45, 71, 57, 0.32), transparent 38%),
+            linear-gradient(180deg, #142720 0%, #0d1613 100%);
+        color: #f6efe5;
+        overflow: hidden;
+        isolation: isolate;
+    }
+
+    .tt-footer::before,
+    .tt-footer::after {
+        content: "";
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(10px);
+        opacity: 0.55;
+        z-index: -1;
+        animation: ttFooterDrift 16s ease-in-out infinite;
+    }
+
+    .tt-footer::before {
+        width: 260px;
+        height: 260px;
+        top: -90px;
+        left: -70px;
+        background: rgba(212, 163, 115, 0.14);
+    }
+
+    .tt-footer::after {
+        width: 220px;
+        height: 220px;
+        right: -60px;
+        bottom: 10px;
+        background: rgba(255, 255, 255, 0.08);
+        animation-delay: -6s;
+    }
+
+    .tt-footer__wrap {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding-top: 34px;
+    }
+
+    .tt-footer__top {
+        display: grid;
+        grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr);
+        gap: 24px;
+        padding: 34px 0 28px;
+    }
+
+    .tt-footer__panel {
+        position: relative;
+        padding: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+        backdrop-filter: blur(12px);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+    }
+
+    .tt-footer__panel::after {
+        content: "";
+        position: absolute;
+        inset: 1px;
+        border-radius: 23px;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        pointer-events: none;
+    }
+
+    .tt-footer__eyebrow {
+        display: inline-block;
+        margin-bottom: 12px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(212, 163, 115, 0.18);
+        color: #f9d9b8;
+        font-size: 0.73rem;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+    }
+
+    .tt-footer__brand h2,
+    .tt-footer__title {
+        margin: 0 0 12px;
+        font-family: 'Playfair Display', serif;
+        font-size: 2rem;
+        line-height: 1.05;
+        color: #fff8ef;
+    }
+
+    .tt-footer__title {
+        font-size: 1.3rem;
+    }
+
+    .tt-footer__copy,
+    .tt-footer__meta,
+    .tt-footer__address,
+    .tt-footer__hours {
+        margin: 0;
+        color: rgba(246, 239, 229, 0.8);
+        line-height: 1.8;
+        font-size: 0.95rem;
+    }
+
+    .tt-footer__chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+    }
+
+    .tt-footer__chip {
+        padding: 9px 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #f6efe5;
+        font-size: 0.82rem;
+    }
+
+    .tt-footer__list {
+        display: grid;
+        gap: 11px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .tt-footer__list a,
+    .tt-footer__contact-link,
+    .tt-footer__social a,
+    .tt-footer__bottom a {
+        color: rgba(246, 239, 229, 0.82);
+        text-decoration: none;
+        transition: color 0.25s ease, transform 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
+    }
+
+    .tt-footer__list a:hover,
+    .tt-footer__contact-link:hover,
+    .tt-footer__social a:hover,
+    .tt-footer__bottom a:hover {
+        color: #ffd8b0;
+    }
+
+    .tt-footer__contact {
+        display: grid;
+        gap: 16px;
+    }
+
+    .tt-footer__meta {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 0.76rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.52);
+    }
+
+    .tt-footer__social {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 18px 0 20px;
+    }
+
+    .tt-footer__social a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 14px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.05);
+        min-width: 94px;
+    }
+
+    .tt-footer__button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 8px;
+        padding: 14px 18px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #d4a373, #b57d45);
+        color: #101915;
+        font-weight: 700;
+        text-decoration: none;
+        box-shadow: 0 14px 26px rgba(181, 125, 69, 0.28);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .tt-footer__button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 18px 34px rgba(181, 125, 69, 0.34);
+        color: #101915;
+    }
+
+    .tt-footer__bottom {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        padding-top: 22px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.56);
+        font-size: 0.88rem;
+    }
+
+    .tt-footer__bottom-links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 18px;
+    }
+
+    @keyframes ttFooterDrift {
+        0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+        50% { transform: translate3d(12px, 16px, 0) scale(1.08); }
+    }
+
+    @media (max-width: 1080px) {
+        .tt-footer__top {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 720px) {
+        .tt-footer__top,
+        .tt-footer__bottom {
+            grid-template-columns: 1fr;
+            display: grid;
+        }
+
+        .tt-footer__bottom-links {
+            justify-content: flex-start;
+        }
+
+        .tt-footer__brand h2 {
+            font-size: 1.8rem;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .tt-footer::before,
+        .tt-footer::after,
+        .tt-footer__button,
+        .tt-footer__social a,
+        .tt-footer__list a {
+            animation: none !important;
+            transition: none !important;
+        }
+    }
+</style>
+
+<footer class="tt-footer">
+    <div class="tt-footer__wrap">
+        <div class="tt-footer__top">
+            <section class="tt-footer__panel tt-footer__brand">
+                <span class="tt-footer__eyebrow">Handcrafted Living</span>
+                <h2>{{ site_settings.store_name }}</h2>
+                <p class="tt-footer__copy">{{ site_settings.footer_tagline }}</p>
+                <div class="tt-footer__chips">
+                    <span class="tt-footer__chip">Tax {{ site_settings.tax_rate }}%</span>
+                    <span class="tt-footer__chip">Shipping from {{ site_settings.currency }} {{ site_settings.shipping_flat_rate }}</span>
+                    <span class="tt-footer__chip">{{ site_settings.footer_hours }}</span>
+                </div>
+            </section>
+
+            <section class="tt-footer__panel">
+                <h3 class="tt-footer__title">Explore</h3>
+                <ul class="tt-footer__list">
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="{% url 'shop' %}">Shop</a></li>
+                    <li><a href="{% url 'gallery' %}">Gallery</a></li>
+                    <li><a href="{% url 'about' %}">About Us</a></li>
+                    <li><a href="{% url 'contact' %}">Contact</a></li>
+                </ul>
+            </section>
+
+            <section class="tt-footer__panel">
+                <h3 class="tt-footer__title">Customer Care</h3>
+                <div class="tt-footer__contact">
+                    <div>
+                        <span class="tt-footer__meta">Phone</span>
+                        <a class="tt-footer__contact-link" href="tel:{{ site_settings.contact_phone|cut:' ' }}">{{ site_settings.contact_phone }}</a>
+                    </div>
+                    <div>
+                        <span class="tt-footer__meta">Email</span>
+                        <a class="tt-footer__contact-link" href="mailto:{{ site_settings.admin_email }}">{{ site_settings.admin_email }}</a>
+                    </div>
+                    <div>
+                        <span class="tt-footer__meta">Useful Pages</span>
+                        <a class="tt-footer__contact-link" href="{% url 'cart' %}">Cart</a>,
+                        <a class="tt-footer__contact-link" href="{% url 'wishlist' %}">Wishlist</a>
+                        {% if user.is_authenticated %}
+                        , <a class="tt-footer__contact-link" href="{% url 'my_orders' %}">My Orders</a>
+                        {% else %}
+                        , <a class="tt-footer__contact-link" href="{% url 'login' %}">Login</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="tt-footer__panel">
+                <span class="tt-footer__eyebrow">Visit Or Write</span>
+                {% if site_settings.footer_address %}
+                <p class="tt-footer__address">{{ site_settings.footer_address|linebreaksbr }}</p>
+                {% else %}
+                <p class="tt-footer__address">Add your workshop or store address from Admin Settings.</p>
+                {% endif %}
+                <p class="tt-footer__hours" style="margin-top: 14px;">{{ site_settings.footer_hours }}</p>
+
+                <div class="tt-footer__social">
+                    {% if site_settings.footer_instagram_url %}
+                    <a href="{{ site_settings.footer_instagram_url }}" target="_blank" rel="noopener noreferrer">Instagram</a>
+                    {% endif %}
+                    {% if site_settings.footer_facebook_url %}
+                    <a href="{{ site_settings.footer_facebook_url }}" target="_blank" rel="noopener noreferrer">Facebook</a>
+                    {% endif %}
+                    {% if site_settings.footer_whatsapp_url %}
+                    <a href="{{ site_settings.footer_whatsapp_url }}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+                    {% endif %}
+                </div>
+
+                <a href="{% url 'contact' %}" class="tt-footer__button">Start A Conversation</a>
+            </section>
+        </div>
+
+        <div class="tt-footer__bottom">
+            <p>&copy; {% now "Y" %} {{ site_settings.store_name }}. Crafted for a calm, thoughtful shopping experience.</p>
+            <div class="tt-footer__bottom-links">
+                <a href="{% url 'about' %}">Our Story</a>
+                <a href="{% url 'gallery' %}">Collections</a>
+                <a href="{% url 'contact' %}">Support</a>
             </div>
-        </div>
-
-        <div class="footer-section links">
-            <h4>Explore</h4>
-            <ul>
-                <li><a href="{% url 'shop' %}">Shop</a></li>
-                <li><a href="{% url 'gallery' %}">Gallery</a></li>
-                <li><a href="{% url 'wishlist' %}">Wishlist</a></li>
-            </ul>
-        </div>
-
-        <div class="footer-section links">
-            <h4>Support</h4>
-            <ul>
-                <li><a href="{% url 'about' %}">About Us</a></li>
-                <li><a href="{% url 'contact' %}">Contact Us</a></li>
-                <li><a href="mailto:{{ site_settings.admin_email }}">{{ site_settings.admin_email }}</a></li>
-                <li><a href="tel:{{ site_settings.contact_phone }}">{{ site_settings.contact_phone }}</a></li>
-            </ul>
-        </div>
-
-        <div class="footer-section newsletter">
-            <h4>Store Details</h4>
-            <p>Currency: {{ site_settings.currency }}<br>Tax Rate: {{ site_settings.tax_rate }}%<br>Shipping: Rs. {{ site_settings.shipping_flat_rate }}</p>
-            <a href="{% url 'checkout' %}" class="primary-link-btn" style="margin-top:16px;">Start Checkout</a>
-        </div>
-    </div>
-
-    <div class="footer-bottom">
-        <p>&copy; {{ current_year }} {{ site_settings.store_name }}. All rights reserved.</p>
-        <div class="footer-legal">
-            <a href="{% url 'about' %}">Privacy</a>
-            <a href="{% url 'contact' %}">Support</a>
         </div>
     </div>
 </footer>

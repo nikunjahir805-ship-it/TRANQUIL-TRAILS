@@ -1,4 +1,4 @@
-{% load static %} 
+﻿{% load static %} 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -318,28 +318,6 @@
             opacity: 0.9;
         }
 
-        /* --- FOOTER --- */
-        .main-footer { background-color: #1a1a1a; color: #bbb; padding: 80px 8% 30px; font-family: 'Poppins', sans-serif; }
-        .footer-container { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr; gap: 40px; max-width: 1200px; margin: 0 auto; }
-        .footer-section h4 { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 25px; color: #c5a880; letter-spacing: 1px; }
-        .footer-logo { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: white; letter-spacing: 2px; margin-bottom: 20px; }
-        .footer-section p { font-size: 0.9rem; line-height: 1.8; color: #999; }
-        .footer-section ul { list-style: none; padding: 0; }
-        .footer-section ul li { margin-bottom: 12px; }
-        .footer-section ul li a { color: #888; text-decoration: none; transition: color 0.3s, transform 0.3s; font-size: 0.9rem; }
-        .footer-section ul li a:hover { color: #c5a880; transform: translateX(5px); }
-        .social-icons { display: flex; gap: 15px; margin-top: 20px; }
-        .social-icons a { color: white; text-decoration: none; font-size: 0.8rem; width: 35px; height: 35px; border: 1px solid #333; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: 0.3s; }
-        .social-icons a:hover { background: #c5a880; border-color: #c5a880; color: #1a1a1a; }
-        .subscribe-form { display: flex; margin-top: 20px; height: 45px; }
-        .subscribe-form input { padding: 10px 15px; border: 1px solid #333; background: #222; color: white; width: 70%; outline: none; font-family: 'Poppins'; }
-        .subscribe-form button { padding: 0 20px; background-color: #c5a880; border: none; cursor: pointer; color: #1a1a1a; font-weight: 600; transition: 0.3s; }
-        .subscribe-form button:hover { background-color: #8B5E3C; color: white; }
-        .footer-bottom { border-top: 1px solid #2a2a2a; margin-top: 60px; padding-top: 30px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #666; }
-        .footer-legal a { margin-left: 20px; color: #666; text-decoration: none; transition: 0.3s; }
-        .footer-legal a:hover { color: #c5a880; }
-        @media (max-width: 992px) { .footer-container { grid-template-columns: 1fr 1fr; } }
-        @media (max-width: 600px) { .footer-container { grid-template-columns: 1fr; } .footer-bottom { flex-direction: column; gap: 15px; text-align: center; } }
         
         /* Dropdown Styles */
         .nav-user-container { 
@@ -493,12 +471,6 @@
             </select>
         </div>
 
-        <div class="gallery-filters">
-            <button class="gallery-filter-btn active" data-category="all" onclick="filterItems('all', this)">All</button>
-            {% for category_name in gallery_categories %}
-            <button class="gallery-filter-btn" data-category="{{ category_name }}" onclick="filterItems('{{ category_name|escapejs }}', this)">{{ category_name }}</button>
-            {% endfor %}
-        </div>
 
         <div class="gallery-grid" id="galleryGrid">
             {% for item in items %}
@@ -536,55 +508,7 @@
         </div>
     </section>
 
-    <footer class="main-footer">
-        <div class="footer-container">
-            <div class="footer-section about">
-                <h3 class="footer-logo">TRANQUIL TRAILS</h3>
-                <p>Bringing the soul of artisanal craftsmanship into modern homes. Every piece tells a story of tradition, sustainability, and mindful living.</p>
-                <div class="social-icons">
-                    <a href="#" aria-label="Instagram">IG</a>
-                    <a href="#" aria-label="Facebook">FB</a>
-                    <a href="#" aria-label="Pinterest">PIN</a>
-                </div>
-            </div>
-
-            <div class="footer-section links">
-                <h4>Shop</h4>
-                <ul>
-                    <li><a href="{% url 'shop' %}">All Products</a></li>
-                    <li><a href="{% url 'gallery' %}">Gallery</a></li>
-                    <li><a href="{% url 'about' %}">Our Story</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-section links">
-                <h4>Support</h4>
-                <ul>
-                    <li><a href="{% url 'contact' %}">Contact Us</a></li>
-                    <li><a href="#">Shipping Policy</a></li>
-                    <li><a href="#">Returns & Exchanges</a></li>
-                    <li><a href="#">FAQs</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-section newsletter">
-                <h4>Join the Journey</h4>
-                <p>Subscribe for early access to new collections and artisan stories.</p>
-                <form class="subscribe-form">
-                    <input type="email" placeholder="Your email address" required>
-                    <button type="submit">Join</button>
-                </form>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <p>&copy; 2026 TRANQUIL TRAILS. All Rights Reserved.</p>
-            <div class="footer-legal">
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms of Service</a>
-            </div>
-        </div>
-    </footer>
+    {% include 'partials/site_footer.html' %}
 
     <script>
         window.djangoUser = "{{ user.username|default:'guest' }}";

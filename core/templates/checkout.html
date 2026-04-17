@@ -155,7 +155,7 @@
     {% include 'partials/cart_sidebar.html' %}
 
     <main class="checkout-shell">
-        <div class="checkout-stage" data-checkout-root data-tax-rate="{{ tax_rate }}" data-shipping-rate="{{ shipping_rate }}" data-create-url="{% url 'create_checkout_order' %}" data-verify-url="{% url 'verify_payment' %}" data-success-url="{% url 'payment_success' %}" data-razorpay-enabled="{{ razorpay_enabled|yesno:'true,false' }}" data-razorpay-key="{{ razorpay_key_id }}" data-csrf="{{ csrf_token }}">
+        <div class="checkout-stage" data-checkout-root data-tax-rate="{{ tax_rate }}" data-shipping-rate="{{ shipping_rate }}" data-create-url="{% url 'create_checkout_order' %}" data-verify-url="{% url 'verify_payment' %}" data-success-url="{% url 'payment_success' %}" data-razorpay-enabled="{{ razorpay_enabled|yesno:'true,false' }}" data-razorpay-key="{{ razorpay_key_id }}" data-csrf="{{ csrf_token }}" data-min-order="30">
             <section class="checkout-card">
                 <div class="checkout-intro">
                     <span class="eyebrow">Secure Checkout</span>
@@ -164,6 +164,7 @@
                 </div>
 
                 <form id="checkoutForm">
+                    {% csrf_token %}
                     <div class="checkout-form-grid">
                         <div class="checkout-field full">
                             <label for="full_name">Full Name</label>
@@ -192,6 +193,11 @@
                         <div class="checkout-field full">
                             <label for="zipcode">Pincode</label>
                             <input id="zipcode" name="zipcode" required>
+                        </div>
+                        <div class="checkout-field full">
+                            <label for="delivery_km">Distance from Store (km) <span style="color:#8B5E3C;font-size:0.82rem;font-weight:400;">— Used to calculate shipping</span></label>
+                            <input id="delivery_km" name="delivery_km" type="number" min="0" step="0.1" placeholder="Enter distance in km (e.g. 5)" style="border-radius:18px;">
+                            <span id="shippingCalcNote" style="font-size:0.8rem;color:#8B5E3C;margin-top:4px;display:block;">Under 10 km: flat ₹30. Beyond 10 km: ₹5 per km.</span>
                         </div>
                     </div>
 
@@ -232,6 +238,7 @@
                     <div class="summary-line"><span>Tax</span><strong id="checkoutTax">Rs. 0.00</strong></div>
                     <div class="summary-line total"><span>Total</span><strong id="checkoutTotal">Rs. 0.00</strong></div>
                 </div>
+                <div id="minOrderWarning" style="display:none;background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.3);border-radius:14px;padding:12px 16px;margin-top:12px;font-size:0.88rem;color:#b91c1c;">⚠️ Minimum order value is <strong>₹30</strong>. Please add more items to continue.</div>
 
                 <button class="checkout-submit" id="checkoutSubmit">Place Order</button>
                 <p class="checkout-muted" style="margin-top:14px;">Online payment opens Razorpay directly after you choose that method.</p>

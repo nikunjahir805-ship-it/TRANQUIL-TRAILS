@@ -6,7 +6,6 @@
 
 {% block content %}
 <style>
-    /* --- Premium Layout & Card Styles --- */
     .dashboard-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -21,9 +20,9 @@
         border: 1px solid #f0f0f0;
         position: relative;
         overflow: hidden;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transition: all 0.3s ease;
         box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-        opacity: 0; /* Hidden for animation */
+        opacity: 0;
         transform: translateY(20px);
     }
 
@@ -41,17 +40,17 @@
     }
 
     .metric-icon {
-        width: 45px; height: 45px;
+        width: 45px;
+        height: 45px;
         border-radius: 12px;
-        display: flex; align-items: center; justify-content: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-size: 1.2rem;
-        transition: transform 0.3s ease;
     }
-    
-    .metric-card:hover .metric-icon { transform: scale(1.1) rotate(5deg); }
 
     .metric-val {
-        font-size: 2.4rem;
+        font-size: 2.2rem;
         font-weight: 700;
         color: #2c2c2c;
         font-family: 'Playfair Display', serif;
@@ -67,16 +66,12 @@
         letter-spacing: 0.5px;
     }
 
-    .trend-indicator {
-        font-size: 0.75rem;
-        font-weight: 700;
-        display: flex; align-items: center; gap: 5px;
-        padding: 5px 10px; border-radius: 20px;
+    .metric-note {
+        font-size: 0.78rem;
+        color: #7c6a59;
+        margin-top: 10px;
     }
-    .trend-up { color: #2e7d32; background: rgba(76, 175, 80, 0.15); }
-    .trend-down { color: #c62828; background: rgba(244, 67, 54, 0.15); }
 
-    /* --- Chart Section --- */
     .chart-section {
         display: grid;
         grid-template-columns: 2fr 1fr;
@@ -90,44 +85,49 @@
         border-radius: 20px;
         border: 1px solid #f0f0f0;
         box-shadow: 0 4px 20px rgba(0,0,0,0.02);
-        height: 100%;
         min-height: 420px;
-        opacity: 0; /* For animation */
+        opacity: 0;
         transform: translateY(20px);
-        display: flex; flex-direction: column;
+        display: flex;
+        flex-direction: column;
     }
 
     .chart-header {
-        display: flex; justify-content: space-between; align-items: center;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 25px;
+        gap: 12px;
     }
+
     .chart-header h3 { font-family: 'Playfair Display'; font-size: 1.3rem; margin: 0; }
 
-    /* --- Top Products List (Scrollable) --- */
     .product-list-container {
         flex: 1;
-        overflow-y: auto; /* Handles 80+ products */
+        overflow-y: auto;
         padding-right: 5px;
     }
-    /* Custom Scrollbar */
+
     .product-list-container::-webkit-scrollbar { width: 4px; }
     .product-list-container::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 4px; }
 
     .product-list-item {
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 15px 0; border-bottom: 1px dashed #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px 0;
+        border-bottom: 1px dashed #f0f0f0;
         transition: background 0.2s;
     }
+
     .product-list-item:hover { background: #fcfcfc; padding-left: 10px; border-radius: 8px; }
     .product-list-item:last-child { border-bottom: none; }
-    
+
     .prod-info { display: flex; align-items: center; gap: 15px; }
     .prod-img { width: 45px; height: 45px; border-radius: 10px; object-fit: cover; background: #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    
     .progress-bar-bg { width: 80px; height: 6px; background: #f0f0f0; border-radius: 10px; overflow: hidden; margin-top: 5px; }
     .progress-bar-fill { height: 100%; background: #8b5e3c; border-radius: 10px; transition: width 1s ease-out; }
 
-    /* Responsive */
     @media (max-width: 992px) {
         .chart-section { grid-template-columns: 1fr; }
         .metric-val { font-size: 2rem; }
@@ -135,8 +135,8 @@
 </style>
 
 <div class="fade-in-up" style="display: flex; justify-content: flex-end; margin-bottom: 25px;">
-    <div style="background: white; padding: 10px 20px; border-radius: 50px; border: 1px solid #e0e0e0; display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #555; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: 0.3s;">
-        <i class="far fa-calendar-alt" style="color: #8b5e3c;"></i> Last 30 Days <i class="fas fa-chevron-down" style="font-size: 0.7rem; margin-left: 5px;"></i>
+    <div style="background: white; padding: 10px 20px; border-radius: 50px; border: 1px solid #e0e0e0; display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #555;">
+        <i class="fas fa-database" style="color: #8b5e3c;"></i> Live data from SQLite
     </div>
 </div>
 
@@ -146,32 +146,32 @@
             <div class="metric-icon" style="background: rgba(139, 94, 60, 0.1); color: #8b5e3c;">
                 <i class="fas fa-coins"></i>
             </div>
-            <div class="trend-indicator trend-up"><i class="fas fa-arrow-up"></i> 12%</div>
         </div>
-        <div class="metric-val counter" data-target="{{ total_revenue|default:0 }}">0</div>
+        <div class="metric-val">Rs. <span class="counter" data-target="{{ total_revenue|default:0 }}">0</span></div>
         <div class="metric-label">Total Revenue</div>
+        <div class="metric-note">Calculated from completed orders only.</div>
     </div>
 
     <div class="metric-card">
         <div class="metric-header">
             <div class="metric-icon" style="background: rgba(33, 150, 243, 0.1); color: #2196f3;">
-                <i class="fas fa-users"></i>
+                <i class="fas fa-shopping-cart"></i>
             </div>
-            <div class="trend-indicator trend-up"><i class="fas fa-arrow-up"></i> 8.5%</div>
         </div>
-        <div class="metric-val counter" data-target="{{ total_visits|default:0 }}">0</div>
-        <div class="metric-label">Site Visits</div>
+        <div class="metric-val counter" data-target="{{ total_orders|default:0 }}">0</div>
+        <div class="metric-label">Total Orders</div>
+        <div class="metric-note">Includes every account in the store.</div>
     </div>
 
     <div class="metric-card">
         <div class="metric-header">
             <div class="metric-icon" style="background: rgba(76, 175, 80, 0.1); color: #4caf50;">
-                <i class="fas fa-chart-pie"></i>
+                <i class="fas fa-check-circle"></i>
             </div>
-            <div class="trend-indicator trend-down"><i class="fas fa-arrow-down"></i> 1.2%</div>
         </div>
-        <div class="metric-val"><span class="counter" data-target="{{ conversion_rate|default:0 }}">0</span>%</div>
-        <div class="metric-label">Conversion Rate</div>
+        <div class="metric-val counter" data-target="{{ completed_orders_count|default:0 }}">0</div>
+        <div class="metric-label">Completed Orders</div>
+        <div class="metric-note">Orders that already affect revenue and stock.</div>
     </div>
 
     <div class="metric-card">
@@ -179,10 +179,10 @@
             <div class="metric-icon" style="background: rgba(255, 152, 0, 0.1); color: #ff9800;">
                 <i class="fas fa-receipt"></i>
             </div>
-            <div class="trend-indicator trend-up"><i class="fas fa-arrow-up"></i> 5%</div>
         </div>
-        <div class="metric-val">₹<span class="counter" data-target="{{ avg_order_value|default:0 }}">0</span></div>
-        <div class="metric-label">Avg. Order Value</div>
+        <div class="metric-val">Rs. <span class="counter" data-target="{{ avg_order_value|default:0 }}">0</span></div>
+        <div class="metric-label">Average Order Value</div>
+        <div class="metric-note">Revenue divided by completed orders.</div>
     </div>
 </div>
 
@@ -190,7 +190,7 @@
     <div class="chart-card">
         <div class="chart-header">
             <h3>Revenue Overview</h3>
-            <i class="fas fa-ellipsis-h" style="color: #bbb; cursor: pointer;"></i>
+            <span style="font-size: 0.8rem; color: #888;">Monthly totals</span>
         </div>
         <div style="flex: 1; width: 100%; min-height: 300px;">
             <canvas id="trafficChart"></canvas>
@@ -200,26 +200,24 @@
     <div class="chart-card">
         <div class="chart-header">
             <h3>Top Products</h3>
-            <span style="font-size: 0.8rem; color: #888;">By Revenue</span>
+            <span style="font-size: 0.8rem; color: #888;">By revenue</span>
         </div>
-        
         <div class="product-list-container">
             {% for product in top_products %}
             <div class="product-list-item">
                 <div class="prod-info">
-                    {% if product.image %}
-                        <img src="{{ product.image.url }}" class="prod-img" alt="{{ product.name }}">
+                    {% if product.image_url %}
+                        <img src="{{ product.image_url }}" class="prod-img" alt="{{ product.product__name }}">
                     {% else %}
                         <div class="prod-img" style="background: #e0e0e0; display:flex; align-items:center; justify-content:center; color:#999; font-size:0.7rem;">IMG</div>
                     {% endif %}
-                    
                     <div>
                         <div style="font-weight: 600; font-size: 0.95rem; color: #333;">{{ product.product__name }}</div>
-                        <div style="font-size: 0.75rem; color: #999;">{{ product.sales_count }} Units Sold</div>
+                        <div style="font-size: 0.75rem; color: #999;">{{ product.sales_count }} units sold</div>
                     </div>
                 </div>
                 <div style="text-align: right;">
-                    <div style="font-weight: 700; color: #2c2c2c;">₹{{ product.total_revenue }}</div>
+                    <div style="font-weight: 700; color: #2c2c2c;">Rs. {{ product.total_revenue|floatformat:2 }}</div>
                     <div class="progress-bar-bg">
                         <div class="progress-bar-fill" style="width: {{ product.percentage }};"></div>
                     </div>
@@ -235,68 +233,69 @@
 <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
     <div class="chart-card" style="min-height: 350px;">
         <div class="chart-header">
-            <h3>Device Breakdown</h3>
+            <h3>Order Status Breakdown</h3>
         </div>
         <div style="height: 250px; display: flex; justify-content: center; position: relative;">
-            <canvas id="deviceChart"></canvas>
+            <canvas id="statusChart"></canvas>
         </div>
     </div>
     <div class="chart-card" style="min-height: 350px;">
         <div class="chart-header">
-            <h3>User Retention</h3>
+            <h3>Payment Methods</h3>
         </div>
         <div style="height: 250px; width: 100%;">
-            <canvas id="retentionChart"></canvas>
+            <canvas id="paymentChart"></canvas>
         </div>
     </div>
 </div>
 
 {{ sales_data_json|json_script:"sales-data" }}
 {{ sales_labels_json|json_script:"sales-labels" }}
+{{ status_labels_json|json_script:"status-labels" }}
+{{ status_data_json|json_script:"status-data" }}
+{{ payment_labels_json|json_script:"payment-labels" }}
+{{ payment_data_json|json_script:"payment-data" }}
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        // 1. GSAP Staggered Entrance
         gsap.to(".metric-card", {
-            opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power2.out"
+            opacity: 1, y: 0, duration: 0.6, stagger: 0.08, ease: "power2.out"
         });
         gsap.to(".chart-card", {
-            opacity: 1, y: 0, duration: 0.8, stagger: 0.2, delay: 0.3, ease: "power2.out"
+            opacity: 1, y: 0, duration: 0.8, stagger: 0.15, delay: 0.2, ease: "power2.out"
         });
 
-        // 2. Animated Numbers
         const counters = document.querySelectorAll('.counter');
         counters.forEach(counter => {
-            const target = +counter.getAttribute('data-target');
-            const isFloat = target % 1 !== 0; // Check if decimal needed
-            
+            const target = parseFloat(counter.getAttribute('data-target') || '0');
+            const isFloat = target % 1 !== 0;
+
             gsap.to(counter, {
                 innerText: target,
-                duration: 2.5,
+                duration: 2,
                 snap: { innerText: isFloat ? 0.1 : 1 },
                 ease: "power3.out",
                 onUpdate: function() {
-                    let val = parseFloat(this.targets()[0].innerText);
-                    // Format numbers (e.g. 1,200)
-                    this.targets()[0].innerText = val.toLocaleString(undefined, { minimumFractionDigits: isFloat ? 1 : 0, maximumFractionDigits: isFloat ? 1 : 0 });
+                    const val = parseFloat(this.targets()[0].innerText || '0');
+                    this.targets()[0].innerText = val.toLocaleString(undefined, {
+                        minimumFractionDigits: isFloat ? 1 : 0,
+                        maximumFractionDigits: isFloat ? 1 : 0
+                    });
                 }
             });
         });
 
-        // 3. Chart Configuration
         const brandColor = '#8b5e3c';
         const brandLight = '#d4a373';
         const brandDark = '#2c2c2c';
 
-        // Retrieve Real Data
-        const salesDataEl = document.getElementById('sales-data');
-        const salesLabelsEl = document.getElementById('sales-labels');
-        
-        // Use real data or premium mock data fallback
-        const salesData = salesDataEl ? JSON.parse(salesDataEl.textContent) : [1500, 2300, 3200, 4500, 4100, 5200, 6800, 5900, 7100, 8500, 9200, 10500];
-        const salesLabels = salesLabelsEl ? JSON.parse(salesLabelsEl.textContent) : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const salesData = JSON.parse(document.getElementById('sales-data').textContent);
+        const salesLabels = JSON.parse(document.getElementById('sales-labels').textContent);
+        const statusLabels = JSON.parse(document.getElementById('status-labels').textContent);
+        const statusData = JSON.parse(document.getElementById('status-data').textContent);
+        const paymentLabels = JSON.parse(document.getElementById('payment-labels').textContent);
+        const paymentData = JSON.parse(document.getElementById('payment-data').textContent);
 
-        // --- TRAFFIC CHART (Line) ---
         const ctx1 = document.getElementById('trafficChart').getContext('2d');
         const gradient1 = ctx1.createLinearGradient(0, 0, 0, 400);
         gradient1.addColorStop(0, 'rgba(139, 94, 60, 0.2)');
@@ -307,7 +306,7 @@
             data: {
                 labels: salesLabels,
                 datasets: [{
-                    label: 'Revenue (₹)',
+                    label: 'Revenue (Rs.)',
                     data: salesData,
                     borderColor: brandColor,
                     backgroundColor: gradient1,
@@ -324,54 +323,45 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: brandDark,
-                        padding: 10,
-                        titleFont: { family: 'Poppins' },
-                        bodyFont: { family: 'Poppins' },
-                        displayColors: false,
-                    }
+                    legend: { display: false }
                 },
                 scales: {
-                    x: { grid: { display: false }, ticks: { font: { family: 'Poppins' } } },
-                    y: { grid: { borderDash: [5, 5], color: '#f0f0f0' }, beginAtZero: true, ticks: { font: { family: 'Poppins' } } }
+                    x: { grid: { display: false } },
+                    y: { grid: { borderDash: [5, 5], color: '#f0f0f0' }, beginAtZero: true }
                 }
             }
         });
 
-        // --- DEVICE CHART (Doughnut) ---
-        const ctx2 = document.getElementById('deviceChart').getContext('2d');
+        const ctx2 = document.getElementById('statusChart').getContext('2d');
         new Chart(ctx2, {
             type: 'doughnut',
             data: {
-                labels: ['Mobile', 'Desktop', 'Tablet'],
+                labels: statusLabels,
                 datasets: [{
-                    data: [65, 25, 10],
-                    backgroundColor: [brandColor, brandDark, '#e0e0e0'],
+                    data: statusData,
+                    backgroundColor: ['#f59e0b', '#2563eb', '#0f766e', '#15803d', '#dc2626'],
                     borderWidth: 0,
-                    hoverOffset: 15
+                    hoverOffset: 12
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '70%',
+                cutout: '68%',
                 plugins: {
-                    legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true, font: { family: 'Poppins' } } }
+                    legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } }
                 }
             }
         });
 
-        // --- RETENTION CHART (Bar) ---
-        const ctx3 = document.getElementById('retentionChart').getContext('2d');
+        const ctx3 = document.getElementById('paymentChart').getContext('2d');
         new Chart(ctx3, {
             type: 'bar',
             data: {
-                labels: ['New Users', 'Returning'],
+                labels: paymentLabels,
                 datasets: [{
-                    label: 'Users',
-                    data: [850, 420],
+                    label: 'Orders',
+                    data: paymentData,
                     backgroundColor: [brandLight, brandColor],
                     borderRadius: 8,
                     barThickness: 50

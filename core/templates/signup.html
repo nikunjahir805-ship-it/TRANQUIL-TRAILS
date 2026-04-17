@@ -20,7 +20,7 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; /* Custom cursor everywhere */ }
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
 
         /* --- CUSTOM CURSOR --- */
         .cursor {
@@ -31,7 +31,7 @@
 
         .container {
             display: flex;
-            height: 100vh;
+            min-height: 100vh;
             width: 100%;
         }
 
@@ -388,5 +388,6 @@
             });
         });
     </script>
+    {% include 'partials/site_footer.html' %}
 </body>
 </html>

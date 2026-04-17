@@ -181,6 +181,12 @@ class SiteSetting(models.Model):
     store_name = models.CharField(max_length=100, default="Tranquil Trails")
     admin_email = models.EmailField(default="admin@tranquiltrails.com")
     contact_phone = models.CharField(max_length=20, default="+1 234 567 890")
+    footer_tagline = models.TextField(default="Thoughtfully handcrafted pieces for calm, soulful spaces.")
+    footer_address = models.TextField(default="Studio Address\nAdd your workshop or store address from Admin Settings.")
+    footer_hours = models.CharField(max_length=120, default="Mon - Sat | 10:00 AM - 7:00 PM")
+    footer_instagram_url = models.URLField(blank=True, default="")
+    footer_facebook_url = models.URLField(blank=True, default="")
+    footer_whatsapp_url = models.URLField(blank=True, default="")
     
     currency = models.CharField(max_length=10, default="USD")
     tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=5.00)

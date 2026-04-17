@@ -55,6 +55,7 @@
         font-family: 'Poppins'; font-size: 0.95rem; background: #fafafa; transition: 0.3s;
     }
     .form-input:focus { border-color: #8b5e3c; background: white; outline: none; }
+    textarea.form-input { min-height: 110px; resize: vertical; }
 
     /* Toggle Switch */
     .switch-wrapper {
@@ -106,6 +107,7 @@
 
     <div class="settings-nav">
         <a class="settings-nav-item active" onclick="scrollToSection('general')"><i class="fas fa-sliders-h"></i> General</a>
+        <a class="settings-nav-item" onclick="scrollToSection('footer')"><i class="fas fa-border-all"></i> Footer</a>
         <a class="settings-nav-item" onclick="scrollToSection('finance')"><i class="fas fa-coins"></i> Finance</a>
         <a class="settings-nav-item" onclick="scrollToSection('system')"><i class="fas fa-server"></i> System</a>
     </div>
@@ -126,6 +128,36 @@
                 <div class="form-group">
                     <label>Contact Phone</label>
                     <input type="text" name="contact_phone" value="{{ settings.contact_phone }}" class="form-input">
+                </div>
+            </div>
+        </div>
+
+        <div id="footer" style="margin-bottom: 40px;">
+            <h3 class="section-title">Footer Content</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Footer Tagline</label>
+                    <textarea name="footer_tagline" class="form-input">{{ settings.footer_tagline }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Studio Address</label>
+                    <textarea name="footer_address" class="form-input">{{ settings.footer_address }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Business Hours</label>
+                    <input type="text" name="footer_hours" value="{{ settings.footer_hours }}" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Instagram URL</label>
+                    <input type="url" name="footer_instagram_url" value="{{ settings.footer_instagram_url }}" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Facebook URL</label>
+                    <input type="url" name="footer_facebook_url" value="{{ settings.footer_facebook_url }}" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>WhatsApp URL</label>
+                    <input type="url" name="footer_whatsapp_url" value="{{ settings.footer_whatsapp_url }}" class="form-input">
                 </div>
             </div>
         </div>

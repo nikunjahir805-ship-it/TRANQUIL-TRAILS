@@ -1,4 +1,5 @@
 import json
+from urllib.parse import quote
 from datetime import timedelta
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
@@ -10,7 +11,7 @@ from django.utils.text import slugify
 from django.utils import timezone
 from django.contrib import messages
 from django.db.models import Count, Sum, F
-from django.db.models.functions import TruncMonth
+from django.db.models.functions import TruncDate, TruncMonth
 from django.conf import settings
 import razorpay
 import csv
@@ -46,7 +47,7 @@ def generate_unique_slug(model, name, slug_field='slug', instance_id=None):
 # ------------------ PUBLIC PAGES ------------------
 
 def home(request):
-    gallery_slider = GalleryItem.objects.all().order_by('-created_at')[:7]
+    gallery_slider = Product.objects.filter(available=True).order_by('-created_at')[:7]
     wood_products = Product.objects.filter(category__name='Wood')[:5]
     categories = Category.objects.all()[:4]
 
@@ -144,13 +145,15 @@ def logout_api(request):
 @login_required(login_url='login')
 @user_passes_test(admin_only, login_url='login')
 def admin_dashboard(request):
-    total_orders = Order.objects.filter(complete=True).count()
+    orders = Order.objects.select_related('customer').prefetch_related('orderitem_set__product').order_by('-date_ordered')
+    total_orders = orders.count()
     pending_count = Order.objects.filter(status='Pending').count()
+    processing_count = Order.objects.filter(status='Processing').count()
     total_revenue = OrderItem.objects.filter(
         order__complete=True
     ).aggregate(total=Sum(F('quantity') * F('product__price')))['total'] or 0
 
-    recent_orders = Order.objects.filter(complete=True).order_by('-date_ordered')[:5]
+    recent_orders = orders[:5]
     
     # Stock Statistics
     total_products = Product.objects.count()
@@ -158,27 +161,54 @@ def admin_dashboard(request):
     out_of_stock_count = Product.objects.filter(stock=0).count()
     total_stock = Product.objects.aggregate(total=Sum('stock'))['total'] or 0
 
+    daily_revenue_rows = (
+        OrderItem.objects.filter(order__complete=True)
+        .annotate(day=TruncDate('order__date_ordered'))
+        .values('day')
+        .annotate(total=Sum(F('quantity') * F('product__price')))
+        .order_by('-day')[:7]
+    )
+    daily_revenue_rows = list(reversed(daily_revenue_rows))
+    revenue_labels = [row['day'].strftime('%d %b') if row['day'] else '' for row in daily_revenue_rows]
+    revenue_values = [float(row['total'] or 0) for row in daily_revenue_rows]
+
+    category_rows = (
+        OrderItem.objects.filter(order__complete=True, product__category__isnull=False)
+        .values('product__category__name')
+        .annotate(total=Sum(F('quantity') * F('product__price')))
+        .order_by('-total')
+    )
+    category_labels = [row['product__category__name'] or 'Uncategorized' for row in category_rows]
+    category_values = [float(row['total'] or 0) for row in category_rows]
+
     return render(request, 'admin/dashboard.html', {
         'total_orders': total_orders,
         'pending_count': pending_count,
+        'processing_count': processing_count,
         'total_revenue': total_revenue,
         'recent_orders': recent_orders,
         'total_products': total_products,
         'low_stock_count': low_stock_count,
         'out_of_stock_count': out_of_stock_count,
         'total_stock': total_stock,
+        'revenue_labels_json': json.dumps(revenue_labels),
+        'revenue_values_json': json.dumps(revenue_values),
+        'category_labels_json': json.dumps(category_labels),
+        'category_values_json': json.dumps(category_values),
     })
 
 @login_required(login_url='login')
 @user_passes_test(admin_only, login_url='login')
 def admin_analytics(request):
+    all_orders = Order.objects.all()
+    completed_orders = Order.objects.filter(complete=True)
     total_revenue = OrderItem.objects.filter(
         order__complete=True
     ).aggregate(total=Sum(F('quantity') * F('product__price')))['total'] or 0
-    
-    total_visits = 15420
-    conversion_rate = 3.2
-    avg_order_value = 2450
+
+    total_orders = all_orders.count()
+    completed_orders_count = completed_orders.count()
+    avg_order_value = round(float(total_revenue) / completed_orders_count, 2) if completed_orders_count else 0
     
     top_products = OrderItem.objects.filter(
         order__complete=True
@@ -193,6 +223,8 @@ def admin_analytics(request):
         max_revenue = top_products[0]['total_revenue']
         for product in top_products:
             product['percentage'] = f"{(product['total_revenue'] / max_revenue * 100):.0f}%"
+            image_path = product.get('product__image') or ''
+            product['image_url'] = f"{settings.MEDIA_URL}{quote(str(image_path))}" if image_path else ''
     
     sales_by_month = OrderItem.objects.filter(
         order__complete=True,
@@ -205,15 +237,26 @@ def admin_analytics(request):
     
     sales_labels = [item['month'].strftime('%b') for item in sales_by_month]
     sales_data = [float(item['revenue']) for item in sales_by_month]
+
+    status_choices = [choice[0] for choice in Order.STATUS_CHOICES]
+    status_labels = status_choices
+    status_data = [all_orders.filter(status=status).count() for status in status_choices]
+
+    payment_labels = [label for _, label in Order.PAYMENT_METHOD_CHOICES]
+    payment_data = [all_orders.filter(payment_method=value).count() for value, _ in Order.PAYMENT_METHOD_CHOICES]
     
     return render(request, 'admin/analytics.html', {
         'total_revenue': total_revenue,
-        'total_visits': total_visits,
-        'conversion_rate': conversion_rate,
+        'total_orders': total_orders,
+        'completed_orders_count': completed_orders_count,
         'avg_order_value': avg_order_value,
         'top_products': top_products,
         'sales_data_json': json.dumps(sales_data),
         'sales_labels_json': json.dumps(sales_labels),
+        'status_labels_json': json.dumps(status_labels),
+        'status_data_json': json.dumps(status_data),
+        'payment_labels_json': json.dumps(payment_labels),
+        'payment_data_json': json.dumps(payment_data),
     })
 
 # ------------------ ADMIN PRODUCTS ------------------
@@ -783,6 +826,12 @@ def admin_settings(request):
         settings_obj.store_name = request.POST.get('store_name', settings_obj.store_name)
         settings_obj.admin_email = request.POST.get('admin_email', settings_obj.admin_email)
         settings_obj.contact_phone = request.POST.get('contact_phone', settings_obj.contact_phone)
+        settings_obj.footer_tagline = request.POST.get('footer_tagline', settings_obj.footer_tagline)
+        settings_obj.footer_address = request.POST.get('footer_address', settings_obj.footer_address)
+        settings_obj.footer_hours = request.POST.get('footer_hours', settings_obj.footer_hours)
+        settings_obj.footer_instagram_url = request.POST.get('footer_instagram_url', settings_obj.footer_instagram_url)
+        settings_obj.footer_facebook_url = request.POST.get('footer_facebook_url', settings_obj.footer_facebook_url)
+        settings_obj.footer_whatsapp_url = request.POST.get('footer_whatsapp_url', settings_obj.footer_whatsapp_url)
         settings_obj.save()
         
         messages.success(request, "Settings updated successfully!")
@@ -810,44 +859,17 @@ def admin_blog(request):
 
 # ------------------ CART & PAYMENT ------------------
 
-def cart_page(request):
-    site_info, _ = SiteSetting.objects.get_or_create(id=1)
-    featured_products = Product.objects.filter(available=True).select_related('category')[:4]
-    return render(request, 'cart.html', {
-        'site_info': site_info,
-        'featured_products': featured_products,
-    })
-
-
-def wishlist_page(request):
-    site_info, _ = SiteSetting.objects.get_or_create(id=1)
-    featured_products = Product.objects.filter(available=True).select_related('category')[:6]
-    return render(request, 'wishlist.html', {
-        'site_info': site_info,
-        'featured_products': featured_products,
-    })
-
 client = razorpay.Client(
     auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
 )
 
-@login_required
-def checkout(request):
-    return render(request, 'checkout.html')
-
-def payment_success(request):
-    return render(request, 'success.html')
-
-def verify_payment(request):
-    return JsonResponse({'status': 'success'})
-
-
-    from django.http import JsonResponse
+from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
 from .models import ContactMessage
+
 
 @require_POST
 def review_submit(request):
@@ -1078,11 +1100,14 @@ def parse_checkout_items(raw_items):
     return valid_items, subtotal
 
 
-def build_checkout_totals(items, site_info):
+def build_checkout_totals(items, site_info, shipping_override=None):
     subtotal = sum((item['line_total'] for item in items), Decimal('0.00'))
-    shipping_rate = Decimal(str(site_info.shipping_flat_rate))
     tax_rate = Decimal(str(site_info.tax_rate))
-    shipping = shipping_rate if items else Decimal('0.00')
+    if shipping_override is not None:
+        shipping = Decimal(str(shipping_override))
+    else:
+        shipping_rate = Decimal(str(site_info.shipping_flat_rate))
+        shipping = shipping_rate if items else Decimal('0.00')
     tax = (subtotal * tax_rate) / Decimal('100.00')
     total = subtotal + shipping + tax
     return {
@@ -1231,6 +1256,11 @@ def create_checkout_order(request):
     if not items:
         return JsonResponse({'success': False, 'error': 'Your cart is empty.'}, status=400)
 
+    # Minimum order check: Rs. 30
+    MIN_ORDER = Decimal('30.00')
+    if subtotal < MIN_ORDER:
+        return JsonResponse({'success': False, 'error': f'Minimum order value is ₹30. Your current total is ₹{subtotal:.2f}.'}, status=400)
+
     customer = get_customer_for_user(request.user)
     customer.full_name = shipping_data['full_name']
     customer.email = shipping_data['email']
@@ -1238,12 +1268,27 @@ def create_checkout_order(request):
     customer.address = shipping_data['address']
     customer.save()
 
+    # Distance-based shipping: under 10 km = flat Rs.30; beyond = Rs.5 per km
+    try:
+        delivery_km = float(payload.get('delivery_km') or 0)
+    except (TypeError, ValueError):
+        delivery_km = 0
+
+    if delivery_km > 0:
+        if delivery_km <= 10:
+            shipping_override = 30.0
+        else:
+            shipping_override = delivery_km * 5.0
+    else:
+        shipping_override = None  # fall back to site flat rate
+
     site_info = get_site_settings()
-    totals = build_checkout_totals(items, site_info)
+    totals = build_checkout_totals(items, site_info, shipping_override=shipping_override)
     order = create_order_records(customer, items, payment_method, totals, shipping_data)
     request.session['latest_order_id'] = order.id
 
     if payment_method == 'COD':
+        finalize_order(order)
         return JsonResponse({
             'success': True,
             'mode': 'cod',
@@ -1255,6 +1300,8 @@ def create_checkout_order(request):
         return JsonResponse({'success': False, 'error': 'Razorpay keys are not configured in Django settings yet.'}, status=400)
 
     amount_paise = int(totals['total'] * 100)
+    if amount_paise < 100:  # Razorpay minimum is Rs. 1 (100 paise)
+        amount_paise = 100
     razorpay_order = client.order.create({
         'amount': amount_paise,
         'currency': 'INR',
@@ -1303,10 +1350,7 @@ def verify_payment(request):
         return JsonResponse({'status': 'error', 'error': 'Payment signature verification failed.'}, status=400)
 
     order = get_object_or_404(Order, razorpay_order_id=payload['razorpay_order_id'])
-    order.razorpay_payment_id = payload['razorpay_payment_id']
-    order.transaction_id = payload['razorpay_payment_id']
-    order.status = 'Pending'
-    order.save(update_fields=['razorpay_payment_id', 'transaction_id', 'status'])
+    finalize_order(order, payload['razorpay_payment_id'])
     request.session['latest_order_id'] = order.id
     return JsonResponse({'status': 'success', 'redirect_url': '/payment-success/'})
 
@@ -1381,6 +1425,12 @@ def admin_settings(request):
         settings_obj.store_name = request.POST.get('store_name', settings_obj.store_name)
         settings_obj.admin_email = request.POST.get('admin_email', settings_obj.admin_email)
         settings_obj.contact_phone = request.POST.get('contact_phone', settings_obj.contact_phone)
+        settings_obj.footer_tagline = request.POST.get('footer_tagline', settings_obj.footer_tagline)
+        settings_obj.footer_address = request.POST.get('footer_address', settings_obj.footer_address)
+        settings_obj.footer_hours = request.POST.get('footer_hours', settings_obj.footer_hours)
+        settings_obj.footer_instagram_url = request.POST.get('footer_instagram_url', settings_obj.footer_instagram_url)
+        settings_obj.footer_facebook_url = request.POST.get('footer_facebook_url', settings_obj.footer_facebook_url)
+        settings_obj.footer_whatsapp_url = request.POST.get('footer_whatsapp_url', settings_obj.footer_whatsapp_url)
         settings_obj.currency = request.POST.get('currency', settings_obj.currency)
 
         try:

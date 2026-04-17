@@ -227,6 +227,12 @@
                     <div><span>Transaction</span><span>{{ order.transaction_id|default:"Pending" }}</span></div>
                     <div><span>Items</span><span>{{ order.get_cart_items }}</span></div>
                     <div><span>Customer</span><span>{{ order.customer.phone|default:"No phone" }}</span></div>
+                    {% with shipping=order.shippingaddress_set.all.0 %}
+                    <div><span>Ship To</span><span>{% if shipping %}{{ shipping.city }}, {{ shipping.state }}{% else %}No address{% endif %}</span></div>
+                    {% if shipping %}
+                    <div><span>Address</span><span>{{ shipping.address }}, {{ shipping.zipcode }}</span></div>
+                    {% endif %}
+                    {% endwith %}
                 </div>
 
                 <form method="post" action="{% url 'admin_update_order_status' order.id %}" class="status-form">
