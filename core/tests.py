@@ -141,3 +141,50 @@ class OrderWorkflowTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, f'Order #{order.id}')
         self.assertContains(response, 'Processing')
+
+
+class AdminExportTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.category = Category.objects.create(name='Decor', slug='decor')
+        self.product = Product.objects.create(
+            category=self.category,
+            name='Lantern',
+            slug='lantern',
+            price=499.50,
+            image='products/lantern.jpg',
+            stock=4,
+            available=True,
+            description='Handcrafted brass lantern',
+        )
+        self.admin_user = User.objects.create_user(
+            username='exports@example.com',
+            email='exports@example.com',
+            password='adminpass123',
+            is_staff=True,
+        )
+        self.client.force_login(self.admin_user)
+
+    def test_products_csv_export(self):
+        response = self.client.get(reverse('admin_export_products_section'), {'format': 'csv'}, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'text/csv')
+        self.assertIn('products_export.csv', response['Content-Disposition'])
+        self.assertIn('Lantern', response.content.decode('utf-8'))
+
+    def test_categories_word_export(self):
+        response = self.client.get(reverse('admin_export_categories'), {'format': 'word'}, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/msword')
+        self.assertIn('categories_export.doc', response['Content-Disposition'])
+        self.assertIn('Decor', response.content.decode('utf-8'))
+
+    def test_inventory_pdf_export(self):
+        response = self.client.get(reverse('admin_export_inventory'), {'format': 'pdf'}, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/pdf')
+        self.assertIn('inventory_export.pdf', response['Content-Disposition'])
+        self.assertTrue(response.content.startswith(b'%PDF-1.4'))

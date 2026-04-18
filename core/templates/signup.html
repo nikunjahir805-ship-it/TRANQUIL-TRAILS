@@ -262,6 +262,10 @@
                         <input type="email" placeholder="name@example.com" required>
                     </div>
                     <div class="input-group">
+                        <label>Phone Number</label>
+                        <input type="tel" placeholder="+1 234 567 890" required>
+                    </div>
+                    <div class="input-group">
                         <label>Create Password</label>
                         <input type="password" placeholder="••••••••" required>
                     </div>
@@ -360,13 +364,14 @@
             // Get values from inputs
             const name = e.target.querySelector('input[type="text"]').value;
             const email = e.target.querySelector('input[type="email"]').value;
+            const phone = e.target.querySelector('input[type="tel"]').value;
             const password = e.target.querySelector('input[type="password"]').value;
 
             // Send to Django API
             fetch('/api/signup/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
-                body: JSON.stringify({ full_name: name, email: email, password: password })
+                body: JSON.stringify({ full_name: name, email: email, phone: phone, password: password })
             })
             .then(res => res.json())
             .then(data => {
@@ -388,6 +393,5 @@
             });
         });
     </script>
-    {% include 'partials/site_footer.html' %}
 </body>
 </html>

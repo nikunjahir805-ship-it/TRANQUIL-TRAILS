@@ -3,43 +3,171 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{ item.title }} | Gallery</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ item.title }} | Gallery | TRANQUIL TRAILS</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        .detail-container { padding: 150px 10%; display: flex; gap: 50px; background: #F4EFE6; min-height: 100vh; align-items: center; }
-        .detail-img { flex: 1; border-radius: 12px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
-        .detail-img img { width: 100%; height: auto; display: block; }
-        .detail-info { flex: 1; }
-        .detail-category { color: #8B5E3C; text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem; font-weight: bold; }
-        .detail-title { font-family: 'Playfair Display'; font-size: 3.5rem; color: #2d2d2d; margin: 10px 0 20px; }
-        .back-btn { display: inline-block; text-decoration: none; color: #2d2d2d; border: 1px solid #2d2d2d; padding: 10px 30px; border-radius: 50px; transition: 0.3s; margin-top: 30px; }
-        .back-btn:hover { background: #2d2d2d; color: white; }
-        @media (max-width: 900px) { .detail-container { flex-direction: column; padding: 100px 5%; } }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: #F4EFE6; 
+        }
+        
+        .detail-container {
+            padding: 140px 10% 80px;
+            display: flex;
+            gap: 60px;
+            align-items: flex-start;
+            min-height: 80vh;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: #2d2d2d;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 30px;
+            transition: 0.3s;
+            font-size: 0.95rem;
+            position: absolute;
+            top: 100px;
+            left: 10%;
+        }
+
+        .back-link:hover {
+            color: #8B5E3C;
+            transform: translateX(-5px);
+        }
+
+        .detail-image-wrapper {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .detail-image-wrapper img {
+            width: 100%;
+            height: auto;
+            max-height: 600px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .detail-info {
+            flex: 1;
+            padding-top: 10px;
+        }
+
+        .detail-category {
+            color: #8B5E3C;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .detail-info h1 {
+            font-family: 'Playfair Display';
+            font-size: 3.5rem;
+            color: #2d2d2d;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .detail-desc {
+            font-size: 1.1rem;
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 40px;
+        }
+
+        .enquiry-btn {
+            background: #2d2d2d;
+            color: white;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .enquiry-btn:hover {
+            background: #8B5E3C;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
+        @media (max-width: 900px) {
+            .detail-container { 
+                flex-direction: column; 
+                padding: 100px 5%; 
+            }
+            .detail-info h1 { 
+                font-size: 2.5rem; 
+            }
+            .back-link {
+                top: 80px;
+                left: 5%;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <nav style="background: white; padding: 20px 5%; display: flex; justify-content: space-between; align-items: center;">
-        <a href="{% url 'home' %}" class="logo-text" style="font-family: 'Playfair Display'; font-weight: bold; font-size: 1.5rem; color: #2d2d2d; text-decoration: none;">TRANQUIL TRAILS</a>
-        <a href="{% url 'gallery' %}" style="text-decoration: none; color: #8B5E3C; font-weight: bold;">Back to Gallery</a>
-    </nav>
+    {% include 'partials/site_nav.html' %}
+    {% include 'partials/cart_sidebar.html' %}
 
     <div class="detail-container">
-        <div class="detail-img">
+        <a href="{% url 'gallery' %}" class="back-link">
+            <i class="fas fa-arrow-left"></i> BACK TO GALLERY
+        </a>
+
+        <div class="detail-image-wrapper">
             <img src="{{ item.image.url }}" alt="{{ item.title }}">
         </div>
+
         <div class="detail-info">
             <span class="detail-category">{{ item.get_category_display }}</span>
-            <h1 class="detail-title">{{ item.title|default:"Untitled Artwork" }}</h1>
-            <p style="line-height: 1.8; color: #555;">
+            <h1>{{ item.title|default:"Untitled Artwork" }}</h1>
+            
+            <p class="detail-desc">
                 This unique piece is part of our curated {{ item.category }} collection. 
-                Handcrafted with precision, it represents the timeless tradition of Indian artisan heritage.
+                Handcrafted with precision, it represents the timeless tradition of Indian artisan heritage. 
+                Every stroke and detail tells a story of craftsmanship passed down through generations.
             </p>
-            <a href="{% url 'gallery' %}" class="back-btn">← Back to Gallery</a>
+
+            <a href="{% url 'contact' %}" class="enquiry-btn">
+                Inquire About This Piece
+            </a>
         </div>
     </div>
 
     {% include 'partials/site_footer.html' %}
+
+    <script src="{% static 'script.js' %}"></script>
+    
 </body>
 </html>

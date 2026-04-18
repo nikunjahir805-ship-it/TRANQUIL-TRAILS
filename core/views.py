@@ -5,16 +5,18 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.text import slugify
 from django.utils import timezone
+from django.utils.html import escape
 from django.contrib import messages
 from django.db.models import Count, Sum, F
 from django.db.models.functions import TruncDate, TruncMonth
 from django.conf import settings
 import razorpay
 import csv
+import random
 
 from .models import (
     Product, Customer, Category, GalleryItem, Order, OrderItem, ShippingAddress,
@@ -43,6 +45,269 @@ def generate_unique_slug(model, name, slug_field='slug', instance_id=None):
         
         slug = f"{base_slug}-{counter}"
         counter += 1
+
+
+def _format_export_value(value):
+    if value is None:
+        return ''
+    if hasattr(value, 'strftime'):
+        return value.strftime('%Y-%m-%d %H:%M:%S')
+    return str(value)
+
+
+def _chunk_lines(lines, chunk_size):
+    for index in range(0, len(lines), chunk_size):
+        yield lines[index:index + chunk_size]
+
+
+def _wrap_pdf_line(text, width=95):
+    text = text or ''
+    words = text.split()
+    if not words:
+        return ['']
+
+    lines = []
+    current = words[0]
+
+    for word in words[1:]:
+        candidate = f'{current} {word}'
+        if len(candidate) <= width:
+            current = candidate
+        else:
+            lines.append(current)
+            current = word
+
+    lines.append(current)
+    return lines
+
+
+def _pdf_escape(text):
+    return text.replace('\\', '\\\\').replace('(', '\\(').replace(')', '\\)')
+
+
+def _build_simple_pdf(title, headers, rows):
+    pdf_lines = [title, '', ' | '.join(headers), '-' * min(110, max(20, len(' | '.join(headers))))]
+
+    for row in rows:
+        row_text = ' | '.join(_format_export_value(value) for value in row)
+        pdf_lines.extend(_wrap_pdf_line(row_text))
+
+    page_chunks = list(_chunk_lines(pdf_lines, 42)) or [['No data available']]
+    page_objects = []
+    content_objects = []
+
+    for page_index, page_lines in enumerate(page_chunks):
+        operations = ['BT', '/F1 10 Tf', '40 780 Td', '14 TL']
+        for line_index, line in enumerate(page_lines):
+            safe_line = _pdf_escape(line)
+            if line_index == 0:
+                operations.append(f'({safe_line}) Tj')
+            else:
+                operations.append(f'T* ({safe_line}) Tj')
+        operations.append('ET')
+        content_stream = '\n'.join(operations)
+
+        page_object_number = 3 + (page_index * 2)
+        content_object_number = page_object_number + 1
+
+        page_objects.append(
+            f"{page_object_number} 0 obj\n"
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] "
+            f"/Resources << /Font << /F1 {3 + len(page_chunks) * 2} 0 R >> >> "
+            f"/Contents {content_object_number} 0 R >>\n"
+            "endobj\n"
+        )
+        content_objects.append(
+            f"{content_object_number} 0 obj\n"
+            f"<< /Length {len(content_stream.encode('latin-1', errors='replace'))} >>\n"
+            "stream\n"
+            f"{content_stream}\n"
+            "endstream\n"
+            "endobj\n"
+        )
+
+    font_object_number = 3 + len(page_chunks) * 2
+    objects = [
+        "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n",
+        (
+            "2 0 obj\n"
+            f"<< /Type /Pages /Kids [{' '.join(f'{3 + (idx * 2)} 0 R' for idx in range(len(page_chunks)))}] "
+            f"/Count {len(page_chunks)} >>\n"
+            "endobj\n"
+        ),
+    ]
+
+    for page_object, content_object in zip(page_objects, content_objects):
+        objects.append(page_object)
+        objects.append(content_object)
+
+    objects.append(
+        f"{font_object_number} 0 obj\n"
+        "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\n"
+        "endobj\n"
+    )
+
+    pdf = b'%PDF-1.4\n'
+    offsets = [0]
+
+    for obj in objects:
+        offsets.append(len(pdf))
+        pdf += obj.encode('latin-1', errors='replace')
+
+    xref_start = len(pdf)
+    pdf += f"xref\n0 {len(offsets)}\n".encode('latin-1')
+    pdf += b"0000000000 65535 f \n"
+
+    for offset in offsets[1:]:
+        pdf += f"{offset:010} 00000 n \n".encode('latin-1')
+
+    pdf += (
+        f"trailer\n<< /Size {len(offsets)} /Root 1 0 R >>\n"
+        f"startxref\n{xref_start}\n%%EOF"
+    ).encode('latin-1')
+    return pdf
+
+
+def _render_table_document(title, headers, rows):
+    header_html = ''.join(f'<th>{escape(header)}</th>' for header in headers)
+    row_html = []
+
+    for row in rows:
+        cells = ''.join(f'<td>{escape(_format_export_value(value))}</td>' for value in row)
+        row_html.append(f'<tr>{cells}</tr>')
+
+    if not row_html:
+        row_html.append(f'<tr><td colspan="{len(headers)}">No data available</td></tr>')
+
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{escape(title)}</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; margin: 32px; color: #222; }}
+        h1 {{ margin-bottom: 8px; }}
+        p {{ color: #666; margin-top: 0; }}
+        table {{ width: 100%; border-collapse: collapse; margin-top: 24px; }}
+        th, td {{ border: 1px solid #d9d9d9; padding: 10px 12px; text-align: left; vertical-align: top; }}
+        th {{ background: #f5f5f5; font-weight: 700; }}
+        tr:nth-child(even) td {{ background: #fbfbfb; }}
+    </style>
+</head>
+<body>
+    <h1>{escape(title)}</h1>
+    <p>Generated from the Tranquil Trails admin panel.</p>
+    <table>
+        <thead>
+            <tr>{header_html}</tr>
+        </thead>
+        <tbody>
+            {''.join(row_html)}
+        </tbody>
+    </table>
+</body>
+</html>"""
+
+
+def _get_export_payload(section):
+    if section == 'products':
+        queryset = Product.objects.select_related('category').all()
+        headers = ['ID', 'Name', 'Slug', 'Category', 'Price', 'Stock', 'Available', 'Description', 'Image URL']
+        rows = [
+            [
+                product.id,
+                product.name,
+                product.slug,
+                product.category.name if product.category else '',
+                product.price,
+                product.stock,
+                'Yes' if product.available else 'No',
+                product.description or '',
+                product.image.url if product.image else '',
+            ]
+            for product in queryset
+        ]
+        return 'Products Export', 'products_export', headers, rows
+
+    if section == 'categories':
+        queryset = Category.objects.annotate(product_count=Count('products')).all()
+        headers = ['ID', 'Name', 'Slug', 'Products', 'Image URL']
+        rows = [
+            [
+                category.id,
+                category.name,
+                category.slug,
+                category.product_count,
+                category.image.url if category.image else '',
+            ]
+            for category in queryset
+        ]
+        return 'Categories Export', 'categories_export', headers, rows
+
+    if section == 'inventory':
+        queryset = Product.objects.select_related('category').all()
+        headers = ['ID', 'Product', 'SKU', 'Category', 'Stock', 'Status', 'Available', 'Last Updated']
+        rows = []
+        for product in queryset:
+            if product.stock > 10:
+                status = 'In Stock'
+            elif product.stock > 0:
+                status = 'Low Stock'
+            else:
+                status = 'Out of Stock'
+
+            rows.append([
+                product.id,
+                product.name,
+                f'SKU-{product.id}00X',
+                product.category.name if product.category else '',
+                product.stock,
+                status,
+                'Yes' if product.available else 'No',
+                product.updated_at,
+            ])
+        return 'Inventory Export', 'inventory_export', headers, rows
+
+    return None
+
+
+def _build_export_response(title, filename_base, headers, rows, export_format):
+    export_format = (export_format or 'csv').lower()
+
+    if export_format == 'csv':
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{filename_base}.csv"'
+        writer = csv.writer(response)
+        writer.writerow(headers)
+        for row in rows:
+            writer.writerow([_format_export_value(value) for value in row])
+        return response
+
+    if export_format == 'word':
+        response = HttpResponse(
+            _render_table_document(title, headers, rows),
+            content_type='application/msword'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{filename_base}.doc"'
+        return response
+
+    if export_format == 'excel':
+        response = HttpResponse(
+            _render_table_document(title, headers, rows),
+            content_type='application/vnd.ms-excel'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{filename_base}.xls"'
+        return response
+
+    if export_format == 'pdf':
+        response = HttpResponse(
+            _build_simple_pdf(title, headers, rows),
+            content_type='application/pdf'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{filename_base}.pdf"'
+        return response
+
+    return HttpResponseBadRequest('Unsupported export format.')
 
 # ------------------ PUBLIC PAGES ------------------
 
@@ -117,7 +382,12 @@ def signup_api(request):
             email=data['email'],
             password=data['password']
         )
-        Customer.objects.create(user=user, full_name=data['full_name'], email=data['email'])
+        Customer.objects.create(
+            user=user, 
+            full_name=data.get('full_name', ''), 
+            email=data.get('email', ''),
+            phone=data.get('phone', '')
+        )
         login(request, user)
         return JsonResponse({'success': True})
     return JsonResponse({'success': False})
@@ -140,7 +410,42 @@ def logout_api(request):
     logout(request)
     return JsonResponse({'success': True})
 
-# ------------------ ADMIN DASHBOARD ------------------
+@csrf_exempt
+def send_otp_api(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        phone = data.get('phone')
+        try:
+            customer = Customer.objects.get(phone=phone)
+            otp = str(random.randint(100000, 999999))
+            request.session['reset_otp'] = otp
+            request.session['reset_phone'] = phone
+            # Return OTP in JSON as requested for frontend display
+            return JsonResponse({'success': True, 'otp': otp})
+        except Customer.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'No account found.'})
+    return JsonResponse({'success': False})
+
+@csrf_exempt
+def verify_otp_reset_api(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        otp = data.get('otp')
+        new_password = data.get('password')
+        session_otp = request.session.get('reset_otp')
+        session_phone = request.session.get('reset_phone')
+        if session_otp and otp == session_otp:
+            customer = Customer.objects.get(phone=session_phone)
+            user = customer.user
+            user.set_password(new_password)
+            user.save()
+            del request.session['reset_otp']
+            del request.session['reset_phone']
+            return JsonResponse({'success': True})
+        return JsonResponse({'success': False, 'error': 'Invalid OTP.'})
+    return JsonResponse({'success': False})
+
+
 
 @login_required(login_url='login')
 @user_passes_test(admin_only, login_url='login')
@@ -423,35 +728,23 @@ def admin_update_stock(request, pk):
     
     return redirect('admin_inventory')
 
-# CSV Export / Import for Products
+# Export / Import for Admin Data
+@login_required(login_url='login')
+@user_passes_test(admin_only, login_url='login')
+def admin_export_section(request, section):
+    payload = _get_export_payload(section)
+    if not payload:
+        return HttpResponseBadRequest('Unsupported export section.')
+
+    title, filename_base, headers, rows = payload
+    export_format = request.GET.get('format', 'csv')
+    return _build_export_response(title, filename_base, headers, rows, export_format)
+
+
 @login_required(login_url='login')
 @user_passes_test(admin_only, login_url='login')
 def admin_export_products(request):
-    """Export products as CSV (admin only)."""
-    products = Product.objects.select_related('category').all()
-
-    from django.http import HttpResponse
-
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="products_export.csv"'
-
-    writer = csv.writer(response)
-    writer.writerow(['id', 'name', 'slug', 'category', 'price', 'stock', 'available', 'description', 'image'])
-
-    for p in products:
-        writer.writerow([
-            p.id,
-            p.name,
-            p.slug,
-            p.category.name if p.category else '',
-            float(p.price),
-            p.stock,
-            '1' if p.available else '0',
-            p.description or '',
-            p.image.url if p.image else ''
-        ])
-
-    return response
+    return admin_export_section(request, 'products')
 
 
 @login_required(login_url='login')

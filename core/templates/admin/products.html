@@ -57,6 +57,29 @@
     .action-btn:hover { background: #2c2c2c; color: white; }
     .btn-delete:hover { background: #c62828; color: white; }
 
+    .export-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .export-link {
+        background: #fff;
+        border: 1px solid #eee;
+        padding: 8px 12px;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #333;
+        font-size: 0.9rem;
+        transition: 0.2s;
+    }
+
+    .export-link:hover {
+        background: #2c2c2c;
+        color: #fff;
+        border-color: #2c2c2c;
+    }
+
 </style>
 
 <div class="fade-in-up">
@@ -79,7 +102,12 @@
                 <button type="submit" style="padding:8px 12px; border-radius:8px; background:#2c2c2c; color:white; border:none; cursor:pointer;">Upload</button>
             </form>
 
-            <a href="{% url 'admin_export_products' %}" style="background:#fff; border:1px solid #eee; padding:8px 12px; border-radius:8px; text-decoration:none; color:#333;">Export CSV</a>
+            <div class="export-actions">
+                <a href="{% url 'admin_export_products_section' %}?format=csv" class="export-link">CSV</a>
+                <a href="{% url 'admin_export_products_section' %}?format=word" class="export-link">Word</a>
+                <a href="{% url 'admin_export_products_section' %}?format=excel" class="export-link">Excel</a>
+                <a href="{% url 'admin_export_products_section' %}?format=pdf" class="export-link">PDF</a>
+            </div>
         </div>
 
         <a href="{% url 'admin_add_product' %}" 

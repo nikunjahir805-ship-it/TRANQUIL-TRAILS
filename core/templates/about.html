@@ -1,4 +1,4 @@
-﻿{% load static %} 
+{% load static %} 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -214,46 +214,83 @@
             line-height: 1.7;
         }
 
-        /* --- Process Timeline --- */
-        .process-container { background: var(--white); padding: 100px 8%; text-align: center; }
-        .process-grid { 
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-            gap: 40px; margin-top: 60px; 
+        /* --- REDESIGNED: The Journey Timeline --- */
+        .journey-container { 
+            background: var(--white); 
+            padding: 120px 8%; 
+            overflow: hidden;
         }
-        .process-card { padding: 40px; background: var(--bg); border-radius: 12px; transition: 0.3s; }
-        .process-card:hover { transform: translateY(-10px); background: #fdfaf7; }
-        .process-num { font-family: 'Playfair Display'; font-size: 3rem; color: rgba(139, 94, 60, 0.2); font-weight: bold; }
+        .journey-header { text-align: center; max-width: 800px; margin: 0 auto 100px; }
+        .journey-header h2 { font-family: 'Playfair Display'; font-size: 3.5rem; color: var(--accent); margin-bottom: 20px; }
+        .journey-header p { color: #666; font-size: 1.1rem; line-height: 1.8; }
+
+        .journey-step {
+            display: flex;
+            align-items: center;
+            gap: 100px;
+            margin-bottom: 120px;
+            position: relative;
+        }
+        .journey-step:nth-child(even) { flex-direction: row-reverse; }
         
-        .process-img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin: 15px 0;
+        .journey-img {
+            flex: 1.2;
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.1);
+        }
+        .journey-img img { width: 100%; height: auto; display: block; transition: transform 0.8s ease; }
+        .journey-step:hover .journey-img img { transform: scale(1.05); }
+
+        .journey-content {
+            flex: 1;
+            position: relative;
+            z-index: 2;
+        }
+        .step-num {
+            font-family: 'Playfair Display';
+            font-size: 8rem;
+            color: rgba(139, 94, 60, 0.08);
+            line-height: 1;
+            position: absolute;
+            top: -60px;
+            left: -30px;
+            z-index: -1;
+            font-weight: 900;
+        }
+        .journey-step:nth-child(even) .step-num { left: auto; right: -30px; }
+
+        .journey-content h3 { font-family: 'Playfair Display'; font-size: 2.2rem; color: var(--accent); margin-bottom: 20px; }
+        .journey-content p { font-size: 1.1rem; color: #555; line-height: 1.8; margin-bottom: 25px; }
+
+        .tag-list { display: flex; gap: 10px; list-style: none; padding: 0; }
+        .tag-list li { 
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            color: var(--primary); 
+            font-weight: 600; 
+            border: 1px solid rgba(139, 94, 60, 0.2);
+            padding: 6px 15px;
+            border-radius: 50px;
         }
 
-        .process-details {
-            list-style: none;
-            padding: 0;
-            margin-top: 15px;
-            border-top: 1px solid rgba(0,0,0,0.1);
-            padding-top: 15px;
+        /* Responsive */
+        @media (max-width: 992px) {
+            .journey-step, .journey-step:nth-child(even) { flex-direction: column; gap: 40px; text-align: center; }
+            .journey-header h2 { font-size: 2.5rem; }
+            .step-num { font-size: 5rem; top: -30px; left: 50%; transform: translateX(-50%); }
+            .journey-step:nth-child(even) .step-num { right: auto; left: 50%; }
+            .tag-list { justify-content: center; flex-wrap: wrap; }
         }
 
-        .process-details li {
-            font-size: 0.85rem;
-            color: var(--primary);
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
+        /* --- Animations for Journey --- */
+        .reveal-left { transform: translateX(-100px); opacity: 0; transition: all 1s ease; }
+        .reveal-right { transform: translateX(100px); opacity: 0; transition: all 1s ease; }
+        .reveal-active { transform: translateX(0); opacity: 1; }
 
-        @media (min-width: 1200px) {
-            .process-grid {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 20px;
-            }
-        }
+        /* Existing Reveal Logic stays the same */
 
         /* --- NEW: Behind The Craft Video Section --- */
         .craft-video-section {
@@ -560,62 +597,82 @@
         </div>
     </section>
 
-    <section class="process-container reveal">
-        <h2 style="font-family: 'Playfair Display'; font-size: clamp(2rem, 5vw, 3rem); margin-bottom: 20px;">The Journey: From Earth to Home</h2>
-        <p style="max-width: 700px; margin: 0 auto 60px; color: #666;">Transparency is at the heart of everything we do. Follow the lifecycle of a Tranquil Trails piece—from the raw materials of the earth to its final place in your sanctuary.</p>
-        
-        <div class="process-grid">
-            <div class="process-card">
-                <div class="process-num">01</div>
-                <img src="{% static 'Ethical Sourcing.jpg' %}" alt="Ethical Sourcing" class="process-img">
+    <section class="journey-container">
+        <div class="journey-header reveal">
+            <h2>The Journey: From Earth to Home</h2>
+            <p>Transparency is at the heart of everything we do. Follow the lifecycle of a Tranquil Trails piece—from the raw materials of the earth to its final place in your sanctuary.</p>
+        </div>
+
+        <div class="journey-step reveal-left">
+            <div class="journey-img">
+                <img src="{% static 'Ethical Sourcing.jpg' %}" alt="Ethical Sourcing">
+            </div>
+            <div class="journey-content">
+                <span class="step-num">01</span>
                 <h3>Ethical Sourcing</h3>
-                <p>We partner with FSC-certified forests and local clay pits to ensure our raw materials never deplete the local ecosystem.</p>
-                <ul class="process-details">
+                <p>We partner with FSC-certified forests and local clay pits to ensure our raw materials never deplete the local ecosystem. Every piece begins with respect for the land it came from.</p>
+                <ul class="tag-list">
                     <li>100% Traceable Wood</li>
-                    <li>Lead-Free Organic Clay</li>
+                    <li>Organic Lead-Free Clay</li>
                 </ul>
             </div>
+        </div>
 
-            <div class="process-card">
-                <div class="process-num">02</div>
-                <img src="{% static 'Artisan Crafting.jpg' %}" alt="Artisan Crafting" class="process-img">
+        <div class="journey-step reveal-right">
+            <div class="journey-img">
+                <img src="{% static 'Artisan Crafting.jpg' %}" alt="Artisan Crafting">
+            </div>
+            <div class="journey-content">
+                <span class="step-num">02</span>
                 <h3>Heritage Crafting</h3>
-                <p>Our artisans use low-impact tools and traditional hand-lathe techniques, preserving centuries-old cultural heritage.</p>
-                <ul class="process-details">
+                <p>Our artisans use low-impact tools and traditional hand-lathe techniques, preserving centuries-old cultural heritage. We don't just make products; we preserve traditions.</p>
+                <ul class="tag-list">
                     <li>Zero-waste cutting</li>
                     <li>Natural non-toxic dyes</li>
                 </ul>
             </div>
+        </div>
 
-            <div class="process-card">
-                <div class="process-num">03</div>
-                <img src="{% static 'Solar Firing.jpg' %}" alt="Solar Firing" class="process-img">
+        <div class="journey-step reveal-left">
+            <div class="journey-img">
+                <img src="{% static 'Solar Firing.jpg' %}" alt="Solar Firing">
+            </div>
+            <div class="journey-content">
+                <span class="step-num">03</span>
                 <h3>Solar Firing</h3>
-                <p>Our ceramics are fired in high-efficiency solar kilns, reducing our carbon footprint by 40% compared to traditional gas ovens.</p>
-                <ul class="process-details">
-                    <li>Renewable energy use</li>
-                    <li>Water recycling system</li>
+                <p>Our ceramics are fired in high-efficiency solar kilns, reducing our carbon footprint by 40% compared to traditional gas ovens. We harness the power of the sun to harden our earth.</p>
+                <ul class="tag-list">
+                    <li>Renewable energy</li>
+                    <li>Water recycling</li>
                 </ul>
             </div>
+        </div>
 
-            <div class="process-card">
-                <div class="process-num">04</div>
-                <img src="{% static 'Eco Packaging.jpg' %}" alt="Eco Packaging" class="process-img">
-                <h3>Plastic-Free Curation</h3>
-                <p>Every order is wrapped in biodegradable honeycomb paper and sealed with soy-based ink tape. No plastic, ever.</p>
-                <ul class="process-details">
-                    <li>Compostable materials</li>
+        <div class="journey-step reveal-right">
+            <div class="journey-img">
+                <img src="{% static 'Eco Packaging.jpg' %}" alt="Eco Packaging">
+            </div>
+            <div class="journey-content">
+                <span class="step-num">04</span>
+                <h3>Eco-Conscious Curation</h3>
+                <p>Every order is wrapped in biodegradable honeycomb paper and sealed with soy-based ink tape. We believe the unboxing experience should be as beautiful as it is sustainable.</p>
+                <ul class="tag-list">
+                    <li>Plastic-free</li>
                     <li>Recycled cardboard</li>
                 </ul>
             </div>
+        </div>
 
-            <div class="process-card">
-                <div class="process-num">05</div>
-                <img src="{% static 'Carbon Delivery.jpg' %}" alt="Carbon Delivery" class="process-img">
+        <div class="journey-step reveal-left">
+            <div class="journey-img">
+                <img src="{% static 'Carbon Delivery.jpg' %}" alt="Carbon Delivery">
+            </div>
+            <div class="journey-content">
+                <span class="step-num">05</span>
                 <h3>Mindful Arrival</h3>
-                <p>We offset 100% of the carbon emissions from every shipment, ensuring your home decor leaves a positive mark.</p>
-                <ul class="process-details">
-                    <li>Carbon-neutral certified</li>
+                <p>We offset 100% of the carbon emissions from every shipment, ensuring your home decor leaves a positive mark on the planet. Your piece arrives with a clean conscience.</p>
+                <ul class="tag-list">
+                    <li>Carbon-neutral</li>
                     <li>Trackable impact</li>
                 </ul>
             </div>
@@ -666,17 +723,23 @@
 
     <script>
         // --- SCROLL REVEAL ANIMATION ---
-        const revealElements = document.querySelectorAll('.reveal');
-
         const revealOnScroll = () => {
             const windowHeight = window.innerHeight;
+            const revealPoint = 100;
             
-            revealElements.forEach(element => {
+            // Standard reveals
+            document.querySelectorAll('.reveal').forEach(element => {
                 const elementTop = element.getBoundingClientRect().top;
-                const revealPoint = 100;
-                
                 if (elementTop < windowHeight - revealPoint) {
                     element.classList.add('active');
+                }
+            });
+
+            // Journey staggered reveals
+            document.querySelectorAll('.reveal-left, .reveal-right').forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                if (elementTop < windowHeight - revealPoint) {
+                    element.classList.add('reveal-active');
                 }
             });
         };

@@ -54,7 +54,7 @@
         .login-form-section { flex: 1; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 40px; position: relative; }
         .form-box { width: 100%; max-width: 400px; opacity: 0; transform: translateY(30px); }
 
-        .logo-back { text-decoration: none; color: var(--text); font-family: 'Playfair Display'; font-weight: bold; font-size: 1.2rem; display: block; margin-bottom: 50px; letter-spacing: 2px; }
+        .logo-back { text-decoration: none; color: var(--text); font-family: 'Playfair Display'; font-weight: bold; font-size: 1.2rem; display: block; margin-bottom: 30px; letter-spacing: 2px; }
         .form-box h3 { font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 10px; }
         .form-box p { color: var(--gray); margin-bottom: 30px; font-size: 0.9rem; }
 
@@ -95,6 +95,7 @@
             <div class="form-box">
                 <a href="{% url 'home' %}" class="logo-back">← TRANQUIL TRAILS</a>
                 
+                <!-- LOGIN VIEW -->
                 <div id="loginView">
                     <h3>Log In</h3>
                     <p>Enter your details to access your account.</p>
@@ -102,20 +103,24 @@
                     <form id="loginForm">
                         <div class="input-group">
                             <label>Email Address</label>
-                            <input type="email" placeholder="name@example.com" required>
+                            <input type="email" id="loginEmail" placeholder="name@example.com" required>
                         </div>
                         <div class="input-group">
                             <label>Password</label>
-                            <input type="password" placeholder="••••••••" required>
+                            <input type="password" id="loginPass" placeholder="••••••••" required>
+                        </div>
+                        <div style="text-align: right; margin-top: -10px; margin-bottom: 20px;">
+                            <a onclick="toggleForm('forgot')" style="font-size: 0.8rem; color: var(--primary); text-decoration: none; font-weight: 600; cursor: pointer;">Forgot Password?</a>
                         </div>
                         <button type="submit" class="sign-in-btn" id="loginBtn">Enter Gallery</button>
                     </form>
 
                     <div class="signup-link">
-                        Don't have an account? <a onclick="toggleForm()">Create one</a>
+                        Don't have an account? <a onclick="toggleForm('signup')">Create one</a>
                     </div>
                 </div>
 
+                <!-- SIGNUP VIEW -->
                 <div id="signupView" style="display: none;">
                     <h3>Join the Studio</h3>
                     <p>Start your journey with handcrafted artistry.</p>
@@ -123,23 +128,65 @@
                     <form id="signupForm">
                         <div class="input-group">
                             <label>Full Name</label>
-                            <input type="text" placeholder="Your Name" required>
+                            <input type="text" id="signupName" placeholder="Your Name" required>
                         </div>
                         <div class="input-group">
                             <label>Email Address</label>
-                            <input type="email" placeholder="name@example.com" required>
+                            <input type="email" id="signupEmail" placeholder="name@example.com" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Phone Number</label>
+                            <input type="tel" id="signupPhone" placeholder="+1 234 567 890" required>
                         </div>
                         <div class="input-group">
                             <label>Create Password</label>
-                            <input type="password" placeholder="••••••••" required>
+                            <input type="password" id="signupPass" placeholder="••••••••" required>
                         </div>
                         <button type="submit" class="sign-in-btn" id="signupBtn">Create Account</button>
                     </form>
 
                     <div class="signup-link">
-                        Already a member? <a onclick="toggleForm()">Log In</a>
+                        Already a member? <a onclick="toggleForm('login')">Log In</a>
                     </div>
                 </div>
+
+                <!-- FORGOT PASSWORD VIEW (Single Form) -->
+                <div id="forgotView" style="display: none;">
+                    <h3>Password Recovery</h3>
+                    <p id="forgotP">Enter your phone number to receive a 6-digit OTP.</p>
+
+                    <form id="forgotPasswordForm">
+                        <!-- Step 1 Content -->
+                        <div id="forgotStep1">
+                            <div class="input-group">
+                                <label>Phone Number</label>
+                                <input type="tel" id="forgotPhone" placeholder="+1 234 567 890" required>
+                            </div>
+                            <button type="button" class="sign-in-btn" id="sendOtpBtn" onclick="sendOTP()">Send OTP</button>
+                        </div>
+
+                        <!-- Step 2 Content -->
+                        <div id="forgotStep2" style="display: none; margin-top: 20px;">
+                            <div class="input-group">
+                                <label style="display: flex; justify-content: space-between;">
+                                    6-Digit OTP 
+                                    <span id="otpDisplay" style="color: var(--primary); font-weight: bold; background: #eee; padding: 2px 8px; border-radius: 4px;"></span>
+                                </label>
+                                <input type="text" id="otpCode" placeholder="Enter Code Above" maxlength="6">
+                            </div>
+                            <div class="input-group">
+                                <label>New Password</label>
+                                <input type="password" id="newPass" placeholder="••••••••">
+                            </div>
+                            <button type="submit" class="sign-in-btn" id="verifyBtn">Update Password</button>
+                        </div>
+                    </form>
+
+                    <div class="signup-link">
+                        Remembered? <a onclick="toggleForm('login')">Back to Login</a>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -158,7 +205,7 @@
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.style.cssText = 'background:white;color:#2c2c2c;padding:16px 24px;border-radius:8px;box-shadow:0 8px 25px rgba(0,0,0,0.15);margin-bottom:12px;display:flex;align-items:center;gap:12px;min-width:300px;max-width:400px;animation:slideInRight 0.3s ease-out;pointer-events:auto;border-left:4px solid #8B5E3C;';
-            const icons = {success: '✓', error: '✕', warning: '⚠', info: 'ℹ'};
+            const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
             toast.innerHTML = `<div style="font-size:1.25rem;flex-shrink:0;font-weight:bold;">${icons[type]}</div><span>${message}</span>`;
             container.appendChild(toast);
             setTimeout(() => {
@@ -205,27 +252,33 @@
             tl.from(".visual-content h2", { opacity: 0, x: -50, duration: 1 }, "-=0.8");
         });
 
-        function toggleForm() {
-            const loginView = document.getElementById('loginView');
-            const signupView = document.getElementById('signupView');
+        function toggleForm(view) {
+            const views = ['loginView', 'signupView', 'forgotView'];
+            const target = view + 'View';
             
+            if (view === 'login') {
+                document.getElementById('forgotStep1').style.display = 'block';
+                document.getElementById('forgotStep1').style.opacity = '1';
+                document.getElementById('forgotStep1').style.pointerEvents = 'auto';
+                document.getElementById('forgotStep2').style.display = 'none';
+                document.getElementById('forgotP').innerText = "Enter your phone number to receive a 6-digit OTP.";
+                document.getElementById('otpDisplay').innerText = "";
+            }
+
             gsap.to(".form-box", {
-                opacity: 0, y: 20, duration: 0.4, 
+                opacity: 0, y: 20, duration: 0.3,
                 onComplete: () => {
-                    if (loginView.style.display === "none") {
-                        loginView.style.display = "block";
-                        signupView.style.display = "none";
-                    } else {
-                        loginView.style.display = "none";
-                        signupView.style.display = "block";
-                    }
-                    gsap.to(".form-box", { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" });
+                    views.forEach(v => {
+                        const el = document.getElementById(v);
+                        if (el) el.style.display = (v === target) ? "block" : "none";
+                    });
+                    gsap.to(".form-box", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" });
                 }
             });
         }
 
         // --- 3. AUTHENTICATION LOGIC ---
-        
+
         // SIGNUP
         document.getElementById('signupForm').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -233,36 +286,35 @@
             const originalText = btn.innerText;
             btn.innerText = "Creating Account...";
             btn.disabled = true;
-            
-            const name = e.target.querySelector('input[placeholder="Your Name"]').value;
-            const email = e.target.querySelector('input[type="email"]').value;
-            const password = e.target.querySelector('input[type="password"]').value;
+
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const phone = document.getElementById('signupPhone').value;
+            const password = document.getElementById('signupPass').value;
 
             fetch('/api/signup/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
-                body: JSON.stringify({ full_name: name, email: email, password: password })
+                body: JSON.stringify({ full_name: name, email: email, phone: phone, password: password })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    localStorage.setItem('isAdmin', 'false');
-                    window.location.href = "{% url 'home' %}";
-                } else {
-                    showToast("Signup Error: " + data.error, "error");
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = "{% url 'home' %}";
+                    } else {
+                        showToast("Signup Error: " + data.error, "error");
+                        btn.innerText = originalText;
+                        btn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    showToast("Connection error", "error");
                     btn.innerText = originalText;
                     btn.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast("Connection error. Please check and try again.", "error");
-                btn.innerText = originalText;
-                btn.disabled = false;
-            });
+                });
         });
 
-        // LOGIN (Admin Check Logic)
+        // LOGIN
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const btn = document.getElementById('loginBtn');
@@ -270,39 +322,107 @@
             btn.innerText = "Verifying...";
             btn.disabled = true;
 
-            const email = e.target.querySelector('input[type="email"]').value;
-            const password = e.target.querySelector('input[type="password"]').value;
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPass').value;
 
             fetch('/api/login/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
                 body: JSON.stringify({ email: email, password: password })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Check if user is Staff (Admin)
-                    if (data.is_staff) {
-                        localStorage.setItem('isAdmin', 'true');
-                        window.location.href = "{% url 'admin_dashboard' %}";
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.is_staff ? "{% url 'admin_dashboard' %}" : "{% url 'home' %}";
                     } else {
-                        localStorage.setItem('isAdmin', 'false');
-                        window.location.href = "{% url 'home' %}";
+                        showToast("Invalid credentials", "error");
+                        btn.innerText = originalText;
+                        btn.disabled = false;
                     }
-                } else {
-                    showToast("Login Failed: Invalid email or password", "error");
+                })
+                .catch(() => {
+                    showToast("Connection error", "error");
                     btn.innerText = originalText;
                     btn.disabled = false;
+                });
+        });
+
+        // FORGOT PASSWORD STEP 1
+        function sendOTP() {
+            const phone = document.getElementById('forgotPhone').value;
+            if (!phone) { showToast("Please enter phone number", "warning"); return; }
+
+            const btn = document.getElementById('sendOtpBtn');
+            btn.disabled = true;
+            btn.innerText = "Sending...";
+
+            fetch('/api/send-otp/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                body: JSON.stringify({ phone: phone })
+            })
+            .then(r => {
+                if (!r.ok) throw new Error("Server error");
+                return r.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showToast("OTP sent!", "success");
+                    gsap.to("#forgotStep1", { opacity: 0.5, pointerEvents: "none", duration: 0.3 });
+                    document.getElementById('forgotP').innerText = "OTP received! Copy the code below:";
+                    document.getElementById('otpDisplay').innerText = data.otp; // Show OTP on page as requested
+                    document.getElementById('forgotStep2').style.display = 'block';
+                    gsap.from("#forgotStep2", { y: 20, opacity: 0, duration: 0.5 });
+                } else {
+                    showToast(data.error, "error");
+                    btn.disabled = false;
+                    btn.innerText = "Send OTP";
                 }
             })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast("Connection error. Please check and try again.", "error");
-                btn.innerText = originalText;
+            .catch(err => {
+                showToast("Connection failed", "error");
                 btn.disabled = false;
+                btn.innerText = "Send OTP";
+            });
+        }
+
+        // FORGOT PASSWORD STEP 2
+        document.getElementById('forgotPasswordForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const otp = document.getElementById('otpCode').value;
+            const pass = document.getElementById('newPass').value;
+            const btn = document.getElementById('verifyBtn');
+
+            if (!otp || !pass) { showToast("Both fields required", "warning"); return; }
+
+            btn.disabled = true;
+            btn.innerText = "Updating...";
+
+            fetch('/api/verify-otp-reset/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                body: JSON.stringify({ otp: otp, password: pass })
+            })
+            .then(r => {
+                if (!r.ok) throw new Error("Server error");
+                return r.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showToast("Password updated!", "success");
+                    setTimeout(() => toggleForm('login'), 1500);
+                } else {
+                    showToast(data.error, "error");
+                    btn.disabled = false;
+                    btn.innerText = "Update Password";
+                }
+            })
+            .catch(err => {
+                showToast("Update failed", "error");
+                btn.disabled = false;
+                btn.innerText = "Update Password";
             });
         });
     </script>
-    {% include 'partials/site_footer.html' %}
 </body>
 </html>

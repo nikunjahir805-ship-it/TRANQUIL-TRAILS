@@ -92,11 +92,35 @@
         border: 1px solid #eee; border-radius: 6px;
         background: #fafafa;
     }
+
+    .toolbar-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .export-link {
+        background: #fff;
+        border: 1px solid #eee;
+        padding: 10px 12px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #333;
+        font-size: 0.9rem;
+        transition: 0.2s;
+    }
+
+    .export-link:hover {
+        background: #2c2c2c;
+        color: white;
+        border-color: #2c2c2c;
+    }
 </style>
 
 <div class="fade-in-up">
 
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; gap: 16px; flex-wrap: wrap;">
         <div style="position: relative;">
             <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #aaa;"></i>
             <input type="text" id="searchInput" placeholder="Search categories..." 
@@ -105,10 +129,17 @@
                    onblur="this.style.borderColor='#eee'; this.style.width='300px'">
         </div>
 
-        <button onclick="openModal()" 
-                style="background: #2c2c2c; color: white; padding: 12px 25px; border-radius: 30px; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px;">
-            <i class="fas fa-plus"></i> New Collection
-        </button>
+        <div class="toolbar-actions">
+            <a href="{% url 'admin_export_categories' %}?format=csv" class="export-link">CSV</a>
+            <a href="{% url 'admin_export_categories' %}?format=word" class="export-link">Word</a>
+            <a href="{% url 'admin_export_categories' %}?format=excel" class="export-link">Excel</a>
+            <a href="{% url 'admin_export_categories' %}?format=pdf" class="export-link">PDF</a>
+
+            <button onclick="openModal()" 
+                    style="background: #2c2c2c; color: white; padding: 12px 25px; border-radius: 30px; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-plus"></i> New Collection
+            </button>
+        </div>
     </div>
 
     <table class="modern-table">

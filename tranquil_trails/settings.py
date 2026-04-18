@@ -152,3 +152,6 @@ LOGIN_URL = 'login'
 
 LOGIN_REDIRECT_URL = 'admin_dashboard'
 LOGOUT_REDIRECT_URL = 'login'
+
+# Email Settings for Password Reset (Console Backend for testing)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

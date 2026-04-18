@@ -76,6 +76,30 @@
 
     /* Fix for form elements in tables */
     .modern-table form { display: contents; }
+
+    .toolbar-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .export-link {
+        background: white;
+        border: 1px solid #eee;
+        padding: 8px 12px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #333;
+        font-size: 0.9rem;
+        transition: 0.2s;
+    }
+
+    .export-link:hover {
+        background: #2c2c2c;
+        color: white;
+        border-color: #2c2c2c;
+    }
 </style>
 
 <div class="fade-in-up">
@@ -94,7 +118,11 @@
                    style="padding: 10px 10px 10px 35px; border: 1px solid #eee; border-radius: 8px; width: 280px; outline: none;">
         </div>
 
-        <div style="display: flex; gap: 10px;">
+        <div class="toolbar-actions">
+            <a href="{% url 'admin_export_inventory' %}?format=csv" class="export-link">CSV</a>
+            <a href="{% url 'admin_export_inventory' %}?format=word" class="export-link">Word</a>
+            <a href="{% url 'admin_export_inventory' %}?format=excel" class="export-link">Excel</a>
+            <a href="{% url 'admin_export_inventory' %}?format=pdf" class="export-link">PDF</a>
             <button class="filter-chip active" onclick="filterTable('all', this)">All Stock</button>
             <button class="filter-chip" onclick="filterTable('low', this)">Low Stock</button>
             <button class="filter-chip" onclick="filterTable('out', this)">Out of Stock</button>
