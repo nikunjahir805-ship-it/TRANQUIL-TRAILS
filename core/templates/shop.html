@@ -1,4 +1,4 @@
-﻿{% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,273 +6,375 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shop | TRANQUIL TRAILS</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;500;600&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <link rel="stylesheet" href="{% static 'styles.css' %}">
 
     <style>
         :root {
             --primary: #8B5E3C;
+            --primary-light: #A67C5D;
             --dark: #2c2c2c;
             --bg: #F4EFE6;
             --white: #ffffff;
+            --accent: #2D4739;
+            --glass: rgba(255, 255, 255, 0.8);
+            --shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--dark); margin: 0; padding: 0; }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: var(--bg); 
+            color: var(--dark); 
+            margin: 0; 
+            padding: 0; 
+            overflow-x: hidden;
+        }
 
-        /* --- SHOP HEADER & FILTERS --- */
-        .shop-container { padding: 120px 5% 60px; min-height: 100vh; }
-        
-        .shop-header { text-align: center; margin-bottom: 40px; opacity: 0; transform: translateY(-20px); }
-        .shop-header h1 { font-family: 'Playfair Display'; font-size: 3.5rem; color: #2d2d2d; margin-bottom: 10px; }
-        .shop-header p { color: #666; font-size: 1.1rem; }
+        /* --- SHOP HEADER --- */
+        .shop-hero {
+            padding: 160px 5% 80px;
+            text-align: center;
+            background: radial-gradient(circle at 50% 50%, rgba(139, 94, 60, 0.05) 0%, transparent 70%);
+            position: relative;
+        }
+
+        .shop-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/paper.png');
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .shop-header { position: relative; z-index: 2; }
+        .shop-header h1 { 
+            font-family: 'Playfair Display'; 
+            font-size: clamp(3rem, 8vw, 4.5rem); 
+            color: var(--dark); 
+            margin-bottom: 15px;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+        .shop-header p { 
+            color: var(--primary); 
+            font-size: 1.2rem; 
+            font-family: 'Outfit';
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        /* --- CONTROLS SECTION --- */
+        .shop-controls-container {
+            max-width: 1200px;
+            margin: -40px auto 40px;
+            padding: 0 5%;
+            position: relative;
+            z-index: 10;
+        }
 
         .shop-controls {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 300px;
             gap: 20px;
-            margin-bottom: 26px;
-            opacity: 0;
-            transform: translateY(12px);
-        }
-        .shop-category-dropdown {
-            width: 100%;
-            border: 1px solid #d8c6b1;
-            border-radius: 50px;
-            background: #fff;
-            color: #2d2d2d;
-            font-family: 'Poppins', sans-serif;
-            font-size: 1rem;
-            font-weight: 500;
-            padding: 0 20px;
-            min-height: 58px;
-            outline: none;
-            box-shadow: 0 8px 25px rgba(139, 94, 60, 0.1);
-            transition: border-color 0.25s, box-shadow 0.25s, transform 0.2s;
-        }
-        .shop-category-dropdown:focus {
-            border-color: var(--primary);
-            box-shadow: 0 12px 35px rgba(139, 94, 60, 0.18);
-            transform: translateY(-2px);
-        }
-
-        .category-filters { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 30px; opacity: 0; transform: translateY(10px); }
-        .filter-btn {
-            background: transparent;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            padding: 8px 25px;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: 0.3s;
-            font-family: 'Poppins';
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-        .filter-btn:hover, .filter-btn.active { background: var(--primary); color: white; }
-
-        /* --- SEARCH BAR STYLES --- */
-        .search-bar-container {
-            max-width: 100%;
-            margin: 0;
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            padding: 15px;
+            border-radius: 100px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
 
         .search-wrapper {
             position: relative;
-            background: white;
-            border-radius: 50px;
-            box-shadow: 0 8px 25px rgba(139, 94, 60, 0.1);
-            overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 2px solid transparent;
-        }
-
-        .search-wrapper:focus-within {
-            box-shadow: 0 12px 35px rgba(139, 94, 60, 0.18);
-            transform: translateY(-3px);
-            border-color: var(--primary);
+            display: flex;
+            align-items: center;
+            padding: 0 25px;
         }
 
         .search-icon {
-            position: absolute;
-            left: 22px;
-            top: 50%;
-            transform: translateY(-50%);
             color: var(--primary);
-            font-size: 1.1rem;
-            pointer-events: none;
-            transition: color 0.3s ease;
+            font-size: 1.2rem;
+            margin-right: 15px;
         }
 
         .search-input {
             width: 100%;
-            padding: 16px 55px 16px 55px;
             border: none;
-            outline: none;
-            font-family: 'Poppins', sans-serif;
+            background: transparent;
+            font-family: 'Poppins';
             font-size: 1rem;
             color: var(--dark);
-            background: transparent;
-            transition: padding 0.3s ease;
+            outline: none;
         }
 
-        .search-input::placeholder {
-            color: #aaa;
-            font-weight: 300;
-        }
-
-        .search-input:focus::placeholder {
-            color: #ccc;
-        }
+        .search-input::placeholder { color: #999; }
 
         .clear-search {
             position: absolute;
-            right: 18px;
-            top: 50%;
-            transform: translateY(-50%) scale(0);
-            width: 32px;
-            height: 32px;
+            right: 15px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             border: none;
-            background: rgba(139, 94, 60, 0.1);
-            color: var(--primary);
+            background: rgba(0,0,0,0.05);
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
+            transition: var(--transition);
         }
 
-        .clear-search.visible {
-            transform: translateY(-50%) scale(1);
-            display: flex;
-        }
+        .clear-search:hover { background: var(--primary); color: white; }
 
-        .clear-search:hover {
+        .shop-category-dropdown {
             background: var(--primary);
             color: white;
-            transform: translateY(-50%) scale(1.1);
+            border: none;
+            border-radius: 100px;
+            padding: 0 30px;
+            font-family: 'Poppins';
+            font-weight: 500;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: calc(100% - 20px) center;
+            transition: var(--transition);
+            min-height: 55px;
         }
 
-        /* No results message */
-        .no-results-message {
-            text-align: center;
-            padding: 60px 20px;
-            grid-column: 1 / -1;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        .no-results-message i {
-            font-size: 3rem;
-            color: #ddd;
-            margin-bottom: 15px;
-            display: block;
-        }
-
-        .no-results-message h3 {
-            font-family: 'Playfair Display';
-            font-size: 1.6rem;
-            color: #999;
-            margin-bottom: 8px;
-        }
-
-        .no-results-message p {
-            color: #aaa;
-            font-size: 0.95rem;
-        }
+        .shop-category-dropdown:hover { background: var(--primary-light); }
 
         /* --- PRODUCT GRID --- */
+        .product-section {
+            padding: 40px 5% 100px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
         .product-grid { 
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 30px;
-            max-width: 1200px; 
-            margin: 0 auto; 
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 40px;
         }
 
         .product-card {
-            background: white; padding: 15px; border-radius: 12px; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05); transition: all 0.3s ease;
-            display: flex; flex-direction: column; justify-content: space-between;
-            opacity: 0; transform: translateY(30px); position: relative;
-        }
-        .product-card:hover { transform: translateY(-10px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
-
-        .product-img-box { 
-            width: 100%; height: 320px; border-radius: 8px; overflow: hidden; 
-            margin-bottom: 15px; background: #f9f9f9; position: relative;
-        }
-        .product-img-box img { 
-            width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; 
-        }
-        .product-card:hover .product-img-box img { transform: scale(1.05); }
-
-        /* Quick View Icon */
-        .quick-view-btn {
-            position: absolute; bottom: -50px; left: 50%; transform: translateX(-50%);
-            background: white; color: var(--dark); width: 45px; height: 45px;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 2;
-        }
-        .product-card:hover .quick-view-btn { bottom: 20px; }
-        .quick-view-btn:hover { background: var(--primary); color: white; }
-
-        /* Typography */
-        .product-card h3 { 
-            font-family: 'Playfair Display'; font-size: 1.25rem; margin-bottom: 5px; color: #333;
-        }
-        .product-card .price { 
-            font-weight: 600; color: var(--primary); margin-bottom: 15px; font-size: 1.1rem;
+            background: var(--white);
+            border-radius: 24px;
+            overflow: hidden;
+            transition: var(--transition);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(0,0,0,0.03);
         }
 
-        /* Buttons */
-        .add-btn {
-            width: 100%; padding: 12px; background: var(--primary); color: white;
-            border: none; border-radius: 6px; cursor: pointer; transition: 0.3s;
-            font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;
+        .product-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 30px 60px rgba(139, 94, 60, 0.12);
         }
-        .add-btn:hover { background: var(--dark); }
 
+        .product-img-box {
+            width: 100%;
+            height: 380px;
+            overflow: hidden;
+            position: relative;
+        }
 
-        /* Dropdown & Nav adjustments */
-        .nav-user-container { position: relative; display: flex; align-items: center; }
-        .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid var(--primary); transition: transform 0.2s; }
-        .profile-dropdown {
-            display: none; position: absolute; top: 55px; right: 0; background-color: #ffffff;
-            min-width: 180px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); border-radius: 8px; z-index: 1000; overflow: hidden; border: 1px solid #e0e0e0;
+        .product-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 1s cubic-bezier(0.2, 1, 0.3, 1);
         }
-        .profile-dropdown.show { display: block; animation: fadeIn 0.3s ease; }
-        .profile-dropdown a { color: #2d2d2d; padding: 12px 16px; text-decoration: none; display: block; font-size: 0.9rem; border-bottom: 1px solid #f4f4f4; transition: 0.2s; }
-        .profile-dropdown a:hover { background-color: #f4f1ea; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        @media (max-width: 1100px) {
-            .product-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
+        .product-card:hover .product-img-box img {
+            transform: scale(1.1);
         }
-        @media (max-width: 768px) {
-            .shop-controls {
-                grid-template-columns: 1fr;
-                gap: 14px;
-            }
-            .search-bar-container {
-                max-width: 100%;
-            }
-            .product-grid {
-                grid-template-columns: 1fr;
-                gap: 22px;
-            }
-            .search-input {
-                font-size: 0.95rem;
-                padding: 14px 50px 14px 50px;
-            }
+
+        .card-actions {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 5;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: var(--transition);
         }
+
+        .product-card:hover .card-actions {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .action-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--white);
+            color: var(--dark);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: var(--transition);
+        }
+
+        .action-btn:hover { background: var(--primary); color: white; }
+        .action-btn.active { background: #ff4757; color: white; }
+
+        .quick-view-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+
+        .product-card:hover .quick-view-overlay {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .quick-view-link {
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .product-info {
+            padding: 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-category {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .product-info h3 {
+            font-family: 'Playfair Display';
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--dark);
+            transition: color 0.3s;
+        }
+
+        .product-card:hover .product-info h3 { color: var(--primary); }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .price {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--dark);
+            font-family: 'Outfit';
+        }
+
+        .add-to-cart-btn {
+            background: var(--dark);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+        }
+
+        .add-to-cart-btn:hover { 
+            background: var(--primary); 
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(139, 94, 60, 0.2);
+        }
+
+        /* --- EMPTY STATE --- */
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 100px 20px;
+        }
+
+        .no-results i {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .no-results h2 {
+            font-family: 'Playfair Display';
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .reset-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 992px) {
+            .shop-controls { grid-template-columns: 1fr; border-radius: 20px; padding: 20px; }
+            .shop-category-dropdown { width: 100%; }
+            .product-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        }
+
+        @media (max-width: 600px) {
+            .shop-hero { padding: 120px 5% 60px; }
+            .shop-header h1 { font-size: 2.5rem; }
+            .product-img-box { height: 300px; }
+            .product-info h3 { font-size: 1.2rem; }
+        }
+
+        /* Animations */
+        .reveal { opacity: 0; transform: translateY(30px); }
     </style>
 </head>
 <body>
@@ -280,79 +382,94 @@
     {% include 'partials/site_nav.html' %}
     {% include 'partials/cart_sidebar.html' %}
 
-    <section class="shop-container">
+    <section class="shop-hero">
         <div class="shop-header">
-            <h1>The Artisan Archive</h1>
-            <p>Curated Handcrafted Pieces for Your Home</p>
+            <p class="reveal">Curated for Your Soul</p>
+            <h1 class="reveal">The Artisan Archive</h1>
         </div>
+    </section>
 
-        <div class="shop-controls">
-            <div class="search-bar-container">
-                <div class="search-wrapper">
-                    <i class="fas fa-search search-icon"></i>
-                    <input 
-                        type="text" 
-                        id="productSearch" 
-                        class="search-input" 
-                        placeholder="Search for handcrafted treasures..."
-                        autocomplete="off"
-                    >
-                    <button class="clear-search" id="clearSearch" style="display: none;">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
+    <div class="shop-controls-container">
+        <div class="shop-controls reveal">
+            <div class="search-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input 
+                    type="text" 
+                    id="productSearch" 
+                    class="search-input" 
+                    placeholder="Search for handcrafted treasures..."
+                    autocomplete="off"
+                >
+                <button class="clear-search" id="clearSearch" style="display: none;">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <select id="shopCategoryDropdown" class="shop-category-dropdown" aria-label="Filter products by category">
-                <option value="all">All Categories</option>
+                <option value="all">All Masterpieces</option>
                 {% for category in categories %}
                 <option value="{{ category.name }}">{{ category.name }}</option>
                 {% endfor %}
             </select>
         </div>
+    </div>
 
-
+    <section class="product-section">
         <div class="product-grid" id="shopGrid">
             {% for product in products %}
-            <div class="product-card" data-category="{{ product.category.name|default:'Other' }}">
+            <div class="product-card reveal" data-category="{{ product.category.name|default:'Other' }}">
                 <div class="product-img-box">
                     {% if product.image %}
-                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">
                     {% else %}
                         <img src="{% static 'placeholder.jpg' %}" alt="No Image">
                     {% endif %}
+                    
+                    <div class="card-actions">
+                        <button class="action-btn wishlist-btn" 
+                                data-id="{{ product.id }}" 
+                                data-name="{{ product.name }}"
+                                data-price="{{ product.price }}"
+                                data-img="{% if product.image %}{{ product.image.url }}{% endif %}"
+                                title="Add to Wishlist">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
 
-                    <a href="{% url 'product_detail' product.id %}" class="quick-view-btn" title="View Details">
-                        <i class="fas fa-eye"></i>
-                    </a>
+                    <div class="quick-view-overlay">
+                        <a href="{% url 'product_detail' product.id %}" class="quick-view-link">
+                            <span>VIEW DETAILS</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
                 </div>
                 
-                <a href="{% url 'product_detail' product.id %}" style="text-decoration: none;">
-                    <h3>{{ product.name }}</h3>
-                </a>
+                <div class="product-info">
+                    <span class="product-category">{{ product.category.name|default:'Other' }}</span>
+                    <a href="{% url 'product_detail' product.id %}" style="text-decoration: none;">
+                        <h3>{{ product.name }}</h3>
+                    </a>
+                    
+                    <div class="price-row">
+                        <p class="price">₹{{ product.price }}</p>
+                    </div>
 
-                <p class="price">₹{{ product.price }}</p>
-                
-                <div style="display:flex; gap:10px;">
-                    <button class="add-btn"
+                    <button class="add-to-cart-btn add-btn"
                             data-id="{{ product.id }}"
                             data-name="{{ product.name }}"
                             data-price="{{ product.price }}"
-                            data-img="{% if product.image %}{{ product.image.url }}{% endif %}">
-                        Add to Cart
-                    </button>
-                    <button class="wishlist-btn"
-                            style="min-width:110px; border-radius:6px;"
-                            data-id="{{ product.id }}"
-                            data-name="{{ product.name }}"
-                            data-price="{{ product.price }}"
-                            data-img="{% if product.image %}{{ product.image.url }}{% endif %}">
-                        <i class="fas fa-heart"></i>
-                        <span class="wishlist-btn-label" style="margin-left:6px;">Wishlist</span>
+                            data-img="{% if product.image %}{{ product.image.url }}{% endif %}"
+                            style="width: 100%; margin-top: 15px; justify-content: center;">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span>ADD TO CART</span>
                     </button>
                 </div>
             </div>
             {% empty %}
-                <p style="text-align:center; grid-column:1/-1; color:#777;">No products available at the moment.</p>
+                <div class="no-results reveal">
+                    <i class="fas fa-search"></i>
+                    <h2>No treasures found</h2>
+                    <p>Try exploring a different category or search term.</p>
+                </div>
             {% endfor %}
         </div>
     </section>
@@ -360,193 +477,84 @@
     {% include 'partials/site_footer.html' %}
 
     <script>
-        window.djangoUser = "{{ user.username|default:'guest' }}";
+        // --- GSAP ANIMATIONS ---
+        gsap.registerPlugin(ScrollTrigger);
 
-        // ANIMATIONS
         document.addEventListener("DOMContentLoaded", () => {
-            gsap.to(".shop-header", { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" });
-            gsap.to(".shop-controls", { opacity: 1, y: 0, duration: 0.7, delay: 0.1, ease: "power2.out" });
-            gsap.to(".category-filters", { opacity: 1, y: 0, duration: 0.8, delay: 0.25, ease: "power2.out" });
-            gsap.to(".search-wrapper, .shop-category-dropdown", { 
-                opacity: 1, 
-                y: 0, 
-                duration: 0.8, 
-                delay: 0.35, 
-                ease: "power2.out" 
+            // Initial load animations
+            gsap.to(".reveal", {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                stagger: 0.15,
+                ease: "expo.out",
+                scrollTrigger: {
+                    trigger: ".reveal",
+                    start: "top 85%",
+                }
             });
-            const requestedCategory = getCategoryFromURL();
-            if (requestedCategory) {
-                filterProducts(requestedCategory);
-            } else {
-                animateGrid();
+
+            // Grid staggered entrance
+            animateGrid();
+            
+            // Check for category in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const categoryParam = urlParams.get('category');
+            if (categoryParam) {
+                const dropdown = document.getElementById('shopCategoryDropdown');
+                if (dropdown) {
+                    dropdown.value = categoryParam;
+                    filterProducts(categoryParam);
+                }
             }
         });
 
         function animateGrid() {
-            gsap.fromTo(".product-card:not(.hidden)", 
-                { opacity: 0, y: 30 },
-                { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power2.out" } 
+            const cards = document.querySelectorAll('.product-card:not(.hidden)');
+            gsap.fromTo(cards, 
+                { opacity: 0, y: 40, scale: 0.95 },
+                { 
+                    opacity: 1, 
+                    y: 0, 
+                    scale: 1,
+                    duration: 0.8, 
+                    stagger: 0.08, 
+                    ease: "power3.out",
+                    overwrite: true
+                } 
             );
         }
 
-        // 4. FILTER LOGIC
-        let currentCategory = 'all';
-        const CATEGORY_ALIASES = {
-            all: 'all',
-            wood: 'wood',
-            wooden: 'wood',
-            woodwork: 'wood',
-            ceramic: 'ceramics',
-            ceramics: 'ceramics',
-            textile: 'textiles',
-            textiles: 'textiles',
-            other: 'other'
-        };
-
-        function normalizeCategory(category) {
-            const raw = (category || '').toString().trim().toLowerCase();
-            return CATEGORY_ALIASES[raw] || raw;
-        }
-
-        function categoryMatches(productCategory, selectedCategory) {
-            const normalizedSelected = normalizeCategory(selectedCategory);
-            if (normalizedSelected === 'all') return true;
-
-            const normalizedProduct = normalizeCategory(productCategory);
-            return normalizedProduct === normalizedSelected ||
-                   normalizedProduct.includes(normalizedSelected) ||
-                   normalizedSelected.includes(normalizedProduct);
-        }
-
-        function setActiveFilterButton(category, sourceBtn = null) {
-            const filterButtons = document.querySelectorAll('.filter-btn');
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-
-            if (sourceBtn) {
-                sourceBtn.classList.add('active');
-                if (categoryDropdown) {
-                    categoryDropdown.value = sourceBtn.getAttribute('data-category') || 'all';
-                }
-                return;
-            }
-
-            const matchedBtn = Array.from(filterButtons).find(btn =>
-                categoryMatches(btn.getAttribute('data-category'), category)
-            );
-
-            if (matchedBtn) {
-                matchedBtn.classList.add('active');
-                if (categoryDropdown) {
-                    categoryDropdown.value = matchedBtn.getAttribute('data-category') || 'all';
-                }
-                return;
-            }
-
-            const allBtn = Array.from(filterButtons).find(btn => btn.getAttribute('data-category') === 'all');
-            if (allBtn) allBtn.classList.add('active');
-            if (categoryDropdown) categoryDropdown.value = 'all';
-        }
-
-        function getCategoryFromURL() {
-            const params = new URLSearchParams(window.location.search);
-            return (params.get('category') || '').trim();
-        }
-
-        function filterProducts(category, sourceBtn = null) {
-            currentCategory = category;
-            setActiveFilterButton(category, sourceBtn);
-
-            const cards = document.querySelectorAll('.product-card');
-
-            cards.forEach(card => {
-                const productCat = card.getAttribute('data-category');
-                
-                if (categoryMatches(productCat, category)) {
-                    card.style.display = 'flex';
-                    card.classList.remove('hidden');
-                } else {
-                    card.style.display = 'none';
-                    card.classList.add('hidden');
-                }
-            });
-
-            // Re-apply search after category filter
-            const searchTerm = searchInput.value.trim();
-            if (searchTerm) {
-                performSearch(searchTerm);
-            } else {
-                animateGrid();
-            }
-        }
-
-        // 5. SEARCH FUNCTIONALITY WITH ANIMATIONS
+        // --- FILTER & SEARCH LOGIC ---
         const searchInput = document.getElementById('productSearch');
         const clearSearchBtn = document.getElementById('clearSearch');
-        const productCards = document.querySelectorAll('.product-card');
-        const shopGrid = document.getElementById('shopGrid');
         const categoryDropdown = document.getElementById('shopCategoryDropdown');
+        const shopGrid = document.getElementById('shopGrid');
+        const productCards = document.querySelectorAll('.product-card');
 
-        if (categoryDropdown) {
-            categoryDropdown.addEventListener('change', function() {
-                filterProducts(this.value);
-            });
+        let currentCategory = 'all';
+
+        function filterProducts(category) {
+            currentCategory = category;
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            performUnifiedFilter(category, searchTerm);
         }
 
-        // Search input event
-        searchInput.addEventListener('input', function(e) {
-            const searchTerm = e.target.value.trim().toLowerCase();
-            
-            // Show/hide clear button with animation
-            if (searchTerm) {
-                clearSearchBtn.classList.add('visible');
-                clearSearchBtn.style.display = 'flex';
-            } else {
-                clearSearchBtn.classList.remove('visible');
-                setTimeout(() => {
-                    if (!searchInput.value.trim()) {
-                        clearSearchBtn.style.display = 'none';
-                    }
-                }, 300);
-            }
-            
-            performSearch(searchTerm);
-        });
-
-        // Clear search button
-        clearSearchBtn.addEventListener('click', function() {
-            searchInput.value = '';
-            clearSearchBtn.classList.remove('visible');
-            setTimeout(() => {
-                clearSearchBtn.style.display = 'none';
-            }, 300);
-            performSearch('');
-            searchInput.focus();
-        });
-
-        // Main search function
-        function performSearch(searchTerm) {
+        function performUnifiedFilter(category, searchTerm) {
             let visibleCount = 0;
-            const noResultsMsg = document.querySelector('.no-results-message');
             
-            // Remove existing no-results message if present
-            if (noResultsMsg) {
-                gsap.to(noResultsMsg, {
-                    opacity: 0,
-                    y: 20,
-                    duration: 0.3,
-                    onComplete: () => noResultsMsg.remove()
-                });
-            }
-            
+            // Clear existing no-results
+            const existingNoResults = document.querySelector('.no-results');
+            if (existingNoResults) existingNoResults.remove();
+
             productCards.forEach(card => {
+                const productCat = card.getAttribute('data-category').toLowerCase();
                 const productName = card.querySelector('h3').textContent.toLowerCase();
-                const productCategory = card.getAttribute('data-category');
                 
-                // Check both category filter AND search term
-                const matchesCategory = categoryMatches(productCategory, currentCategory);
-                const matchesSearch = !searchTerm || productName.includes(searchTerm);
+                const matchesCat = (category === 'all' || productCat === category.toLowerCase());
+                const matchesSearch = (!searchTerm || productName.includes(searchTerm));
                 
-                if (matchesCategory && matchesSearch) {
+                if (matchesCat && matchesSearch) {
                     card.style.display = 'flex';
                     card.classList.remove('hidden');
                     visibleCount++;
@@ -555,42 +563,55 @@
                     card.classList.add('hidden');
                 }
             });
-            
-            // Show "no results" message if nothing found
-            if (visibleCount === 0 && searchTerm) {
+
+            if (visibleCount === 0) {
                 const noResultsHTML = `
-                    <div class="no-results-message">
+                    <div class="no-results">
                         <i class="fas fa-search"></i>
-                        <h3>No products found</h3>
-                        <p>Try adjusting your search or browse our categories</p>
+                        <h2>No treasures found</h2>
+                        <p>Try exploring a different category or search term.</p>
+                        <button class="reset-btn" onclick="resetFilters()">Clear Filters</button>
                     </div>
                 `;
                 shopGrid.insertAdjacentHTML('beforeend', noResultsHTML);
-                
-                gsap.fromTo('.no-results-message', 
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
-                );
+                gsap.from(".no-results", { opacity: 0, y: 20, duration: 0.5 });
+            } else {
+                animateGrid();
             }
-            
-            // Animate visible cards
-            animateGrid();
         }
 
-        // Focus animation
-        searchInput.addEventListener('focus', function() {
-            gsap.to('.search-wrapper', {
-                scale: 1.02,
-                duration: 0.3,
-                ease: "power2.out"
-            });
+        function resetFilters() {
+            searchInput.value = '';
+            categoryDropdown.value = 'all';
+            clearSearchBtn.style.display = 'none';
+            filterProducts('all');
+        }
+
+        categoryDropdown.addEventListener('change', (e) => filterProducts(e.target.value));
+
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.trim().toLowerCase();
+            clearSearchBtn.style.display = term ? 'flex' : 'none';
+            performUnifiedFilter(categoryDropdown.value, term);
         });
 
-        searchInput.addEventListener('blur', function() {
-            gsap.to('.search-wrapper', {
-                scale: 1,
-                duration: 0.3,
-                ease: "power2.out"
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            clearSearchBtn.style.display = 'none';
+            performUnifiedFilter(categoryDropdown.value, '');
+            searchInput.focus();
+        });
+
+        // Magnetic effect for buttons (Subtle)
+        document.querySelectorAll('.add-to-cart-btn, .action-btn').forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                gsap.to(btn, { x: x * 0.2, y: y * 0.2, duration: 0.3 });
+            });
+            btn.addEventListener('mouseleave', () => {
+                gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
             });
         });
     </script>

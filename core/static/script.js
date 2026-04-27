@@ -839,6 +839,18 @@ function logoutUser() {
         });
 }
 
+function initRevealOnScroll() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initHamburger();
     initCartSidebar();
@@ -846,6 +858,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initGlobalStoreButtons();
     initSlider();
     initWoodSection();
+    initRevealOnScroll(); // Added reveal logic
     initCheckoutOptions();
     initCheckoutSubmit();
     renderCartSidebar();

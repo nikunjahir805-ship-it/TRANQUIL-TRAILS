@@ -1,4 +1,4 @@
-﻿{% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -391,6 +391,119 @@
             </div>
         </div>
     </section>
+
+    {% if extra_case_data %}
+    <!-- Dynamic Category Showcases -->
+    {% for item in extra_case_data %}
+        {% with cat=item.category products=item.products %}
+            {% if forloop.counter0|divisibleby:3 %}
+                <!-- Layout A: Mosaic Grid -->
+                <section class="dynamic-category-showcase layout-mosaic" id="cat-{{ cat.slug }}">
+                    <div class="section-container">
+                        <div class="category-header">
+                            <span class="eyebrow" style="color: #8B5E3C; letter-spacing: 3px; font-size: 0.8rem; font-weight: 700;">EXPLORE</span>
+                            <h2 class="playfair" style="font-size: 3rem; margin-top: 5px;">{{ cat.name }} Heritage</h2>
+                        </div>
+                        <div class="mosaic-grid">
+                            {% for prod in products %}
+                            <div class="mosaic-item reveal-on-scroll">
+                                <div class="mosaic-media">
+                                    <img src="{{ prod.image.url }}" alt="{{ prod.name }}">
+                                    <div class="mosaic-overlay">
+                                        <div class="mosaic-info">
+                                            <h3>{{ prod.name }}</h3>
+                                            <p>₹{{ prod.price }}</p>
+                                            <button class="add-to-cart-btn" 
+                                                    data-id="{{ prod.id }}" data-name="{{ prod.name }}" 
+                                                    data-price="{{ prod.price }}" data-img="{{ prod.image.url }}">
+                                                Quick Add
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </section>
+            {% elif forloop.counter|add:"-1"|divisibleby:3 or forloop.counter0 == 1 %}
+                <!-- Layout B: Horizontal Shelf -->
+                <section class="dynamic-category-showcase layout-shelf" id="cat-{{ cat.slug }}">
+                    <div class="shelf-bg-text">{{ cat.name }}</div>
+                    <div class="section-container">
+                        <div class="category-header" style="text-align: center; margin-bottom: 50px;">
+                            <span class="eyebrow" style="color: #ffffff; letter-spacing: 3px; font-size: 0.8rem; font-weight: 700; opacity: 0.8;">NEW ARRIVALS</span>
+                            <h2 class="playfair" style="font-size: 3.5rem; color: #ffffff; margin-top: 10px;">The {{ cat.name }} Shelf</h2>
+                        </div>
+                        <div class="shelf-scroll-container">
+                            <div class="shelf-track">
+                                {% for prod in products %}
+                                <div class="shelf-card glass-card reveal-on-scroll">
+                                    <div class="shelf-img-box">
+                                        <img src="{{ prod.image.url }}" alt="{{ prod.name }}">
+                                        <button class="wishlist-btn wishlist-toggle" 
+                                                data-id="{{ prod.id }}" data-name="{{ prod.name }}" 
+                                                data-price="{{ prod.price }}" data-img="{{ prod.image.url }}">
+                                            <i class="fas fa-heart"></i>
+                                        </button>
+                                    </div>
+                                    <div class="shelf-info">
+                                        <h3>{{ prod.name }}</h3>
+                                        <div class="shelf-row">
+                                            <span class="price">₹{{ prod.price }}</span>
+                                            <button class="add-to-cart-btn"
+                                                    data-id="{{ prod.id }}" data-name="{{ prod.name }}" 
+                                                    data-price="{{ prod.price }}" data-img="{{ prod.image.url }}">
+                                                <i class="fas fa-shopping-bag"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            {% else %}
+                <!-- Layout C: Split Banner -->
+                <section class="dynamic-category-showcase layout-split" id="cat-{{ cat.slug }}">
+                    <div class="split-container">
+                        <div class="split-side split-banner reveal-on-scroll">
+                            <div class="banner-content">
+                                <span class="eyebrow" style="color: var(--primary); font-weight: 800; letter-spacing: 4px;">FEATURED</span>
+                                <h1 class="playfair" style="font-size: 4rem; line-height: 1.1; margin-top: 10px;">{{ cat.name }}<br>Artistry</h1>
+                                <p style="margin: 20px 0 30px; font-size: 1.1rem; opacity: 0.8;">Discover the soul of {{ cat.name }} through our handcrafted selective favorites.</p>
+                                <a href="{% url 'shop' %}?category={{ cat.name|urlencode }}" class="shop-collection-btn">Browse Collection</a>
+                            </div>
+                            {% if cat.image %}
+                                <img src="{{ cat.image.url }}" alt="{{ cat.name }}">
+                            {% else %}
+                                <div class="gradient-bg"></div>
+                            {% endif %}
+                        </div>
+                        <div class="split-side split-prods">
+                            <div class="grid-wrap">
+                                {% for prod in products|slice:":4" %}
+                                <div class="split-card reveal-on-scroll">
+                                    <img src="{{ prod.image.url }}" alt="{{ prod.name }}">
+                                    <div class="split-info">
+                                        <h4>{{ prod.name }}</h4>
+                                        <button class="add-to-cart-btn"
+                                                data-id="{{ prod.id }}" data-name="{{ prod.name }}" 
+                                                data-price="{{ prod.price }}" data-img="{{ prod.image.url }}">
+                                            ₹{{ prod.price }}
+                                        </button>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            {% endif %}
+        {% endwith %}
+    {% endfor %}
+    {% endif %}
 
     <section class="story-section" style="background: #2c2c2c; color: white; padding: 80px 5%; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 50px;">
          

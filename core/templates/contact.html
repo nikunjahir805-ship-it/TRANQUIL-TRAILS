@@ -1,535 +1,480 @@
-﻿{% load static %} 
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Us | Tranquil Trails</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;500;600&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <link rel="stylesheet" href="{% static 'styles.css' %}">
 
     <style>
-        /* --- Floating Background Shapes --- */
-        .bg-shapes {
-            position: fixed;
-            width: 100%;
-            height: 100%;
+        :root {
+            --primary: #8B5E3C;
+            --primary-light: #A67C5D;
+            --dark: #2c2c2c;
+            --bg: #F4EFE6;
+            --white: #ffffff;
+            --accent: #2D4739;
+            --glass: rgba(255, 255, 255, 0.85);
+            --shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: var(--bg); 
+            color: var(--dark); 
+            margin: 0; 
+            padding: 0; 
+            overflow-x: hidden;
+        }
+
+        /* --- CONTACT HERO --- */
+        .contact-hero {
+            padding: 160px 5% 80px;
+            text-align: center;
+            background: radial-gradient(circle at 50% 50%, rgba(139, 94, 60, 0.05) 0%, transparent 70%);
+            position: relative;
+        }
+
+        .contact-hero::before {
+            content: '';
+            position: absolute;
             top: 0;
             left: 0;
-            z-index: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/paper.png');
+            opacity: 0.3;
             pointer-events: none;
-            overflow: hidden;
-        }
-        .shape {
-            position: absolute;
-            border-radius: 50%;
-            opacity: 0.05;
-            animation: float 20s infinite ease-in-out;
-        }
-        .shape-1 { width: 300px; height: 300px; background: #8B5E3C; top: 10%; left: 5%; animation-delay: 0s; }
-        .shape-2 { width: 200px; height: 200px; background: #2d2d2d; top: 60%; right: 10%; animation-delay: 5s; }
-        .shape-3 { width: 150px; height: 150px; background: #8B5E3C; bottom: 15%; left: 15%; animation-delay: 10s; }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            25% { transform: translateY(-20px) rotate(5deg); }
-            50% { transform: translateY(10px) rotate(-5deg); }
-            75% { transform: translateY(-10px) rotate(3deg); }
         }
 
-        /* --- Contact Page Specific Styles --- */
-        .contact-wrapper {
-            position: relative;
-            z-index: 1;
+        .hero-content { position: relative; z-index: 2; }
+        .hero-content h1 { 
+            font-family: 'Playfair Display'; 
+            font-size: clamp(3rem, 8vw, 4.5rem); 
+            color: var(--dark); 
+            margin-bottom: 15px;
+            line-height: 1.1;
         }
-        .contact-container {
-            padding: 100px 10%;
+        .hero-content p { 
+            color: var(--primary); 
+            font-size: 1.2rem; 
+            font-family: 'Outfit';
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        /* --- CONTACT CONTENT --- */
+        .contact-main {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 5% 100px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 100px;
-            background: #F4EFE6;
-            min-height: 80vh;
-            opacity: 0;
-            animation: fadeInUp 1s ease forwards;
-        }
-        
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            grid-template-columns: 0.8fr 1.2fr;
+            gap: 60px;
+            align-items: start;
         }
 
-        .contact-info {
-            animation: slideInLeft 1s ease 0.3s forwards;
-            opacity: 0;
-        }
-        
-        @keyframes slideInLeft {
-            from { opacity: 0; transform: translateX(-50px); }
-            to { opacity: 1; transform: translateX(0); }
+        /* Info Section */
+        .info-cards {
+            display: grid;
+            gap: 25px;
         }
 
-        .contact-info h2 {
-            font-family: 'Playfair Display';
-            font-size: 3.5rem;
-            margin-bottom: 30px;
-            color: #2d2d2d;
-            line-height: 1.2;
-        }
-        .contact-info p {
-            color: #555;
-            line-height: 1.8;
-            font-size: 1.05rem;
-        }
-        .info-item {
-            margin: 30px 0;
-            padding: 20px 0;
-            border-left: 3px solid #8B5E3C;
-            padding-left: 20px;
-            transition: all 0.3s ease;
-        }
-        .info-item:hover {
-            transform: translateX(10px);
-            border-left-width: 5px;
-        }
-        .info-item strong {
-            color: #2d2d2d;
-            font-size: 1.1rem;
-            display: block;
-            margin-bottom: 8px;
+        .info-card {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.03);
+            transition: var(--transition);
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
         }
 
-        .contact-form {
-            background: #fff;
-            padding: 50px;
-            border: 1px solid #eee;
+        .info-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 30px 60px rgba(139, 94, 60, 0.1);
+        }
+
+        .info-icon {
+            width: 55px;
+            height: 55px;
+            background: rgba(139, 94, 60, 0.1);
+            color: var(--primary);
             border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.08);
-            opacity: 0;
-            animation: slideInRight 1s ease 0.5s forwards;
-            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+            transition: var(--transition);
         }
-        
-        .contact-form:hover {
-            box-shadow: 0 25px 70px rgba(0,0,0,0.12);
-            transform: translateY(-5px);
+
+        .info-card:hover .info-icon {
+            background: var(--primary);
+            color: white;
+            transform: rotate(-10deg);
         }
-        
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(50px); }
-            to { opacity: 1; transform: translateX(0); }
+
+        .info-text h3 {
+            font-family: 'Outfit';
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .info-text p {
+            color: #555;
+            line-height: 1.6;
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        /* Form Section */
+        .form-panel {
+            background: var(--white);
+            padding: 50px;
+            border-radius: 32px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.03);
+            position: relative;
         }
 
         .form-group {
             margin-bottom: 25px;
-            position: relative;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #2d2d2d;
-            transition: color 0.3s ease;
-        }
-        .form-group input, .form-group textarea {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid #e0e0e0;
-            font-family: 'Poppins';
-            outline: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
-        }
-        .form-group input:focus, .form-group textarea:focus { 
-            border-color: #8B5E3C;
-            box-shadow: 0 0 0 4px rgba(139, 94, 60, 0.1);
-            transform: translateY(-2px);
-        }
-        .form-group textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-        
-        .submit-btn {
-            background: linear-gradient(135deg, #8B5E3C 0%, #6d4a2e 100%);
-            color: white;
-            padding: 16px 40px;
-            border: none;
-            cursor: pointer;
-            font-family: 'Poppins';
-            transition: all 0.4s ease;
-            border-radius: 8px;
-            font-weight: 600;
-            width: 100%;
-            font-size: 1rem;
-            position: relative;
-            overflow: hidden;
-        }
-        .submit-btn:before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-        .submit-btn:hover:before {
-            width: 300px;
-            height: 300px;
-        }
-        .submit-btn:hover { 
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(139, 94, 60, 0.3);
-        }
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
         }
 
-        /* Success Message */
-        .success-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--dark);
+            font-family: 'Outfit';
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input, 
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #f0f0f0;
+            background: #fcfcfc;
+            border-radius: 14px;
+            font-family: 'Poppins';
+            font-size: 1rem;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .form-group input:focus, 
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
             background: white;
-            padding: 40px 60px;
+            box-shadow: 0 0 0 4px rgba(139, 94, 60, 0.08);
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: var(--dark);
+            color: white;
+            border: none;
+            padding: 18px;
             border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-            z-index: 10000;
-            text-align: center;
-            opacity: 0;
-            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-        .success-message.show {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
-        .success-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: #4CAF50;
-            margin: 0 auto 20px;
+            font-weight: 600;
+            font-family: 'Poppins';
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
             display: flex;
             align-items: center;
             justify-content: center;
-            animation: scaleIn 0.5s ease;
+            gap: 12px;
+            letter-spacing: 1px;
         }
-        @keyframes scaleIn {
-            0% { transform: scale(0) rotate(-180deg); }
-            100% { transform: scale(1) rotate(0deg); }
+
+        .submit-btn:hover {
+            background: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 15px 30px rgba(139, 94, 60, 0.25);
         }
-        .success-icon svg {
-            width: 40px;
-            height: 40px;
-            stroke: white;
-            stroke-width: 3;
-            stroke-dasharray: 100;
-            stroke-dashoffset: 100;
-            animation: checkmark 0.5s ease 0.3s forwards;
+
+        /* --- REVIEWS SECTION --- */
+        .review-section {
+            padding: 100px 5%;
+            background: rgba(255, 255, 255, 0.5);
+            position: relative;
         }
-        @keyframes checkmark {
-            to { stroke-dashoffset: 0; }
+
+        .section-header {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 60px;
         }
-        .success-message h3 {
+
+        .section-header h2 {
             font-family: 'Playfair Display';
-            font-size: 2rem;
-            color: #2d2d2d;
-            margin-bottom: 10px;
+            font-size: 3rem;
+            margin-bottom: 15px;
         }
-        .success-message p {
-            color: #555;
-            font-size: 1rem;
+
+        .review-grid {
+            max-width: 1000px;
+            margin: 0 auto;
         }
-        .overlay {
+
+        /* --- SUCCESS MODAL --- */
+        .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 9999;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(8px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-        .overlay.show {
-            opacity: 1;
-            pointer-events: all;
+            transition: var(--transition);
         }
 
-        /* Loading Spinner */
-        .btn-loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top-color: white;
+        .modal-overlay.show { opacity: 1; pointer-events: all; }
+
+        .success-modal {
+            background: white;
+            padding: 50px;
+            border-radius: 32px;
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            transform: scale(0.9) translateY(20px);
+            transition: var(--transition);
+        }
+
+        .modal-overlay.show .success-modal { transform: scale(1) translateY(0); }
+
+        .success-icon-box {
+            width: 80px;
+            height: 80px;
+            background: #4CAF50;
+            color: white;
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Responsive */
-        @media (max-width: 900px) {
-            .contact-container { 
-                grid-template-columns: 1fr; 
-                gap: 50px; 
-                padding: 60px 5%;
-            }
-            .contact-info h2 {
-                font-size: 2.5rem;
-            }
-            .contact-form {
-                padding: 35px;
-            }
-            .info-item:hover {
-                transform: translateX(5px);
-            }
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 25px;
+            box-shadow: 0 10px 25px rgba(76, 175, 80, 0.3);
         }
 
+        .success-modal h2 { font-family: 'Playfair Display'; margin-bottom: 10px; }
+        .success-modal p { color: #666; margin-bottom: 30px; }
+
+        .close-modal-btn {
+            background: var(--dark);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
         }
+
+        .close-modal-btn:hover { background: var(--primary); }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 992px) {
+            .contact-main { grid-template-columns: 1fr; gap: 40px; }
+            .form-panel { padding: 35px; }
+        }
+
+        @media (max-width: 600px) {
+            .contact-hero { padding: 120px 5% 60px; }
+            .hero-content h1 { font-size: 2.5rem; }
+            .section-header h2 { font-size: 2rem; }
+        }
+
+        .reveal { opacity: 0; transform: translateY(30px); }
     </style>
 </head>
 <body>
-    <!-- Floating Background Shapes -->
-    <div class="bg-shapes">
-        <div class="shape shape-1"></div>
-        <div class="shape shape-2"></div>
-        <div class="shape shape-3"></div>
-    </div>
 
-    <nav>
-        <a href="{% url 'home' %}" class="logo-container">
-            <img src="{% static 'Adobe Express - file.png' %}" alt="Logo" class="logo-img">
-            <span class="logo-text">TRANQUIL TRAILS</span>
-        </a>
-        
-        <button class="hamburger" id="hamburger" aria-label="Toggle menu">
-            <span></span><span></span><span></span>
-        </button>
-
-        <ul class="nav-links" id="navLinks">
-            <li><a href="{% url 'home' %}">Home</a></li>
-            <li><a href="{% url 'shop' %}">Shop</a></li>
-            <li><a href="{% url 'gallery' %}">Gallery</a></li>
-            <li><a href="{% url 'about' %}">About</a></li>
-            <li><a href="{% url 'contact' %}" style="color: #8B5E3C; font-weight: bold;">Contact</a></li>
-
-            {% if user.is_staff %}
-            <li>
-                <a href="{% url 'admin_dashboard' %}" style="color: #d32f2f; font-weight: bold;">Admin Panel</a>
-            </li>
-            {% endif %}
-
-            {% if user.is_authenticated %}
-                <li>
-                    <div class="nav-user-container">
-                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" class="user-avatar" id="userAvatarBtn">
-                        
-                        <div class="profile-dropdown" id="profileDropdown">
-                            <div style="padding: 10px 16px; font-weight: bold; background: #f9f9f9; font-size: 0.8rem; border-bottom: 1px solid #eee;">
-                                Hi, {{ user.first_name|default:user.username }}
-                            </div>
-                            <a href="#">My Orders</a>
-                            <a href="{% url 'wishlist' %}">Wishlist <span class="cart-count-pill" data-wishlist-count>0</span></a>
-                            <a href="#" onclick="logoutUser()" class="logout-btn">Logout</a>
-                        </div>
-                    </div>
-                </li>
-            {% else %}
-                <li><a href="{% url 'login' %}">Log In</a></li>
-                <li>
-                    <a href="{% url 'signup' %}" style="background: #8B5E3C; color: white; padding: 10px 25px; border-radius: 50px; font-weight: bold; transition: 0.3s;">
-                        Join
-                    </a>
-                </li>
-            {% endif %}
-            
-            <li id="cartNavItem">
-                <a href="#" id="cart-link">Cart <span class="cart-count-pill" id="cart-count">0</span></a>
-            </li>
-        </ul>
-    </nav>
-
+    {% include 'partials/site_nav.html' %}
     {% include 'partials/cart_sidebar.html' %}
 
-    <!-- Success Message Overlay -->
-    <div class="overlay" id="successOverlay"></div>
-    <div class="success-message" id="successMessage">
-        <div class="success-icon">
-            <svg fill="none" viewBox="0 0 24 24">
-                <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
+    <section class="contact-hero">
+        <div class="hero-content">
+            <p class="reveal">Connect with Us</p>
+            <h1 class="reveal">Get in Touch</h1>
         </div>
-        <h3>Message Sent!</h3>
-        <p>We'll get back to you within 24 hours.</p>
-    </div>
+    </section>
 
-    <div class="contact-wrapper">
-        <section class="contact-container">
-            <div class="contact-info">
-                <h2>Get in Touch</h2>
-                <p>Have a question about a specific piece or an order? We're here to help you bring artistry into your home.</p>
-                
-                <div class="info-item">
-                    <strong>Studio Address:</strong>
-                    123 Artisan Way, Ahmedabad, Gujarat
-                </div>
-                
-                <div class="info-item">
-                    <strong>Email:</strong>
-                    hello@tranquiltrails.com
-                </div>
-                
-                <div class="info-item">
-                    <strong>Hours:</strong>
-                    Mon — Fri, 9am — 5pm
+    <main class="contact-main">
+        <aside class="info-cards">
+            <div class="info-card reveal">
+                <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                <div class="info-text">
+                    <h3>Location</h3>
+                    <p>123 Artisan Way,<br>Ahmedabad, Gujarat</p>
                 </div>
             </div>
-
-            <div class="contact-form">
-                <form id="contactForm">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" id="name" name="name" placeholder="Your Name" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Email Address</label>
-                        <input type="email" id="email" name="email" placeholder="email@example.com" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Message</label>
-                        <textarea id="message" name="message" rows="5" placeholder="How can we help?" required></textarea>
-                    </div>
-                    <button type="submit" class="submit-btn" id="submitBtn">
-                        <span id="btnText">Send Message</span>
-                        <span id="btnLoading" class="btn-loading" style="display: none;"></span>
-                    </button>
-
-                </form>
+            <div class="info-card reveal">
+                <div class="info-icon"><i class="fas fa-envelope"></i></div>
+                <div class="info-text">
+                    <h3>Email</h3>
+                    <p>hello@tranquiltrails.com<br>support@tranquiltrails.com</p>
+                </div>
             </div>
-        </section>
-
-        <!-- review submission section -->
-        <section class="contact-container" style="margin-top:40px;">
-            <div class="contact-info">
-                <h2>Share a Review</h2>
-                <p>If you’ve purchased a product, let us know what you think!</p>
+            <div class="info-card reveal">
+                <div class="info-icon"><i class="fas fa-clock"></i></div>
+                <div class="info-text">
+                    <h3>Studio Hours</h3>
+                    <p>Mon — Fri, 9am — 6pm<br>Sat, 10am — 4pm</p>
+                </div>
             </div>
-            <div class="contact-form">
+        </aside>
+
+        <div class="form-panel reveal">
+            <form id="contactForm">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="name" name="name" placeholder="E.g. John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="john@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>How can we help?</label>
+                    <textarea id="message" name="message" rows="5" placeholder="Tell us about your interest..." required></textarea>
+                </div>
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span id="btnText">SEND MESSAGE</span>
+                    <span id="btnLoading" class="btn-loading" style="display: none;"></span>
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <section class="review-section">
+        <div class="section-header reveal">
+            <h2>Share a Review</h2>
+            <p>We value your feedback. Let us know about your experience with our handcrafted pieces.</p>
+        </div>
+
+        <div class="review-grid">
+            <div class="form-panel reveal">
                 <form id="reviewForm">
                     {% csrf_token %}
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" id="rev_name" name="name" placeholder="Your Name" required>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="rev_name" name="name" placeholder="Your Name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" id="rev_email" name="email" placeholder="email@example.com" required>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="form-group">
+                            <label>Product</label>
+                            <select id="rev_product" name="product" required>
+                                <option value="">-- Select Product --</option>
+                                {% for p in products %}
+                                <option value="{{ p.id }}">{{ p.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Rating</label>
+                            <select id="rev_rating" name="rating">
+                                <option value="5">★★★★★ Excellent</option>
+                                <option value="4">★★★★☆ Very Good</option>
+                                <option value="3">★★★☆☆ Good</option>
+                                <option value="2">★★☆☆☆ Fair</option>
+                                <option value="1">★☆☆☆☆ Poor</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label>Email Address</label>
-                        <input type="email" id="rev_email" name="email" placeholder="email@example.com" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Product</label>
-                        <select id="rev_product" name="product" required>
-                            <option value="">-- Choose product --</option>
-                            {% for p in products %}
-                            <option value="{{ p.id }}">{{ p.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Rating</label>
-                        <select id="rev_rating" name="rating">
-                            <option value="5">★★★★★</option>
-                            <option value="4">★★★★☆</option>
-                            <option value="3">★★★☆☆</option>
-                            <option value="2">★★☆☆☆</option>
-                            <option value="1">★☆☆☆☆</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Comment</label>
-                        <textarea id="rev_comment" name="comment" rows="4" placeholder="Your thoughts" required></textarea>
+                        <label>Your Thoughts</label>
+                        <textarea id="rev_comment" name="comment" rows="4" placeholder="How was the craftsmanship?" required></textarea>
                     </div>
                     <button type="submit" class="submit-btn" id="revSubmitBtn">
-                        <span id="revBtnText">Submit Review</span>
+                        <span id="revBtnText">SUBMIT REVIEW</span>
                         <span id="revBtnLoading" class="btn-loading" style="display:none"></span>
+                        <i class="fas fa-star"></i>
                     </button>
                 </form>
             </div>
-        </section>
-    </div>                </form>
-            </div>
-        </section>
+        </div>
+    </section>
+
+    <!-- Success Modal Overlay -->
+    <div class="modal-overlay" id="successOverlay">
+        <div class="success-modal">
+            <div class="success-icon-box"><i class="fas fa-check"></i></div>
+            <h2 id="modalTitle">Message Sent!</h2>
+            <p id="modalBody">Thank you for reaching out. We'll get back to you within 24 hours.</p>
+            <button class="close-modal-btn" onclick="closeModal()">GREAT</button>
+        </div>
     </div>
 
     {% include 'partials/site_footer.html' %}
 
     <script>
         window.djangoUser = "{{ user.username|default:'guest' }}";
-    </script>
-    <script src="{% static 'script.js' %}"></script>
-    <script src="{% static 'js/cart.js' %}"></script>
 
-    <script>
-        // --- TOAST NOTIFICATION SYSTEM ---
-        function showToast(message, type = 'info', duration = 3500) {
-            if (!document.getElementById('toast-container')) {
-                const container = document.createElement('div');
-                container.id = 'toast-container';
-                container.className = 'toast-container';
-                container.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;pointer-events:none;';
-                document.body.appendChild(container);
-            }
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.style.cssText = 'background:white;color:#2c2c2c;padding:16px 24px;border-radius:8px;box-shadow:0 8px 25px rgba(0,0,0,0.15);margin-bottom:12px;display:flex;align-items:center;gap:12px;min-width:300px;max-width:400px;animation:slideInRight 0.3s ease-out;pointer-events:auto;border-left:4px solid #8B5E3C;';
-            const icons = {success: '✓', error: '✕', warning: '⚠', info: 'ℹ'};
-            toast.innerHTML = `<div style="font-size:1.25rem;flex-shrink:0;font-weight:bold;">${icons[type]}</div><span>${message}</span>`;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.animation = 'slideOutRight 0.3s ease-in forwards';
-                setTimeout(() => toast.remove(), 300);
-            }, duration);
+        // --- GSAP ANIMATIONS ---
+        gsap.registerPlugin(ScrollTrigger);
+
+        document.addEventListener("DOMContentLoaded", () => {
+            gsap.to(".reveal", {
+                opacity: 1,
+                y: 0,
+                duration: 1.2,
+                stagger: 0.15,
+                ease: "expo.out",
+                scrollTrigger: {
+                    trigger: ".reveal",
+                    start: "top 90%",
+                }
+            });
+        });
+
+        // Modal Controls
+        function closeModal() {
+            document.getElementById('successOverlay').classList.remove('show');
         }
 
-        // Add CSS for animations
-        const style = document.createElement('style');
-        style.innerHTML = `
-            @keyframes slideInRight {
-                from { transform: translateX(400px); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            @keyframes slideOutRight {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(400px); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // --- 3. CONTACT FORM AJAX SUBMISSION ---
+        // --- FORM SUBMISSIONS ---
         const contactForm = document.getElementById('contactForm');
         const submitBtn = document.getElementById('submitBtn');
         const btnText = document.getElementById('btnText');
         const btnLoading = document.getElementById('btnLoading');
-        const successMessage = document.getElementById('successMessage');
-        const successOverlay = document.getElementById('successOverlay');
+        const overlay = document.getElementById('successOverlay');
 
         contactForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            
-            // Disable button and show loading
             submitBtn.disabled = true;
             btnText.style.display = 'none';
             btnLoading.style.display = 'inline-block';
@@ -543,38 +488,25 @@
                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
                 }
             })
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    // Show success message
-                    successOverlay.classList.add('show');
-                    successMessage.classList.add('show');
-                    
-                    // Clear form
+                    document.getElementById('modalTitle').textContent = "Message Sent!";
+                    document.getElementById('modalBody').textContent = "Thank you for reaching out. We'll get back to you shortly.";
+                    overlay.classList.add('show');
                     contactForm.reset();
-                    
-                    // Hide success message after 3 seconds
-                    setTimeout(() => {
-                        successOverlay.classList.remove('show');
-                        successMessage.classList.remove('show');
-                    }, 3000);
                 } else {
-                    showToast('Error: ' + (data.error || 'Something went wrong'), 'error');
+                    alert('Error: ' + data.error);
                 }
             })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast('Connection error. Please try again.', 'error');
-            })
+            .catch(err => alert('Connection error. Please try again.'))
             .finally(() => {
-                // Re-enable button
                 submitBtn.disabled = false;
                 btnText.style.display = 'inline';
                 btnLoading.style.display = 'none';
             });
         });
 
-        // --- 4. REVIEW FORM AJAX SUBMISSION ---
         const reviewForm = document.getElementById('reviewForm');
         const revSubmitBtn = document.getElementById('revSubmitBtn');
         const revBtnText = document.getElementById('revBtnText');
@@ -597,16 +529,15 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    showToast('Review submitted!', 'success');
+                    document.getElementById('modalTitle').textContent = "Review Submitted!";
+                    document.getElementById('modalBody').textContent = "Thank you for sharing your experience with us.";
+                    overlay.classList.add('show');
                     reviewForm.reset();
                 } else {
-                    showToast('Error: '+(data.error||'Something went wrong'),'error');
+                    alert('Error: ' + data.error);
                 }
             })
-            .catch(err => {
-                console.error(err);
-                showToast('Connection error. Please try again.', 'error');
-            })
+            .catch(err => alert('Connection error.'))
             .finally(() => {
                 revSubmitBtn.disabled = false;
                 revBtnText.style.display = 'inline';
@@ -614,6 +545,8 @@
             });
         });
     </script>
+    
+    <script src="{% static 'script.js' %}"></script>
 </body>
 </html>
 

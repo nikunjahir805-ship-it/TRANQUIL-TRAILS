@@ -4,134 +4,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ item.title }} | Gallery | TRANQUIL TRAILS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>{{ item.title }} | Gallery | Tranquil Trails</title>
     
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;500;600&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+
     <style>
+        :root {
+            --primary: #8B5E3C;
+            --primary-light: #A67C5D;
+            --dark: #2c2c2c;
+            --bg: #F4EFE6;
+            --white: #ffffff;
+            --shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+            --transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         body { 
             font-family: 'Poppins', sans-serif; 
+            background: var(--bg); 
+            color: var(--dark); 
             margin: 0; 
             padding: 0; 
-            background: #F4EFE6; 
+            overflow-x: hidden;
         }
-        
-        .detail-container {
-            padding: 140px 10% 80px;
-            display: flex;
-            gap: 60px;
-            align-items: flex-start;
-            min-height: 80vh;
-            max-width: 1200px;
+
+        /* --- DETAIL LAYOUT --- */
+        .detail-wrapper {
+            padding: 160px 5% 100px;
+            max-width: 1400px;
             margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 80px;
+            align-items: start;
+        }
+
+        /* Image Side */
+        .image-showcase {
             position: relative;
-        }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            color: #2d2d2d;
-            text-decoration: none;
-            font-weight: 600;
-            margin-bottom: 30px;
-            transition: 0.3s;
-            font-size: 0.95rem;
-            position: absolute;
-            top: 100px;
-            left: 10%;
-        }
-
-        .back-link:hover {
-            color: #8B5E3C;
-            transform: translateX(-5px);
-        }
-
-        .detail-image-wrapper {
-            flex: 1;
-            background: white;
+            background: var(--white);
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border-radius: 40px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.03);
+            opacity: 0;
+            transform: translateX(-40px);
         }
 
-        .detail-image-wrapper img {
+        .image-showcase img {
             width: 100%;
             height: auto;
-            max-height: 600px;
-            border-radius: 8px;
-            object-fit: cover;
-        }
-
-        .detail-info {
-            flex: 1;
-            padding-top: 10px;
-        }
-
-        .detail-category {
-            color: #8B5E3C;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 0.9rem;
-            font-weight: bold;
+            border-radius: 24px;
             display: block;
-            margin-bottom: 10px;
+            object-fit: cover;
+            max-height: 750px;
         }
 
-        .detail-info h1 {
-            font-family: 'Playfair Display';
-            font-size: 3.5rem;
-            color: #2d2d2d;
-            margin-bottom: 20px;
-            line-height: 1.2;
+        /* Content Side */
+        .content-showcase {
+            padding-top: 40px;
+            opacity: 0;
+            transform: translateX(40px);
         }
 
-        .detail-desc {
-            font-size: 1.1rem;
-            color: #555;
-            line-height: 1.8;
-            margin-bottom: 40px;
-        }
-
-        .enquiry-btn {
-            background: #2d2d2d;
-            color: white;
-            padding: 18px 40px;
-            border: none;
-            border-radius: 6px;
-            font-size: 1.1rem;
+        .back-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--primary);
+            text-decoration: none;
+            font-family: 'Outfit';
+            font-size: 0.9rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            letter-spacing: 2px;
+            margin-bottom: 40px;
+            transition: var(--transition);
+        }
+
+        .back-nav:hover {
+            color: var(--dark);
+            transform: translateX(-8px);
+        }
+
+        .item-eyebrow {
+            display: block;
+            font-family: 'Outfit';
+            font-size: 1rem;
+            color: var(--primary-light);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 15px;
+        }
+
+        .item-title {
+            font-family: 'Playfair Display';
+            font-size: clamp(3rem, 6vw, 4.5rem);
+            color: var(--dark);
+            line-height: 1.1;
+            margin-bottom: 30px;
+        }
+
+        .item-description {
+            font-size: 1.15rem;
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 50px;
+            position: relative;
+            padding-left: 30px;
+            border-left: 2px solid var(--primary-light);
+        }
+
+        .action-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .inquiry-btn {
+            background: var(--dark);
+            color: white;
+            padding: 22px 45px;
+            border-radius: 20px;
+            font-family: 'Poppins';
+            font-weight: 600;
             text-decoration: none;
-            display: inline-block;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
         }
 
-        .enquiry-btn:hover {
-            background: #8B5E3C;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        .inquiry-btn:hover {
+            background: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(139, 94, 60, 0.2);
         }
 
-        @media (max-width: 900px) {
-            .detail-container { 
-                flex-direction: column; 
-                padding: 100px 5%; 
-            }
-            .detail-info h1 { 
-                font-size: 2.5rem; 
-            }
-            .back-link {
-                top: 80px;
-                left: 5%;
-            }
+        /* --- DECOR --- */
+        .decor-blob {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(139, 94, 60, 0.04) 0%, transparent 70%);
+            top: -100px;
+            right: -100px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        @media (max-width: 1024px) {
+            .detail-wrapper { grid-template-columns: 1fr; gap: 60px; padding-top: 120px; }
+            .image-showcase { order: 1; }
+            .content-showcase { order: 2; padding-top: 0; }
+            .item-title { font-size: 3rem; }
         }
     </style>
 </head>
@@ -140,34 +172,68 @@
     {% include 'partials/site_nav.html' %}
     {% include 'partials/cart_sidebar.html' %}
 
-    <div class="detail-container">
-        <a href="{% url 'gallery' %}" class="back-link">
-            <i class="fas fa-arrow-left"></i> BACK TO GALLERY
-        </a>
+    <div class="decor-blob"></div>
 
-        <div class="detail-image-wrapper">
-            <img src="{{ item.image.url }}" alt="{{ item.title }}">
+    <main class="detail-wrapper">
+        <div class="image-showcase" id="imageReveal">
+            {% if item.image %}
+                <img src="{{ item.image.url }}" alt="{{ item.title }}">
+            {% else %}
+                <img src="{% static 'placeholder.jpg' %}" alt="Placeholder">
+            {% endif %}
         </div>
 
-        <div class="detail-info">
-            <span class="detail-category">{{ item.get_category_display }}</span>
-            <h1>{{ item.title|default:"Untitled Artwork" }}</h1>
-            
-            <p class="detail-desc">
-                This unique piece is part of our curated {{ item.category }} collection. 
-                Handcrafted with precision, it represents the timeless tradition of Indian artisan heritage. 
-                Every stroke and detail tells a story of craftsmanship passed down through generations.
-            </p>
-
-            <a href="{% url 'contact' %}" class="enquiry-btn">
-                Inquire About This Piece
+        <div class="content-showcase" id="contentReveal">
+            <a href="{% url 'gallery' %}" class="back-nav">
+                <i class="fas fa-long-arrow-alt-left"></i>
+                Back to Archive
             </a>
+
+            <span class="item-eyebrow">{{ item.category|default:"Artisan Piece" }}</span>
+            <h1 class="item-title">{{ item.title|default:"Untitled Artwork" }}</h1>
+            
+            <div class="item-description">
+                <p>
+                    Part of our curated <strong>{{ item.category }}</strong> collection, this unique piece represents the pinnacle of handcrafted Indian excellence. 
+                    Each detail has been meticulously shaped by master artisans, preserving techniques that have defined our heritage for generations.
+                </p>
+                <p style="margin-top: 20px;">
+                    Every purchase from the Tranquil Trails Gallery directly supports local artisan communities, ensuring these timeless skills continue to flourish in a modern world.
+                </p>
+            </div>
+
+            <div class="action-row">
+                <a href="{% url 'contact' %}?piece={{ item.title|urlencode }}" class="inquiry-btn">
+                    <span>INQUIRE ABOUT THIS PIECE</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
         </div>
-    </div>
+    </main>
 
     {% include 'partials/site_footer.html' %}
 
+    <script>
+        window.djangoUser = "{{ user.username|default:'guest' }}";
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // Entrance animations
+            gsap.to("#imageReveal", {
+                opacity: 1,
+                x: 0,
+                duration: 1.4,
+                ease: "power4.out"
+            });
+
+            gsap.to("#contentReveal", {
+                opacity: 1,
+                x: 0,
+                duration: 1.4,
+                delay: 0.2,
+                ease: "power4.out"
+            });
+        });
+    </script>
     <script src="{% static 'script.js' %}"></script>
-    
 </body>
 </html>

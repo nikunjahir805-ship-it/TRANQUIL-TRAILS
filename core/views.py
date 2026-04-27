@@ -316,6 +316,23 @@ def home(request):
     wood_products = Product.objects.filter(category__name='Wood')[:5]
     categories = Category.objects.all()[:4]
 
+    # Identify categories already featured to avoid duplication
+    shown_cat_ids = [cat.id for cat in categories]
+    wood_cat = Category.objects.filter(name='Wood').first()
+    if wood_cat:
+        shown_cat_ids.append(wood_cat.id)
+
+    # Fetch extra categories and their products for dynamic showcases
+    extra_categories = Category.objects.exclude(id__in=shown_cat_ids)
+    extra_case_data = []
+    for cat in extra_categories:
+        prods = Product.objects.filter(category=cat, available=True)[:6]
+        if prods.exists():
+            extra_case_data.append({
+                'category': cat,
+                'products': prods
+            })
+
     # load latest three reviews (could filter by is_liked or rating)
     reviews = Review.objects.all().select_related('customer').order_by('-created_at')[:3]
 
@@ -323,8 +340,10 @@ def home(request):
         'gallery_slider': gallery_slider,
         'wood_products': wood_products,
         'categories': categories,
+        'extra_case_data': extra_case_data,
         'reviews': reviews,
     })
+
 
 def shop(request):
     products = Product.objects.filter(available=True)
