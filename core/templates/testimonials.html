@@ -1,0 +1,333 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testimonials | Tranquil Trails</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(139, 94, 60, 0.16), transparent 30%),
+                radial-gradient(circle at top right, rgba(212, 163, 115, 0.16), transparent 24%),
+                linear-gradient(180deg, #f7f1eb 0%, #fffaf4 100%);
+            color: #222;
+        }
+
+        .testimonials-hero {
+            position: relative;
+            overflow: hidden;
+            padding: 120px 5% 70px;
+            background:
+                linear-gradient(135deg, rgba(17, 17, 29, 0.96), rgba(55, 32, 19, 0.9)),
+                url("{% static 'background.gif' %}") center/cover no-repeat;
+            color: #fff;
+        }
+
+        .testimonials-hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.08), transparent 50%);
+        }
+
+        .hero-inner {
+            position: relative;
+            z-index: 1;
+            max-width: 1180px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.9fr);
+            gap: 40px;
+            align-items: end;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            color: #f2c89e;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .hero-inner h1 {
+            margin: 18px 0 16px;
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.6rem, 5vw, 4.8rem);
+            line-height: 1.02;
+        }
+
+        .hero-inner p {
+            margin: 0;
+            max-width: 640px;
+            font-size: 1.02rem;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        .hero-actions a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 13px 20px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
+        }
+
+        .hero-actions .primary {
+            background: linear-gradient(135deg, #d4a373, #b57d45);
+            color: #101915;
+        }
+
+        .hero-actions .secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .hero-actions a:hover {
+            transform: translateY(-2px);
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+
+        .hero-stat {
+            padding: 22px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+        }
+
+        .hero-stat strong {
+            display: block;
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 6px;
+        }
+
+        .hero-stat span {
+            color: rgba(255, 255, 255, 0.74);
+            font-size: 0.88rem;
+        }
+
+        .testimonials-grid {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 38px 5% 96px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(285px, 1fr));
+            gap: 24px;
+        }
+
+        .testimonial-card {
+            position: relative;
+            padding: 28px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid rgba(139, 94, 60, 0.08);
+            box-shadow: 0 18px 36px rgba(40, 25, 18, 0.08);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .testimonial-card::before {
+            content: '"';
+            position: absolute;
+            top: -18px;
+            right: 18px;
+            font-family: 'Playfair Display', serif;
+            font-size: 7rem;
+            color: rgba(139, 94, 60, 0.08);
+            line-height: 1;
+        }
+
+        .testimonial-badge {
+            display: inline-flex;
+            margin-bottom: 16px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #8b5e3c;
+            background: rgba(139, 94, 60, 0.09);
+        }
+
+        .testimonial-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .testimonial-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid rgba(139, 94, 60, 0.2);
+            background: linear-gradient(135deg, #8b5e3c, #d4a373);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .testimonial-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .testimonial-avatar span {
+            color: #fff;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .testimonial-person h3 {
+            margin: 0 0 4px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15rem;
+            color: #231813;
+        }
+
+        .testimonial-person p {
+            margin: 0;
+            color: #7a6a61;
+            font-size: 0.84rem;
+        }
+
+        .testimonial-stars {
+            display: flex;
+            gap: 4px;
+            color: #ffb400;
+            margin: 8px 0 16px;
+        }
+
+        .testimonial-card blockquote {
+            margin: 0;
+            color: #43322a;
+            line-height: 1.85;
+            font-style: italic;
+        }
+
+        @media (max-width: 900px) {
+            .hero-inner {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .testimonials-hero {
+                padding-top: 100px;
+            }
+
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include 'partials/site_nav.html' %}
+
+    <section class="testimonials-hero">
+        <div class="hero-inner">
+            <div>
+                <span class="eyebrow">Testimonials</span>
+                <h1>Twenty voices from the Tranquil Trails community.</h1>
+                <p>
+                    Real customer stories, handpicked from the workshop floor to the living room shelf.
+                    These testimonials highlight the craftsmanship, care, and calm that define the store.
+                </p>
+                <div class="hero-actions">
+                    <a class="primary" href="{% url 'shop' %}">Explore the Collection</a>
+                    <a class="secondary" href="{% url 'contact' %}">Share Your Story</a>
+                </div>
+            </div>
+
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <strong>{{ testimonial_count }}</strong>
+                    <span>Published testimonials</span>
+                </div>
+                <div class="hero-stat">
+                    <strong>{{ average_rating }}</strong>
+                    <span>Average customer rating</span>
+                </div>
+                <div class="hero-stat">
+                    <strong>{{ featured_count }}</strong>
+                    <span>Featured by the admin team</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="testimonials-grid">
+        {% for review in testimonials %}
+        <article class="testimonial-card">
+            {% if review.is_liked %}
+            <span class="testimonial-badge">Featured</span>
+            {% endif %}
+            <div class="testimonial-header">
+                <div class="testimonial-avatar">
+                    {% if review.avatar_url %}
+                    <img src="{{ review.avatar_url }}" alt="{{ review.display_name }}">
+                    {% else %}
+                    <span>{{ review.avatar_initial }}</span>
+                    {% endif %}
+                </div>
+                <div class="testimonial-person">
+                    <h3>{{ review.display_name }}</h3>
+                    <p>{{ review.created_at|date:"M d, Y" }} on {{ review.product_name }}</p>
+                </div>
+            </div>
+            <div class="testimonial-stars">
+                {% for i in "12345" %}
+                    {% if forloop.counter <= review.rating %}
+                        <i class="fas fa-star"></i>
+                    {% else %}
+                        <i class="far fa-star" style="color:#ddd;"></i>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <blockquote>{{ review.comment }}</blockquote>
+        </article>
+        {% empty %}
+        <div style="grid-column:1/-1; text-align:center; color:#6f5e55; padding:40px 0;">
+            No testimonials yet.
+        </div>
+        {% endfor %}
+    </section>
+
+    {% include 'partials/site_footer.html' %}
+</body>
+</html>

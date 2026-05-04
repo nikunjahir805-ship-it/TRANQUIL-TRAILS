@@ -1,8 +1,8 @@
 {% extends 'admin/base_admin.html' %}
 {% load static %}
 
-{% block page_title %}Customer Reviews{% endblock %}
-{% block page_desc %}Manage feedback, ratings, and featured reviews.{% endblock %}
+{% block page_title %}Testimonials{% endblock %}
+{% block page_desc %}Manage customer stories, avatar images, and featured testimonials.{% endblock %}
 
 {% block content %}
 <style>
@@ -189,9 +189,9 @@
 <div class="split-layout">
     
     <div class="form-card" id="reviewFormCard">
-        <div class="form-header">Add Manual Review</div>
+        <div class="form-header">Add Testimonial</div>
         
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="form-group">
                 <label><i class="fas fa-user" style="margin-right:5px;"></i> Customer</label>
@@ -229,8 +229,16 @@
                 <textarea name="comment" class="form-control" rows="4" placeholder="Share the customer's thoughts..." required></textarea>
             </div>
 
+            <div class="form-group">
+                <label><i class="fas fa-image" style="margin-right:5px;"></i> Avatar Image</label>
+                <input type="file" name="avatar_image" class="form-control" accept="image/*">
+                <small style="display:block; margin-top:8px; color:#777; line-height:1.5;">
+                    Optional. Leave blank to use the customer's profile photo or an initials fallback.
+                </small>
+            </div>
+
             <button type="submit" class="btn-submit">
-                <i class="fas fa-paper-plane" style="margin-right: 8px;"></i> Post Review
+                <i class="fas fa-paper-plane" style="margin-right: 8px;"></i> Publish Testimonial
             </button>
         </form>
     </div>
@@ -241,17 +249,17 @@
             <div class="review-card">
                 <div class="review-content-wrapper">
                     <div class="review-header">
-                        {% if review.customer.profile_pic %}
-                            <img src="{{ review.customer.profile_pic.url }}" class="user-avatar" alt="User">
+                        {% if review.avatar_url %}
+                            <img src="{{ review.avatar_url }}" class="user-avatar" alt="{{ review.display_name }}">
                         {% else %}
                             <div class="user-initial-avatar">
-                                {{ review.customer.full_name|slice:":1" }}
+                                {{ review.avatar_initial }}
                             </div>
                         {% endif %}
                         
                         <div class="user-info">
-                            <h4>{{ review.customer.full_name }}</h4>
-                            <span>{{ review.created_at|date:"M d, Y" }} on <strong>{{ review.product.name }}</strong></span>
+                            <h4>{{ review.display_name }}</h4>
+                            <span>{{ review.created_at|date:"M d, Y" }} on <strong>{{ review.product_name }}</strong></span>
                         </div>
                     </div>
 
@@ -282,8 +290,8 @@
             {% empty %}
             <div style="text-align: center; padding: 60px; color: #999; grid-column: 1/-1;">
                 <i class="far fa-comment-dots" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
-                <p>No reviews yet. Use the form to add one manually!</p>
-            </div>
+                <p>No testimonials yet. Use the form to add one manually!</p>
+                </div>
             {% endfor %}
         </div>
     </div>

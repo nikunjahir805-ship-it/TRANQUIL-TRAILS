@@ -151,6 +151,7 @@ class Offer(models.Model):
 class Review(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    avatar_image = models.ImageField(upload_to='reviews/avatars/', blank=True, null=True)
     rating = models.IntegerField(default=5)
     comment = models.TextField()
     is_liked = models.BooleanField(default=False)

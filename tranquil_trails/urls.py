@@ -20,6 +20,7 @@ urlpatterns = [
     # Info Pages
     path('offers/', views.offers, name='offers'),
     path('about/', views.about, name='about'),
+    path('testimonials/', views.testimonials, name='testimonials'),
     # FIXED: Changed 'Contact' to 'contact' to match your template request
     path('contact-us/', views.contact, name='contact'),
 

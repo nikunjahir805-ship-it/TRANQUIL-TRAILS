@@ -13,6 +13,7 @@
         <li><a href="{% url 'home' %}" {% if request.resolver_match.url_name == 'home' %}style="color:#8B5E3C; font-weight:700;"{% endif %}>Home</a></li>
         <li><a href="{% url 'shop' %}" {% if request.resolver_match.url_name == 'shop' %}style="color:#8B5E3C; font-weight:700;"{% endif %}>Shop</a></li>
         <li><a href="{% url 'gallery' %}" {% if request.resolver_match.url_name == 'gallery' %}style="color:#8B5E3C; font-weight:700;"{% endif %}>Gallery</a></li>
+        <li><a href="{% url 'testimonials' %}" {% if request.resolver_match.url_name == 'testimonials' %}style="color:#8B5E3C; font-weight:700;"{% endif %}>Testimonials</a></li>
         <li><a href="{% url 'about' %}" {% if request.resolver_match.url_name == 'about' %}style="color:#8B5E3C; font-weight:700;"{% endif %}>About</a></li>
         <li><a href="{% url 'contact' %}" {% if request.resolver_match.url_name == 'contact' %}style="color:#8B5E3C; font-weight:700;"{% endif %}>Contact</a></li>
 

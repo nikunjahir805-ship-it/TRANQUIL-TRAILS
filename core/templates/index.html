@@ -542,6 +542,7 @@
         <div style="text-align: center; margin-bottom: 50px;" class="testimonial-header">
             <span style="font-family: 'Poppins'; color: #8B5E3C; letter-spacing: 2px; text-transform: uppercase; font-size: 0.9rem; font-weight: 600;">Testimonials</span>
             <h2 style="font-family: 'Playfair Display'; font-size: 2.5rem; color: #ffffff; margin-top: 10px;">Voices from the Community</h2>
+            <a href="{% url 'testimonials' %}" style="display:inline-flex; margin-top:18px; padding:12px 20px; border-radius:999px; border:1px solid rgba(255,255,255,0.18); color:#fff; background:rgba(255,255,255,0.06); font-family:'Poppins'; font-size:0.9rem; text-decoration:none; transition:0.25s ease;">View All Testimonials</a>
         </div>
 
         <div class="reviews-grid">
@@ -561,15 +562,14 @@
                 </div>
                 <p>"{{ review.comment }}"</p>
                 <div class="reviewer">
-                    <div class="reviewer-avatar">
-                        {% if review.customer.profile_pic %}
-                            <img src="{{ review.customer.profile_pic.url }}" alt="User" class="reviewer-photo">
+                    <div class="reviewer-avatar{% if not review.avatar_url %} reviewer-avatar-fallback{% endif %}">
+                        {% if review.avatar_url %}
+                            <img src="{{ review.avatar_url }}" alt="{{ review.display_name }}" class="reviewer-photo">
                         {% else %}
-                            <img src="" alt="User" class="reviewer-photo reviewer-photo-fallback js-random-avatar" data-avatar-name="{{ review.customer.full_name|default:'Guest User' }}">
+                            <span class="reviewer-avatar-initial">{{ review.avatar_initial }}</span>
                         {% endif %}
-                        <span class="reviewer-avatar-icon"><i class="fas fa-user"></i></span>
                     </div>
-                    <div><h4>{{ review.customer.full_name }}</h4><span>{{ review.created_at|date:"M d, Y" }}</span></div>
+                    <div><h4>{{ review.display_name }}</h4><span>{{ review.created_at|date:"M d, Y" }}</span></div>
                 </div>
             </div>
             {% empty %}
@@ -716,6 +716,10 @@
             justify-content: center;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
+
+        .reviewer-avatar-fallback {
+            background: linear-gradient(135deg, rgba(139, 94, 60, 0.9), rgba(240, 213, 190, 0.72));
+        }
         
         .reviewer-photo { 
             width: 100%;
@@ -724,24 +728,13 @@
             display: block;
             transition: transform 0.25s ease;
         }
-        
-        .reviewer-avatar-icon {
-            position: absolute;
-            inset: 0;
-            display: none;
-            align-items: center;
-            justify-content: center;
+
+        .reviewer-avatar-initial {
             color: #ffffff;
             font-size: 1rem;
-            background: linear-gradient(135deg, rgba(139, 94, 60, 0.82), rgba(212, 163, 115, 0.86));
-        }
-        
-        .reviewer-avatar.show-icon .reviewer-photo {
-            display: none;
-        }
-
-        .reviewer-avatar.show-icon .reviewer-avatar-icon {
-            display: flex;
+            font-weight: 700;
+            font-family: 'Playfair Display';
+            letter-spacing: 0.05em;
         }
         
         .review-card:hover .reviewer-photo {
@@ -1035,45 +1028,6 @@
                 });
             }
 
-            const randomAvatarPool = [
-                'https://i.pravatar.cc/120?img=12',
-                'https://i.pravatar.cc/120?img=23',
-                'https://i.pravatar.cc/120?img=35',
-                'https://i.pravatar.cc/120?img=41',
-                'https://i.pravatar.cc/120?img=54',
-                'https://i.pravatar.cc/120?img=66'
-            ];
-
-            function showAvatarIcon(imgEl) {
-                const avatar = imgEl.closest('.reviewer-avatar');
-                if (avatar) {
-                    avatar.classList.add('show-icon');
-                }
-            }
-
-            function setRandomFallbackAvatar(imgEl) {
-                const randomUrl = randomAvatarPool[Math.floor(Math.random() * randomAvatarPool.length)];
-                imgEl.src = randomUrl;
-                imgEl.dataset.randomAvatarApplied = 'true';
-                imgEl.onload = () => {
-                    const avatar = imgEl.closest('.reviewer-avatar');
-                    if (avatar) avatar.classList.remove('show-icon');
-                };
-            }
-
-            document.querySelectorAll('.reviewer-photo').forEach((imgEl) => {
-                imgEl.onerror = () => {
-                    if (imgEl.dataset.randomAvatarApplied === 'true') {
-                        showAvatarIcon(imgEl);
-                        return;
-                    }
-                    setRandomFallbackAvatar(imgEl);
-                };
-
-                if (imgEl.classList.contains('js-random-avatar') || !imgEl.getAttribute('src')) {
-                    setRandomFallbackAvatar(imgEl);
-                }
-            });
         })();
     </script>
 

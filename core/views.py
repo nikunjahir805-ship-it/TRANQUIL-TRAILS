@@ -28,6 +28,42 @@ from .models import (
 def admin_only(user):
     return user.is_authenticated and user.is_staff
 
+
+def _review_display_name(review):
+    customer = getattr(review, 'customer', None)
+    name = (customer.full_name if customer and customer.full_name else '').strip()
+    return name or 'Guest User'
+
+
+def _review_avatar_url(review):
+    avatar = getattr(review, 'avatar_image', None)
+    if avatar:
+        try:
+            return avatar.url
+        except ValueError:
+            return ''
+
+    customer = getattr(review, 'customer', None)
+    profile_pic = getattr(customer, 'profile_pic', None)
+    if profile_pic:
+        try:
+            return profile_pic.url
+        except ValueError:
+            return ''
+
+    return ''
+
+
+def _prepare_reviews(reviews):
+    prepared = []
+    for review in reviews:
+        review.display_name = _review_display_name(review)
+        review.avatar_url = _review_avatar_url(review)
+        review.avatar_initial = review.display_name[:1].upper() if review.display_name else 'G'
+        review.product_name = review.product.name if getattr(review, 'product', None) else 'Tranquil Trails'
+        prepared.append(review)
+    return prepared
+
 def generate_unique_slug(model, name, slug_field='slug', instance_id=None):
     base_slug = slugify(name)
     slug = base_slug
@@ -333,8 +369,10 @@ def home(request):
                 'products': prods
             })
 
-    # load latest three reviews (could filter by is_liked or rating)
-    reviews = Review.objects.all().select_related('customer').order_by('-created_at')[:3]
+    # load latest featured reviews
+    reviews = _prepare_reviews(
+        Review.objects.select_related('customer', 'product').order_by('-is_liked', '-created_at')[:3]
+    )
 
     return render(request, 'index.html', {
         'gallery_slider': gallery_slider,
@@ -381,6 +419,25 @@ def contact(request):
     # pass available products for review form
     products = Product.objects.filter(available=True)
     return render(request, 'contact.html', {'products': products})
+
+
+def testimonials(request):
+    testimonials_list = _prepare_reviews(
+        Review.objects.select_related('customer', 'product').order_by('-is_liked', '-created_at')[:20]
+    )
+    testimonial_count = len(testimonials_list)
+    featured_count = sum(1 for review in testimonials_list if review.is_liked)
+    average_rating = round(
+        sum(review.rating for review in testimonials_list) / testimonial_count,
+        1
+    ) if testimonial_count else 0
+
+    return render(request, 'testimonials.html', {
+        'testimonials': testimonials_list,
+        'testimonial_count': testimonial_count,
+        'featured_count': featured_count,
+        'average_rating': average_rating,
+    })
 
 # ------------------ AUTH ------------------
 
@@ -997,21 +1054,28 @@ def admin_reviews(request):
         product_id = request.POST.get('product')
         rating = request.POST.get('rating', 5)
         comment = request.POST.get('comment')
+        avatar_image = request.FILES.get('avatar_image')
         
         customer = get_object_or_404(Customer, id=customer_id)
         product = get_object_or_404(Product, id=product_id)
-        
-        Review.objects.create(
-            customer=customer,
-            product=product,
-            rating=rating,
-            comment=comment
-        )
+
+        review_kwargs = {
+            'customer': customer,
+            'product': product,
+            'rating': rating,
+            'comment': comment,
+        }
+        if avatar_image:
+            review_kwargs['avatar_image'] = avatar_image
+
+        Review.objects.create(**review_kwargs)
         
         messages.success(request, "Review posted successfully!")
         return redirect('admin_reviews')
     
-    reviews = Review.objects.all().select_related('customer', 'product').order_by('-created_at')
+    reviews = _prepare_reviews(
+        Review.objects.select_related('customer', 'product').order_by('-is_liked', '-created_at')
+    )
     customers = Customer.objects.all()
     products = Product.objects.all()
     
@@ -1206,6 +1270,9 @@ def review_submit(request):
             email=email,
             defaults={'full_name': name}
         )
+        if customer.full_name != name:
+            customer.full_name = name
+            customer.save(update_fields=['full_name'])
         try:
             rating_val = int(rating)
         except (TypeError, ValueError):

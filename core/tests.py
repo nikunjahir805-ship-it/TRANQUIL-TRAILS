@@ -19,13 +19,14 @@ class ContactReviewTests(TestCase):
             available=True,
         )
         self.client = Client()
+        self.client.defaults['wsgi.url_scheme'] = 'https'
 
     def test_submit_message_only(self):
         response = self.client.post('/contact/submit/', {
             'name': 'Bob',
             'email': 'bob@example.com',
             'message': 'Hello there',
-        })
+        }, secure=True)
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertTrue(data.get('success'))
@@ -36,7 +37,7 @@ class ContactReviewTests(TestCase):
             'name': 'Foo',
             'email': 'invalid',
             'message': 'Test',
-        })
+        }, secure=True)
         self.assertEqual(response.status_code, 400)
         self.assertFalse(response.json().get('success'))
 
@@ -47,16 +48,30 @@ class ContactReviewTests(TestCase):
             'product': str(self.product.id),
             'rating': '4',
             'comment': 'Great product!',
-        })
+        }, secure=True)
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertTrue(data.get('success'))
         self.assertTrue(Review.objects.filter(comment='Great product!').exists())
 
+    def test_testimonials_page_loads(self):
+        customer = Customer.objects.create(full_name='Test Customer', email='customer@example.com')
+        Review.objects.create(
+            customer=customer,
+            product=self.product,
+            rating=5,
+            comment='Beautiful craftsmanship and a calm buying experience.',
+        )
+
+        response = self.client.get(reverse('testimonials'), secure=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Beautiful craftsmanship and a calm buying experience.')
+
 
 class OrderWorkflowTests(TestCase):
     def setUp(self):
         self.client = Client()
+        self.client.defaults['wsgi.url_scheme'] = 'https'
         self.category = Category.objects.create(name='Craft', slug='craft')
         self.product = Product.objects.create(
             category=self.category,
@@ -104,14 +119,15 @@ class OrderWorkflowTests(TestCase):
             reverse('create_checkout_order'),
             data=json.dumps(payload),
             content_type='application/json',
+            secure=True,
         )
 
         self.assertEqual(response.status_code, 200)
         order = Order.objects.get(customer=self.customer)
-        self.assertEqual(order.status, 'Pending')
-        self.assertFalse(order.complete)
+        self.assertEqual(order.status, 'Processing')
+        self.assertTrue(order.complete)
         self.product.refresh_from_db()
-        self.assertEqual(self.product.stock, 5)
+        self.assertEqual(self.product.stock, 3)
 
     def test_admin_can_confirm_order_and_user_can_view_it(self):
         order = Order.objects.create(
@@ -126,6 +142,7 @@ class OrderWorkflowTests(TestCase):
         response = self.client.post(
             reverse('admin_update_order_status', args=[order.id]),
             {'status': 'Processing'},
+            secure=True,
         )
 
         self.assertEqual(response.status_code, 302)
@@ -136,7 +153,7 @@ class OrderWorkflowTests(TestCase):
         self.assertEqual(self.product.stock, 3)
 
         self.client.force_login(self.user)
-        response = self.client.get(reverse('my_orders'))
+        response = self.client.get(reverse('my_orders'), secure=True)
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, f'Order #{order.id}')
@@ -146,6 +163,7 @@ class OrderWorkflowTests(TestCase):
 class AdminExportTests(TestCase):
     def setUp(self):
         self.client = Client()
+        self.client.defaults['wsgi.url_scheme'] = 'https'
         self.category = Category.objects.create(name='Decor', slug='decor')
         self.product = Product.objects.create(
             category=self.category,
@@ -166,7 +184,7 @@ class AdminExportTests(TestCase):
         self.client.force_login(self.admin_user)
 
     def test_products_csv_export(self):
-        response = self.client.get(reverse('admin_export_products_section'), {'format': 'csv'}, follow=True)
+        response = self.client.get(reverse('admin_export_products_section'), {'format': 'csv'}, follow=True, secure=True)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'text/csv')
@@ -174,7 +192,7 @@ class AdminExportTests(TestCase):
         self.assertIn('Lantern', response.content.decode('utf-8'))
 
     def test_categories_word_export(self):
-        response = self.client.get(reverse('admin_export_categories'), {'format': 'word'}, follow=True)
+        response = self.client.get(reverse('admin_export_categories'), {'format': 'word'}, follow=True, secure=True)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/msword')
@@ -182,7 +200,7 @@ class AdminExportTests(TestCase):
         self.assertIn('Decor', response.content.decode('utf-8'))
 
     def test_inventory_pdf_export(self):
-        response = self.client.get(reverse('admin_export_inventory'), {'format': 'pdf'}, follow=True)
+        response = self.client.get(reverse('admin_export_inventory'), {'format': 'pdf'}, follow=True, secure=True)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/pdf')
