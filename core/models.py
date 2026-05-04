@@ -105,6 +105,35 @@ class ShippingAddress(models.Model):
     def __str__(self):
         return self.address
 
+
+# --- 6. RETURN REQUEST MODEL ---
+class ReturnRequest(models.Model):
+    STATUS_CHOICES = (
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Received', 'Received'),
+        ('Refunded', 'Refunded'),
+        ('Rejected', 'Rejected'),
+    )
+
+    order = models.ForeignKey(Order, related_name='return_requests', on_delete=models.CASCADE)
+    order_item = models.ForeignKey(OrderItem, related_name='return_requests', on_delete=models.SET_NULL, null=True, blank=True)
+    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True)
+    quantity = models.PositiveIntegerField(default=1)
+    reason = models.CharField(max_length=255)
+    details = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    admin_note = models.TextField(blank=True)
+    restocked = models.BooleanField(default=False)
+    processed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        product_name = self.product.name if self.product else 'Return Request'
+        return f"#{self.order_id} - {product_name}"
+
 # --- 7. GALLERY MODEL ---
 class GalleryItem(models.Model):
     CATEGORY_CHOICES = [

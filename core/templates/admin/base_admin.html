@@ -344,6 +344,11 @@
                     <span class="badge bg-accent">12</span>
                 </a>
             </div>
+            <div class="nav-item">
+                <a href="{% url 'admin_returns' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_returns' %}active{% endif %}">
+                    <i class="fas fa-undo-alt"></i> <span>Returns</span>
+                </a>
+            </div>
              <div class="nav-item">
                 <a href="{% url 'admin_discounts' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_discounts' %}active{% endif %}">
                     <i class="fas fa-ticket-alt"></i> <span>Coupons</span>

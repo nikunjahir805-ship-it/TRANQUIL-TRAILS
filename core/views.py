@@ -20,7 +20,7 @@ import random
 
 from .models import (
     Product, Customer, Category, GalleryItem, Order, OrderItem, ShippingAddress,
-    Offer, Review, Campaign, SiteSetting
+    Offer, Review, Campaign, SiteSetting, ReturnRequest
 )
 
 # ------------------ HELPER FUNCTIONS ------------------
@@ -1567,6 +1567,31 @@ def restock_order(order):
     return order
 
 
+def _can_request_return(order):
+    return bool(order and order.complete and order.status == 'Delivered')
+
+
+def _restock_return_request(return_request):
+    if return_request.restocked:
+        return
+
+    order_item = return_request.order_item
+    product = return_request.product or (order_item.product if order_item else None)
+    if not product:
+        return
+
+    quantity = return_request.quantity or (order_item.quantity if order_item else 0)
+    if quantity <= 0:
+        return
+
+    product.stock += quantity
+    product.available = product.stock > 0
+    product.save(update_fields=['stock', 'available', 'updated_at'])
+
+    return_request.restocked = True
+    return_request.save(update_fields=['restocked', 'updated_at'])
+
+
 def payment_keys_configured():
     key_id = getattr(settings, 'RAZORPAY_KEY_ID', '') or ''
     key_secret = getattr(settings, 'RAZORPAY_KEY_SECRET', '') or ''
@@ -1749,10 +1774,83 @@ def my_orders(request):
     orders = (
         Order.objects.filter(customer=customer)
         .select_related('customer')
-        .prefetch_related('orderitem_set__product', 'shippingaddress_set')
+        .prefetch_related('orderitem_set__product', 'shippingaddress_set', 'return_requests__order_item__product')
         .order_by('-date_ordered')
     )
     return render(request, 'my_orders.html', {'orders': orders})
+
+
+@login_required
+def return_product(request, order_id):
+    customer = get_customer_for_user(request.user)
+    order = get_object_or_404(
+        Order.objects.select_related('customer').prefetch_related('orderitem_set__product', 'return_requests__order_item__product'),
+        id=order_id,
+        customer=customer,
+    )
+    eligible_items = order.orderitem_set.select_related('product').all()
+    return_requests = order.return_requests.select_related('order_item__product').order_by('-created_at')
+
+    return render(request, 'return_product.html', {
+        'order': order,
+        'eligible_items': eligible_items,
+        'return_requests': return_requests,
+        'can_request_return': _can_request_return(order),
+    })
+
+
+@login_required
+@require_POST
+def submit_return_request(request, order_id):
+    customer = get_customer_for_user(request.user)
+    order = get_object_or_404(
+        Order.objects.select_related('customer').prefetch_related('orderitem_set__product'),
+        id=order_id,
+        customer=customer,
+    )
+
+    if not _can_request_return(order):
+        messages.error(request, 'Return requests are available only for delivered and completed orders.')
+        return redirect('return_product', order_id=order.id)
+
+    order_item_id = request.POST.get('order_item')
+    reason = (request.POST.get('reason') or '').strip()
+    details = (request.POST.get('details') or '').strip()
+
+    if not order_item_id or not reason:
+        messages.error(request, 'Please choose a product and add a return reason.')
+        return redirect('return_product', order_id=order.id)
+
+    order_item = get_object_or_404(OrderItem.objects.select_related('product', 'order'), id=order_item_id, order=order)
+
+    try:
+        quantity = int(request.POST.get('quantity') or 1)
+    except (TypeError, ValueError):
+        quantity = 1
+
+    if quantity < 1 or quantity > order_item.quantity:
+        messages.error(request, 'Return quantity must be between 1 and the quantity in the order.')
+        return redirect('return_product', order_id=order.id)
+
+    if ReturnRequest.objects.filter(
+        order=order,
+        order_item=order_item,
+        status__in=['Pending', 'Approved', 'Received'],
+    ).exists():
+        messages.error(request, 'A return request for this item is already in progress.')
+        return redirect('return_product', order_id=order.id)
+
+    ReturnRequest.objects.create(
+        order=order,
+        order_item=order_item,
+        customer=customer,
+        product=order_item.product,
+        quantity=quantity,
+        reason=reason,
+        details=details,
+    )
+    messages.success(request, 'Your return request has been submitted successfully.')
+    return redirect('return_product', order_id=order.id)
 
 
 @login_required(login_url='login')
@@ -1765,6 +1863,58 @@ def admin_orders(request):
         .order_by('-date_ordered')
     )
     return render(request, 'admin/orders_realtime.html', {'orders': orders})
+
+
+@login_required(login_url='login')
+@user_passes_test(admin_only, login_url='login')
+def admin_returns(request):
+    return_requests = (
+        ReturnRequest.objects.select_related(
+            'customer',
+            'order',
+            'order_item',
+            'order_item__product',
+            'product',
+        )
+        .order_by('-created_at')
+    )
+
+    return render(request, 'admin/returns.html', {
+        'return_requests': return_requests,
+        'return_count': return_requests.count(),
+        'pending_count': return_requests.filter(status='Pending').count(),
+        'approved_count': return_requests.filter(status='Approved').count(),
+        'completed_count': return_requests.filter(status__in=['Received', 'Refunded']).count(),
+        'status_choices': ReturnRequest.STATUS_CHOICES,
+    })
+
+
+@login_required(login_url='login')
+@user_passes_test(admin_only, login_url='login')
+@require_POST
+def admin_update_return_status(request, return_id):
+    return_request = get_object_or_404(
+        ReturnRequest.objects.select_related('order', 'order_item', 'order_item__product', 'product'),
+        id=return_id,
+    )
+    new_status = (request.POST.get('status') or '').strip()
+    valid_statuses = {choice[0] for choice in ReturnRequest.STATUS_CHOICES}
+
+    if new_status not in valid_statuses:
+        messages.error(request, 'Invalid return status selected.')
+        return redirect('admin_returns')
+
+    return_request.status = new_status
+    return_request.admin_note = (request.POST.get('admin_note') or return_request.admin_note).strip()
+    if new_status in {'Received', 'Refunded'}:
+        _restock_return_request(return_request)
+        return_request.processed_at = timezone.now()
+    elif new_status in {'Approved', 'Rejected'} and not return_request.processed_at:
+        return_request.processed_at = timezone.now()
+
+    return_request.save()
+    messages.success(request, f"Return request #{return_request.id} updated to {new_status}.")
+    return redirect('admin_returns')
 
 
 @login_required(login_url='login')

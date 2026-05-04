@@ -56,6 +56,8 @@ urlpatterns = [
     path('verify-payment/', views.verify_payment, name='verify_payment'),
     path('payment-success/', views.payment_success, name='payment_success'),
     path('my-orders/', views.my_orders, name='my_orders'),
+    path('return-product/<int:order_id>/', views.return_product, name='return_product'),
+    path('return-product/<int:order_id>/submit/', views.submit_return_request, name='submit_return_request'),
 
     # ===== CUSTOM ADMIN PANEL =====
 
@@ -99,6 +101,9 @@ urlpatterns = [
     path('admin-orders/', views.admin_orders, name='admin_orders'),
     path('admin/orders/', views.admin_orders, name='admin_orders'),
     path('admin/orders/<int:order_id>/status/', views.admin_update_order_status, name='admin_update_order_status'),
+    path('admin-returns/', views.admin_returns, name='admin_returns'),
+    path('admin/returns/', views.admin_returns, name='admin_returns'),
+    path('admin/returns/<int:return_id>/status/', views.admin_update_return_status, name='admin_update_return_status'),
 
     # Reviews
     path('admin-reviews/', views.admin_reviews, name='admin_reviews'),
@@ -110,7 +115,6 @@ urlpatterns = [
     # Other Admin Pages
     path('admin-invoices/', views.admin_invoices, name='admin_invoices'),
     path('admin-shipments/', views.admin_shipments, name='admin_shipments'),
-    path('admin-returns/', views.admin_returns, name='admin_returns'),
     path('admin-customers/', views.admin_customers, name='admin_customers'),
     path('admin-segments/', views.admin_segments, name='admin_segments'),
     path('admin-staff/', views.admin_staff, name='admin_staff'),

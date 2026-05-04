@@ -1,11 +1,267 @@
 {% extends 'admin/base_admin.html' %}
+{% load static %}
+
 {% block page_title %}Returns{% endblock %}
-{% block page_desc %}Process return requests and refunds.{% endblock %}
+{% block page_desc %}Review return requests and update refund progress.{% endblock %}
 
 {% block content %}
-<div class="card fade-in-up" style="text-align: center; padding: 50px;">
-    <i class="fas fa-check-circle" style="font-size: 3rem; color: #4caf50; margin-bottom: 20px;"></i>
-    <h3>All Caught Up!</h3>
-    <p>There are no pending return requests at this time.</p>
+<style>
+    .returns-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .stat-box {
+        background: #fff;
+        border: 1px solid #ece4da;
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: 0 8px 28px rgba(76, 53, 28, 0.05);
+    }
+
+    .stat-box span {
+        display: block;
+        color: #8a7a6a;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 10px;
+    }
+
+    .stat-box strong {
+        color: #2f241d;
+        font-size: 1.5rem;
+    }
+
+    .returns-grid {
+        display: grid;
+        gap: 18px;
+    }
+
+    .return-card {
+        background: #fff;
+        border: 1px solid #ece4da;
+        border-left: 5px solid #c8b39d;
+        border-radius: 22px;
+        padding: 22px;
+        box-shadow: 0 10px 30px rgba(76, 53, 28, 0.06);
+    }
+
+    .return-card.status-pending { border-left-color: #f59e0b; }
+    .return-card.status-approved { border-left-color: #2563eb; }
+    .return-card.status-received { border-left-color: #15803d; }
+    .return-card.status-refunded { border-left-color: #0f766e; }
+    .return-card.status-rejected { border-left-color: #dc2626; }
+
+    .return-head,
+    .return-meta,
+    .return-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .return-meta {
+        margin-top: 8px;
+        color: #6d5f55;
+        font-size: 0.92rem;
+    }
+
+    .status-badge {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 7px 12px;
+        border-radius: 999px;
+        font-size: 0.82rem;
+        font-weight: 700;
+    }
+
+    .status-pending-badge { background: #fff3d6; color: #a16207; }
+    .status-approved-badge { background: #dbeafe; color: #1d4ed8; }
+    .status-received-badge { background: #dcfce7; color: #15803d; }
+    .status-refunded-badge { background: #e0f2fe; color: #0e7490; }
+    .status-rejected-badge { background: #fee2e2; color: #b91c1c; }
+
+    .return-layout {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 18px;
+        margin-top: 18px;
+    }
+
+    .panel {
+        border: 1px solid #f1e9df;
+        border-radius: 18px;
+        padding: 16px;
+        background: #fffdfa;
+    }
+
+    .panel h4 {
+        margin-top: 0;
+        color: #2f241d;
+    }
+
+    .item-row,
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .item-row {
+        border-bottom: 1px solid #f1e9df;
+        padding-bottom: 12px;
+        margin-bottom: 12px;
+    }
+
+    .item-row:last-child {
+        border-bottom: 0;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .actions-form {
+        display: grid;
+        gap: 12px;
+        margin-top: 10px;
+    }
+
+    .actions-form select,
+    .actions-form textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid #ddcfbf;
+        background: #fff;
+        font-family: inherit;
+    }
+
+    .actions-form textarea {
+        min-height: 92px;
+        resize: vertical;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        border: 0;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: #2f241d;
+        color: #fff;
+    }
+
+    .btn-secondary {
+        background: #eadfce;
+        color: #5b4636;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 68px 20px;
+        background: #fff;
+        border-radius: 24px;
+        border: 1px dashed #dccdbc;
+    }
+
+    @media (max-width: 900px) {
+        .return-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="returns-stats">
+    <div class="stat-box">
+        <span>Total Requests</span>
+        <strong>{{ return_count }}</strong>
+    </div>
+    <div class="stat-box">
+        <span>Pending</span>
+        <strong>{{ pending_count }}</strong>
+    </div>
+    <div class="stat-box">
+        <span>Approved</span>
+        <strong>{{ approved_count }}</strong>
+    </div>
+    <div class="stat-box">
+        <span>Completed</span>
+        <strong>{{ completed_count }}</strong>
+    </div>
+</div>
+
+<div class="returns-grid">
+    {% for request in return_requests %}
+    <article class="return-card status-{{ request.status|lower }}">
+        <div class="return-head">
+            <div>
+                <h3 style="margin:0; color:#2f241d;">Return #{{ request.id }} - Order #{{ request.order.id }}</h3>
+                <p class="return-meta" style="margin-bottom:0;">
+                    {{ request.customer.full_name|default:"Guest Customer" }} | {{ request.customer.email|default:"No email available" }} | {{ request.created_at|date:"M d, Y H:i" }}
+                </p>
+                <span class="status-badge status-{{ request.status|lower }}-badge">{{ request.status }}</span>
+            </div>
+            <div style="text-align:right;">
+                <strong style="font-size:1.1rem; color:#2f241d;">Qty {{ request.quantity }}</strong>
+                <p class="return-meta" style="margin-top:6px;">{{ request.product.name|default:"Removed product" }}</p>
+            </div>
+        </div>
+
+        <div class="return-layout">
+            <div class="panel">
+                <h4>Return Details</h4>
+                <div class="item-row">
+                    <div>
+                        <strong>{{ request.product.name|default:"Removed product" }}</strong>
+                        <p class="return-meta">Order item: #{{ request.order_item.id|default:"N/A" }}</p>
+                    </div>
+                    <strong>Order #{{ request.order.id }}</strong>
+                </div>
+                <div class="detail-row"><span>Reason</span><strong>{{ request.reason }}</strong></div>
+                <div class="detail-row"><span>Payment</span><strong>{{ request.order.get_payment_method_display }}</strong></div>
+                <div class="detail-row"><span>Order Status</span><strong>{{ request.order.status }}</strong></div>
+                <div class="detail-row"><span>Stock Restocked</span><strong>{% if request.restocked %}Yes{% else %}No{% endif %}</strong></div>
+                {% if request.details %}
+                <div style="margin-top:12px;">
+                    <span class="return-meta">Customer notes</span>
+                    <p style="margin:8px 0 0; color:#4f4135;">{{ request.details }}</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="panel">
+                <h4>Admin Action</h4>
+                <form method="post" action="{% url 'admin_update_return_status' request.id %}" class="actions-form">
+                    {% csrf_token %}
+                    <select name="status" required>
+                        {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if request.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <textarea name="admin_note" placeholder="Add an internal note or refund reference">{{ request.admin_note }}</textarea>
+                    <div class="return-actions">
+                        <button type="submit" class="btn-primary">Save Update</button>
+                        <button type="submit" name="status" value="Received" class="btn-secondary">Mark Received</button>
+                        <button type="submit" name="status" value="Refunded" class="btn-secondary">Mark Refunded</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </article>
+    {% empty %}
+    <div class="empty-state">
+        <i class="fas fa-undo-alt" style="font-size: 3rem; color: #d6c6b4; margin-bottom: 14px;"></i>
+        <h3 style="margin: 0 0 8px; color: #2f241d;">No return requests yet</h3>
+        <p style="color:#6f6257;">Customer return submissions will appear here for review and refund handling.</p>
+    </div>
+    {% endfor %}
 </div>
 {% endblock %}

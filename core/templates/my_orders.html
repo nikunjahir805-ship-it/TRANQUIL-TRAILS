@@ -174,6 +174,31 @@
             margin-bottom: 0;
         }
 
+        .return-box {
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px dashed #d9c8b6;
+        }
+
+        .return-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 10px 16px;
+            background: #2f241d;
+            color: #fff;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.92rem;
+        }
+
+        .return-link.disabled {
+            background: #bda998;
+            pointer-events: none;
+        }
+
         .empty-state {
             text-align: center;
             padding: 70px 20px;
@@ -268,6 +293,20 @@
                         <div class="fact-row"><span>Payment</span><strong>{{ order.get_payment_method_display }}</strong></div>
                         <div class="fact-row"><span>Items</span><strong>{{ order.get_cart_items }}</strong></div>
                         <div class="fact-row"><span>Transaction</span><strong>{{ order.transaction_id|default:"Pending" }}</strong></div>
+                        <div class="return-box">
+                            {% with latest_return=order.return_requests.all|first %}
+                            <div class="fact-row"><span>Return</span><strong>{% if latest_return %}{{ latest_return.status }}{% else %}Not requested{% endif %}</strong></div>
+                            {% if order.complete and order.status == 'Delivered' %}
+                                <a href="{% url 'return_product' order.id %}" class="return-link">
+                                    <i class="fas fa-undo"></i> Request Return
+                                </a>
+                            {% else %}
+                                <a href="#" class="return-link disabled">
+                                    <i class="fas fa-lock"></i> Return available after delivery
+                                </a>
+                            {% endif %}
+                            {% endwith %}
+                        </div>
                     </div>
                 </div>
             </article>
