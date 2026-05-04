@@ -108,16 +108,63 @@
     .btn-draft { background: none; border: 1px solid #ddd; padding: 12px 20px; border-radius: 8px; color: #666; cursor: pointer; }
     
     /* Toast */
-    .toast-container { position: fixed; top: 20px; right: 20px; z-index: 3000; }
-    .toast { background: white; padding: 15px 20px; border-radius: 8px; border-left: 4px solid #28a745; box-shadow: 0 5px 20px rgba(0,0,0,0.1); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; animation: slideIn 0.4s ease; }
-    @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    .toast-container {
+        position: fixed;
+        top: calc(20px + env(safe-area-inset-top));
+        right: calc(20px + env(safe-area-inset-right));
+        z-index: 3000;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+        width: min(420px, calc(100vw - 32px));
+        pointer-events: none;
+    }
+    .toast {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #16a34a, #06b6d4);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 18px;
+        box-shadow: 0 18px 35px rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.08) inset;
+        border: 1px solid rgba(255,255,255,0.18);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        pointer-events: auto;
+        transform: translate3d(110px, -16px, 0) scale(0.94);
+        opacity: 0;
+        transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.2,0.85,0.2,1);
+    }
+    .toast::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.24), transparent 35%), radial-gradient(circle at top right, rgba(255,255,255,0.22), transparent 35%);
+        pointer-events: none;
+    }
+    .toast.show { transform: translate3d(0,0,0) scale(1); opacity: 1; }
+    .toast.success { background: linear-gradient(135deg, #16a34a, #22c55e); }
+    .toast.warning { background: linear-gradient(135deg, #d97706, #f97316); }
+    .toast.error { background: linear-gradient(135deg, #be123c, #7c3aed); }
+    .toast.info { background: linear-gradient(135deg, #0f766e, #2563eb); }
+    @keyframes toastPulse { 0%, 100% { transform: scale(0.95); opacity: 0.35; } 50% { transform: scale(1.08); opacity: 0.72; } }
 </style>
 
 <div class="toast-container">
     {% if messages %}
         {% for message in messages %}
-            <div class="toast">
-                <i class="fas fa-check-circle" style="color:#28a745"></i>
+            <div class="toast {% if message.tags %}{{ message.tags }}{% endif %} show">
+                {% if message.tags == 'success' %}
+                    <i class="fas fa-check-circle"></i>
+                {% elif message.tags == 'warning' %}
+                    <i class="fas fa-exclamation-triangle"></i>
+                {% elif message.tags == 'error' %}
+                    <i class="fas fa-times-circle"></i>
+                {% else %}
+                    <i class="fas fa-info-circle"></i>
+                {% endif %}
                 <span>{{ message }}</span>
             </div>
         {% endfor %}

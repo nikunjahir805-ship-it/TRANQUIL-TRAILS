@@ -140,19 +140,54 @@
     .lightbox-img { max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
     
     /* TOASTS */
-    .toast-container { position: fixed; top: 20px; right: 20px; z-index: 3000; display: flex; flex-direction: column; gap: 10px; }
-    .toast { background: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.15); border-left: 4px solid #333; transform: translateX(100%); transition: 0.4s; opacity: 0; display:flex; gap:10px; align-items:center; }
-    .toast.show { transform: translateX(0); opacity: 1; }
-    .toast.success { border-left-color: #28a745; }
-    .toast.error { border-left-color: #dc3545; }
+    .toast-container {
+        position: fixed;
+        top: calc(20px + env(safe-area-inset-top));
+        right: calc(20px + env(safe-area-inset-right));
+        z-index: 3000;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+        width: min(420px, calc(100vw - 32px));
+        pointer-events: none;
+    }
+    .toast {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #0f766e, #2563eb);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 18px;
+        box-shadow: 0 18px 35px rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.08) inset;
+        border: 1px solid rgba(255,255,255,0.18);
+        transform: translate3d(110px, -16px, 0) scale(0.94);
+        transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.2,0.85,0.2,1);
+        opacity: 0;
+        display:flex;
+        gap:10px;
+        align-items:center;
+        pointer-events: auto;
+    }
+    .toast::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.24), transparent 35%), radial-gradient(circle at top right, rgba(255,255,255,0.22), transparent 35%);
+        pointer-events: none;
+    }
+    .toast.show { transform: translate3d(0,0,0) scale(1); opacity: 1; }
+    .toast.success { background: linear-gradient(135deg, #16a34a, #22c55e); }
+    .toast.error { background: linear-gradient(135deg, #be123c, #7c3aed); }
+    .toast.info { background: linear-gradient(135deg, #0f766e, #2563eb); }
 
 </style>
 
 <div class="toast-container" id="toastContainer">
     {% if messages %}
         {% for message in messages %}
-            <div class="toast {{ message.tags }}">
-                {% if message.tags == 'success' %}<i class="fas fa-check-circle" style="color:#28a745"></i>
+            <div class="toast {{ message.tags }} show">
+                {% if message.tags == 'success' %}<i class="fas fa-check-circle"></i>
                 {% else %}<i class="fas fa-info-circle"></i>{% endif %}
                 <span>{{ message }}</span>
             </div>
@@ -403,8 +438,9 @@
         const container = document.getElementById('toastContainer');
         const toast = document.createElement('div');
         toast.className = 'toast show';
-        toast.style.borderLeftColor = '#8b5e3c';
-        toast.innerHTML = `<i class="fas fa-check"></i> <span>₹{msg}</span>`;
+        toast.classList.add('success');
+        toast.innerHTML = `<i class="fas fa-check-circle"></i> <span></span>`;
+        toast.querySelector('span').textContent = msg;
         container.appendChild(toast);
         setTimeout(() => {
             toast.classList.remove('show');

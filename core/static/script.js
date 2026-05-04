@@ -52,6 +52,16 @@ if (currentUser !== 'guest') {
 
 let cart = parseStorage(cartKey);
 let wishlist = parseStorage(wishlistKey);
+let toastSequence = 0;
+
+const toastPalette = [
+    ['#0f766e', '#14b8a6'],
+    ['#2563eb', '#06b6d4'],
+    ['#7c3aed', '#ec4899'],
+    ['#d97706', '#f59e0b'],
+    ['#be123c', '#f43f5e'],
+    ['#16a34a', '#84cc16'],
+];
 
 function initToastContainer() {
     if (!document.getElementById('toast-container')) {
@@ -66,14 +76,33 @@ function showToast(message, type = 'info', duration = 2500) {
     initToastContainer();
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
+    const typeOffset = { info: 0, success: 1, warning: 2, error: 3 }[type] ?? 0;
+    const theme = toastPalette[(toastSequence + typeOffset) % toastPalette.length];
+    const icons = {
+        success: '&#10003;',
+        warning: '&#9888;',
+        error: '&#10005;',
+        info: '&#8505;',
+    };
+
     toast.className = `toast ${type}`;
-    toast.innerHTML = `<span>${message}</span>`;
+    toast.style.setProperty('--toast-start', theme[0]);
+    toast.style.setProperty('--toast-end', theme[1]);
+    toast.style.setProperty('--toast-delay', `${Math.min(toastSequence * 40, 180)}ms`);
+    toast.innerHTML = `
+        <span class="toast-icon" aria-hidden="true">${icons[type] || icons.info}</span>
+        <span class="toast-message"></span>
+    `;
+    toast.querySelector('.toast-message').textContent = message;
     container.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
 
     setTimeout(() => {
         toast.classList.add('hide');
-        setTimeout(() => toast.remove(), 280);
+        setTimeout(() => toast.remove(), 320);
     }, duration);
+
+    toastSequence += 1;
 }
 
 function normalizeImagePath(path) {

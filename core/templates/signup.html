@@ -280,37 +280,73 @@
     </div>
 
     <script>        // --- TOAST NOTIFICATION SYSTEM ---
+        let toastSequence = 0;
+        const toastPalette = [
+            ['#0f766e', '#14b8a6'],
+            ['#2563eb', '#06b6d4'],
+            ['#7c3aed', '#ec4899'],
+            ['#d97706', '#f59e0b'],
+            ['#be123c', '#f43f5e'],
+        ];
+
         function showToast(message, type = 'info', duration = 3500) {
             if (!document.getElementById('toast-container')) {
                 const container = document.createElement('div');
                 container.id = 'toast-container';
                 container.className = 'toast-container';
-                container.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;pointer-events:none;';
+                container.style.cssText = 'position:fixed;top:calc(20px + env(safe-area-inset-top));right:calc(20px + env(safe-area-inset-right));z-index:9999;pointer-events:none;display:flex;flex-direction:column;align-items:flex-end;gap:12px;width:min(420px,calc(100vw - 32px));';
                 document.body.appendChild(container);
             }
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
+            const typeOffset = { info: 0, success: 1, warning: 2, error: 3 }[type] ?? 0;
+            const tone = toastPalette[(toastSequence + typeOffset) % toastPalette.length];
+            const icons = { success: '&#10003;', error: '&#10005;', warning: '&#9888;', info: '&#8505;' };
             toast.className = `toast ${type}`;
-            toast.style.cssText = 'background:white;color:#2c2c2c;padding:16px 24px;border-radius:8px;box-shadow:0 8px 25px rgba(0,0,0,0.15);margin-bottom:12px;display:flex;align-items:center;gap:12px;min-width:300px;max-width:400px;animation:slideInRight 0.3s ease-out;pointer-events:auto;border-left:4px solid #8B5E3C;';
-            const icons = {success: '✓', error: '✕', warning: '⚠', info: 'ℹ'};
-            toast.innerHTML = `<div style="font-size:1.25rem;flex-shrink:0;font-weight:bold;">${icons[type]}</div><span>${message}</span>`;
+            toast.style.cssText = `position:relative;overflow:hidden;padding:15px 18px;border-radius:18px;box-shadow:0 18px 35px rgba(0,0,0,0.18),0 0 0 1px rgba(255,255,255,0.08) inset;border:1px solid rgba(255,255,255,0.18);background:linear-gradient(135deg, ${tone[0]}, ${tone[1]});color:white;display:flex;align-items:center;gap:12px;min-width:300px;max-width:100%;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);pointer-events:auto;opacity:0;transform:translate3d(110px,-16px,0) scale(0.94);transition:opacity 0.35s ease, transform 0.45s cubic-bezier(0.2,0.85,0.2,1);`;
+            toast.innerHTML = `
+                <span style="position:relative;z-index:1;width:32px;height:32px;border-radius:999px;background:rgba(255,255,255,0.18);display:inline-flex;align-items:center;justify-content:center;flex:0 0 32px;font-size:0.92rem;font-weight:700;box-shadow:0 10px 18px rgba(0,0,0,0.12);">${icons[type] || icons.info}</span>
+                <span class="toast-message" style="position:relative;z-index:1;line-height:1.45;font-weight:600;letter-spacing:0.01em;"></span>
+            `;
+            toast.querySelector('.toast-message').textContent = message;
             container.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translate3d(0,0,0) scale(1)';
+            });
             setTimeout(() => {
-                toast.style.animation = 'slideOutRight 0.3s ease-in forwards';
-                setTimeout(() => toast.remove(), 300);
+                toast.style.opacity = '0';
+                toast.style.transform = 'translate3d(70px,-10px,0) scale(0.96)';
+                setTimeout(() => toast.remove(), 320);
             }, duration);
+            toastSequence += 1;
         }
 
         // Add CSS for animations
         const style = document.createElement('style');
         style.innerHTML = `
-            @keyframes slideInRight {
-                from { transform: translateX(400px); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
+            .toast::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(135deg, rgba(255,255,255,0.24), transparent 35%), radial-gradient(circle at top right, rgba(255,255,255,0.22), transparent 35%);
+                pointer-events: none;
             }
-            @keyframes slideOutRight {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(400px); opacity: 0; }
+            .toast::after {
+                content: '';
+                position: absolute;
+                inset: auto -30% -55% auto;
+                width: 140px;
+                height: 140px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(255,255,255,0.26), transparent 68%);
+                opacity: 0.5;
+                pointer-events: none;
+                animation: toastPulse 3.8s ease-in-out infinite;
+            }
+            @keyframes toastPulse {
+                0%, 100% { transform: scale(0.95); opacity: 0.35; }
+                50% { transform: scale(1.08); opacity: 0.72; }
             }
         `;
         document.head.appendChild(style);
