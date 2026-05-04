@@ -1025,9 +1025,51 @@ nav {
         min-height: 240px;
     }
 
-    .wishlist-actions,
-    .recommendation-card-actions,
-    .wishlist-showcase-actions {
+.wishlist-actions,
+.recommendation-card-actions,
+.wishlist-showcase-actions {
         flex-direction: column;
+    }
+}
+
+/* Shelf wishlist fix */
+.layout-shelf .shelf-img-box {
+    overflow: hidden;
+}
+
+.layout-shelf .wishlist-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+.layout-shelf .wishlist-btn i {
+    font-size: 1rem;
+    pointer-events: none;
+}
+
+.layout-shelf .wishlist-btn:hover {
+    transform: scale(1.06);
+    background: #fff;
+}
+
+@media (max-width: 767px) {
+    .layout-shelf .shelf-img-box {
+        height: 320px;
+    }
+
+    .layout-shelf .wishlist-btn {
+        top: 14px;
+        right: 14px;
+        width: 40px;
+        height: 40px;
     }
 }
